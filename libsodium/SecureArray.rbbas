@@ -34,8 +34,16 @@ Inherits libsodium.SecureMemory
 
 	#tag Method, Flags = &h0
 		Function Operator_Subscript(Index As Integer) As libsodium.SecureMemoryBlock
-		  
+		  Return New libsodium.SecureMemoryBlock(Me, Index)
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Operator_Subscript(Index As Integer, Assigns NewData As libsodium.SecureMemoryBlock)
+		  If NewData.Size > mFieldSize Then Raise New SodiumException("The data is too large for the buffer.")
+		  Dim mb As New libsodium.SecureMemoryBlock(Me, Index)
+		  mb.StringValue(0, NewData.Size) = NewData.StringValue(0, NewData.Size)
+		End Sub
 	#tag EndMethod
 
 

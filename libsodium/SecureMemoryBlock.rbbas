@@ -1,6 +1,18 @@
 #tag Class
 Class SecureMemoryBlock
 Inherits libsodium.SecureMemory
+	#tag Method, Flags = &h1000
+		Sub Constructor(SecuredArray As libsodium.SecureArray, Index As Integer)
+		  // Calling the overridden superclass constructor.
+		  Super.Constructor()
+		  mFreeable = False
+		  mSize = SecuredArray.FieldSize
+		  Dim op As Int32 = Int32(SecuredArray.mPtr) + (Index * mSize)
+		  mPtr = Ptr(op)
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub Constructor(Size As UInt64)
 		  Super.Constructor()
@@ -12,7 +24,7 @@ Inherits libsodium.SecureMemory
 
 	#tag Method, Flags = &h21
 		Private Sub Destructor()
-		  If mPtr <> Nil Then
+		  If mPtr <> Nil And mFreeable Then
 		    If mProtectionLevel <> libsodium.MemoryProtectionLevel.ReadWrite Then Me.ProtectionLevel = libsodium.MemoryProtectionLevel.ReadWrite
 		    If Not mAllowSwap Then Me.AllowSwap = True
 		    sodium_free(mPtr)
