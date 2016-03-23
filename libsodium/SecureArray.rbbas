@@ -11,6 +11,12 @@ Inherits libsodium.SecureMemory
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function Count() As UInt64
+		  Return mCount
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h21
 		Private Sub Destructor()
 		  If mPtr <> Nil Then sodium_free(mPtr)
@@ -18,6 +24,12 @@ Inherits libsodium.SecureMemory
 		  mFieldSize = 0
 		  mCount = 0
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function FieldSize() As UInt64
+		  Return mFieldSize
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0

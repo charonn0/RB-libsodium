@@ -23,6 +23,12 @@ Inherits libsodium.SecureMemory
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Size() As UInt64
+		  Return mSize
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function StringValue(Offset As UInt64, Length As UInt64) As MemoryBlock
 		  If mProtectionLevel = libsodium.MemoryProtectionLevel.NoAccess Then Raise New SodiumException("The requested memory is secured and cannot be accessed.")
 		  Dim mb As MemoryBlock = mPtr
