@@ -1,8 +1,9 @@
 #tag Class
-Protected Class SecureMemoryBlock
+Class SecureMemoryBlock
+Inherits libsodium.SecureMemory
 	#tag Method, Flags = &h0
 		Sub Constructor(Size As UInt64)
-		  If sodium_init() = -1 Then Raise New SodiumException("libsodium could not be initialized.")
+		  Super.Constructor()
 		  mPtr = sodium_malloc(Size)
 		  If mPtr = Nil Then Raise New SodiumException("Unable to create a secure memory block of the requested size.")
 		  mSize = Size
@@ -71,40 +72,12 @@ Protected Class SecureMemoryBlock
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mProtectionLevel As libsodium.MemoryProtectionLevel = libsodium.MemoryProtectionLevel.ReadWrite
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private mPtr As Ptr
+		Private mFreeable As Boolean = True
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private mSize As UInt64
 	#tag EndProperty
-
-	#tag ComputedProperty, Flags = &h0
-		#tag Getter
-			Get
-			  return mProtectionLevel
-			End Get
-		#tag EndGetter
-		#tag Setter
-			Set
-			  Dim i As Integer
-			  Select Case value
-			  Case libsodium.MemoryProtectionLevel.ReadWrite
-			    i = sodium_mprotect_readwrite(mPtr)
-			  Case libsodium.MemoryProtectionLevel.ReadOnly
-			    i = sodium_mprotect_readonly(mPtr)
-			  Case libsodium.MemoryProtectionLevel.NoAccess
-			    i = sodium_mprotect_noaccess(mPtr)
-			  End Select
-			  If i = -1 Then Raise New SodiumException("Unable to set the memory protection level.")
-			  mProtectionLevel = value
-			End Set
-		#tag EndSetter
-		ProtectionLevel As libsodium.MemoryProtectionLevel
-	#tag EndComputedProperty
 
 
 	#tag ViewBehavior
