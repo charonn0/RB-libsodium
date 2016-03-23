@@ -6,6 +6,36 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h1
+		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
+		  Dim mb As New MemoryBlock(Count)
+		  randombytes_buf(mb, mb.Size)
+		  Return mb
+		End Function
+	#tag EndMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Sub randombytes_buf Lib "libsodium" (Buffer As Ptr, BufferSize As UInt64)
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function randombytes_random Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function randombytes_uniform Lib "libsodium" (UpperBound As UInt32) As UInt32
+	#tag EndExternalMethod
+
+	#tag Method, Flags = &h1
+		Protected Function RandomUInt32(Optional UpperBound As UInt32) As UInt32
+		  If UpperBound = 0 Then
+		    Return randombytes_random()
+		  Else
+		    Return randombytes_uniform(UpperBound)
+		  End If
+		End Function
+	#tag EndMethod
+
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function sodium_allocarray Lib "libsodium" (Count As UInt64, FieldSize As UInt64) As Ptr
 	#tag EndExternalMethod
