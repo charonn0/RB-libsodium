@@ -3,21 +3,21 @@ Class SecureMemoryBlock
 Inherits libsodium.SecureMemory
 	#tag Method, Flags = &h1000
 		Sub Constructor(SecuredArray As libsodium.SecureArray, Index As Integer)
-		  // Calling the overridden superclass constructor.
-		  Super.Constructor()
-		  mFreeable = False
-		  mSize = SecuredArray.FieldSize
-		  Dim op As Int32 = Int32(SecuredArray.mPtr) + (Index * mSize)
-		  mPtr = Ptr(op)
+		  #pragma Warning "Fixme"
+		  'If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
+		  'mFreeable = False
+		  'mSize = SecuredArray.FieldSize
+		  'Dim op As Int32 = Int32(SecuredArray.mPtr) + (Index * mSize)
+		  'mPtr = Ptr(op)
 		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub Constructor(Size As UInt64)
-		  Super.Constructor()
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
 		  mPtr = sodium_malloc(Size)
-		  If mPtr = Nil Then Raise New SodiumException("Unable to create a secure memory block of the requested size.")
+		  If mPtr = Nil Then Raise New SodiumException(ERR_CANT_ALLOC)
 		  mSize = Size
 		End Sub
 	#tag EndMethod
@@ -42,7 +42,7 @@ Inherits libsodium.SecureMemory
 
 	#tag Method, Flags = &h0
 		Function StringValue(Offset As UInt64, Length As UInt64) As MemoryBlock
-		  If mProtectionLevel = libsodium.MemoryProtectionLevel.NoAccess Then Raise New SodiumException("The requested memory is secured and cannot be accessed.")
+		  If mProtectionLevel = libsodium.MemoryProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  Dim mb As MemoryBlock = mPtr
 		  Return mb.StringValue(Offset, Length)
 		End Function
@@ -50,7 +50,7 @@ Inherits libsodium.SecureMemory
 
 	#tag Method, Flags = &h0
 		Sub StringValue(Offset As UInt64, Length As UInt64, Assigns NewData As MemoryBlock)
-		  If mProtectionLevel <> libsodium.MemoryProtectionLevel.ReadWrite Then Raise New SodiumException("The requested memory is secured and cannot be modified.")
+		  If mProtectionLevel <> libsodium.MemoryProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  Dim mb As MemoryBlock = mPtr
 		  mb.StringValue(Offset, Length) = NewData
 		End Sub
@@ -78,7 +78,7 @@ Inherits libsodium.SecureMemory
 			  Else
 			    i = sodium_mlock(mPtr, mSize)
 			  End If
-			  If i = -1 Then Raise New SodiumException("The requested memory lock could not be modified.")
+			  If i = -1 Then Raise New SodiumException(ERR_LOCK_DENIED)
 			  mAllowSwap = value
 			End Set
 		#tag EndSetter

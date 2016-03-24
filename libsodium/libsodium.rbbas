@@ -14,6 +14,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim mb As New MemoryBlock(Count)
 		  randombytes_buf(mb, mb.Size)
 		  Return mb
@@ -34,6 +35,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function RandomUInt32(Optional UpperBound As UInt32) As UInt32
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If UpperBound = 0 Then
 		    Return randombytes_random()
 		  Else

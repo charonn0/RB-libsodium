@@ -3,9 +3,9 @@ Class SecureArray
 Inherits libsodium.SecureMemory
 	#tag Method, Flags = &h0
 		Sub Constructor(Count As UInt64, FieldSize As UInt64)
-		  Super.Constructor()
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
 		  mPtr = sodium_allocarray(Count, FieldSize)
-		  If mPtr = Nil Then Raise New SodiumException("Unable to create a secure array of the requested size.")
+		  If mPtr = Nil Then Raise New SodiumException(ERR_CANT_ALLOC)
 		  mFieldSize = FieldSize
 		  mCount = Count
 		End Sub
@@ -40,7 +40,7 @@ Inherits libsodium.SecureMemory
 
 	#tag Method, Flags = &h0
 		Sub Operator_Subscript(Index As Integer, Assigns NewData As libsodium.SecureMemoryBlock)
-		  If NewData.Size > mFieldSize Then Raise New SodiumException("The data is too large for the buffer.")
+		  If NewData.Size > mFieldSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As New libsodium.SecureMemoryBlock(Me, Index)
 		  mb.StringValue(0, NewData.Size) = NewData.StringValue(0, NewData.Size)
 		End Sub
