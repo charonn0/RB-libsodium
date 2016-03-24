@@ -1,6 +1,5 @@
 #tag Class
 Class SecureArray
-Inherits libsodium.SecureMemory
 	#tag Method, Flags = &h0
 		Sub Constructor(Count As UInt64, FieldSize As UInt64)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
@@ -54,6 +53,38 @@ Inherits libsodium.SecureMemory
 	#tag Property, Flags = &h21
 		Private mFieldSize As UInt64
 	#tag EndProperty
+
+	#tag Property, Flags = &h1
+		Protected mProtectionLevel As libsodium.MemoryProtectionLevel = libsodium.MemoryProtectionLevel.ReadWrite
+	#tag EndProperty
+
+	#tag Property, Flags = &h1
+		Protected mPtr As Ptr
+	#tag EndProperty
+
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  return mProtectionLevel
+			End Get
+		#tag EndGetter
+		#tag Setter
+			Set
+			  Dim i As Integer
+			  Select Case value
+			  Case libsodium.MemoryProtectionLevel.ReadWrite
+			    i = sodium_mprotect_readwrite(mPtr)
+			  Case libsodium.MemoryProtectionLevel.ReadOnly
+			    i = sodium_mprotect_readonly(mPtr)
+			  Case libsodium.MemoryProtectionLevel.NoAccess
+			    i = sodium_mprotect_noaccess(mPtr)
+			  End Select
+			  If i = -1 Then Raise New SodiumException(ERR_PROTECT_FAILED)
+			  mProtectionLevel = value
+			End Set
+		#tag EndSetter
+		ProtectionLevel As libsodium.MemoryProtectionLevel
+	#tag EndComputedProperty
 
 
 	#tag ViewBehavior
