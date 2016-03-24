@@ -2,7 +2,13 @@
 Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function IsAvailable() As Boolean
-		  Return System.IsFunctionAvailable("sodium_init", "libsodium")
+		  Static available As Boolean
+		  
+		  If Not available Then available = System.IsFunctionAvailable("sodium_init", "libsodium")
+		  If available Then 
+		    If sodium_init() = -1 Then available = False
+		  End If
+		  Return available
 		End Function
 	#tag EndMethod
 
