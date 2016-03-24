@@ -1,6 +1,21 @@
 #tag Module
 Protected Module libsodium
 	#tag Method, Flags = &h1
+		Protected Function DecodeHex(HexData As MemoryBlock) As MemoryBlock
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function EncodeHex(BinaryData As MemoryBlock) As MemoryBlock
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
+		  If sodium_bin2hex(output, output.Size, BinaryData, BinaryData.Size) = Nil Then Return Nil
+		  Return output.CString(0)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function IsAvailable() As Boolean
 		  Static available As Boolean
 		  
@@ -46,6 +61,10 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function sodium_allocarray Lib "libsodium" (Count As UInt64, FieldSize As UInt64) As Ptr
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_bin2hex Lib "libsodium" (HexBuffer As Ptr, HexBufferLength As UInt64, BinBuffer As Ptr, BinBufferLength As UInt64) As Ptr
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
