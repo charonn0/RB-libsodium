@@ -1,5 +1,58 @@
 #tag Class
 Class SecureMemoryBlock
+	#tag Method, Flags = &h0
+		Function BooleanValue(Offset As UInt64) As Boolean
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.BooleanValue(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub BooleanValue(Offset As UInt64, Assigns NewBool As Boolean)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 1 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.BooleanValue(Offset) = NewBool
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function ByteValue(Offset As UInt64) As Byte
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 1 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.Byte(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub ByteValue(Offset As UInt64, Assigns NewByte As Byte)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 1 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.Byte(Offset) = NewByte
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function ColorValue(Offset As UInt64, Bits As Integer) As Color
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.ColorValue(Offset, Bits)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub ColorValue(Offset As UInt64, Bits As Integer, Assigns NewColor As Color)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.ColorValue(Offset, Bits) = NewColor
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h1000
 		Sub Constructor(SecuredArray As libsodium.SecureArray, Index As Integer)
 		  #pragma Warning "Fixme"
@@ -21,6 +74,41 @@ Class SecureMemoryBlock
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function CString(Offset As UInt64) As CString
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.CString(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub CString(Offset As UInt64, Assigns NewString As CString)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + NewString.LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.CString(Offset) = NewString
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function CurrencyValue(Offset As UInt64) As Currency
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.CurrencyValue(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub CurrencyValue(Offset As UInt64, Assigns NewCurrency As Currency)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.CurrencyValue(Offset) = NewCurrency
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h21
 		Private Sub Destructor()
 		  If mPtr <> Nil And mFreeable Then
@@ -34,6 +122,90 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function DoubleValue(Offset As UInt64) As Double
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.DoubleValue(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function DoubleValue(Offset As UInt64, Assigns NewDouble As Double) As Double
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.DoubleValue(Offset) = NewDouble
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Int16Value(Offset As UInt64) As Int16
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 2 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.Int16Value(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Int16Value(Offset As UInt64, Assigns NewInt As Int16)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 2 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.Int16Value(Offset) = NewInt
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Int32Value(Offset As UInt64) As Int32
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.Int32Value(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Int32Value(Offset As UInt64, Assigns NewInt As Int32)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.Int16Value(Offset) = NewInt
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Int64Value(Offset As UInt64) As Int64
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.Int64Value(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Int64Value(Offset As UInt64, Assigns NewInt As Int64)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.Int64Value(Offset) = NewInt
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Long(Offset As UInt64) As Integer
+		  Return Me.Int32Value(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Long(Offset As UInt64, Assigns NewInt As Integer)
+		  Me.Int32Value(Offset) = NewInt
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherMB As libsodium.SecureMemoryBlock) As Integer
 		  If sodium_memcmp(mPtr, OtherMB.mPtr, Max(mSize, OtherMB.Size)) = 0 Then Return 0
 		  If OtherMB.Size > mSize Then Return -1
@@ -42,6 +214,66 @@ Class SecureMemoryBlock
 		  Return Sign(Integer(mPtr) - Integer(OtherMB.mPtr))
 		  
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Operator_Convert() As String
+		  Return Me.StringValue(0, mSize)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Operator_Convert(FromString As String)
+		  Me.Constructor(FromString.LenB)
+		  Me.StringValue(0, FromString.LenB) = FromString
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function PString(Offset As UInt64) As PString
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.PString(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub PString(Offset As UInt64, Assigns NewString As PString)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + NewString.LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.PString(Offset) = NewString
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Ptr(Offset As UInt64) As libsodium.SecureMemoryBlock
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Ptr(Offset As UInt64, Assigns NewData As libsodium.SecureMemoryBlock)
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function SingleValue(Offset As UInt64) As Single
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.SingleValue(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub SingleValue(Offset As UInt64, Assigns NewInt As Single)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.SingleValue(Offset) = NewInt
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -63,6 +295,113 @@ Class SecureMemoryBlock
 		  If mProtectionLevel <> libsodium.MemoryProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  Dim mb As MemoryBlock = mPtr
 		  mb.StringValue(Offset, Length) = NewData
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function TruePtr() As Ptr
+		  Return mPtr
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function UInt16Value(Offset As UInt64) As UInt16
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 2 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.UInt16Value(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub UInt16Value(Offset As UInt64, Assigns NewInt As UInt16)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 2 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.UInt16Value(Offset) = NewInt
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function UInt32Value(Offset As UInt64) As UInt32
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.UInt32Value(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub UInt32Value(Offset As UInt64, Assigns NewInt As UInt32)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.UInt16Value(Offset) = NewInt
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function UInt64Value(Offset As UInt64) As UInt64
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.UInt64Value(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub UInt64Value(Offset As UInt64, Assigns NewInt As UInt64)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.UInt64Value(Offset) = NewInt
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function UInt8Value(Offset As UInt64) As UInt8
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If Offset + 1 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.UInt8Value(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub UInt8Value(Offset As UInt64, Assigns NewInt As UInt8)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + 1 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.UInt8Value(Offset) = NewInt
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function UShortValue(Offset As UInt64) As UInt16
+		  Return Me.UInt16Value(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub UShortValue(Offset As UInt64, Assigns NewInt As UInt16)
+		  Me.UInt16Value(Offset) = NewInt
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function WString(Offset As UInt64) As WString
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  Dim mb As MemoryBlock = mPtr
+		  Return mb.WString(Offset)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub WString(Offset As UInt64, Assigns NewString As WString)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + NewString.LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Dim mb As MemoryBlock = mPtr
+		  mb.WString(Offset) = NewString
 		End Sub
 	#tag EndMethod
 
