@@ -1,5 +1,20 @@
 #tag Module
 Protected Module libsodium
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_generichash_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_generichash_init Lib "libsodium" (State As Ptr, Key As Ptr, KeySize As Int64, OutLength As Int64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_generichash_statebytes Lib "libsodium" () As UInt64
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_generichash_update Lib "libsodium" (State As Ptr, InputBuffer As Ptr, InputSize As UInt64) As Int32
+	#tag EndExternalMethod
 	#tag Method, Flags = &h1
 		Protected Function DecodeHex(HexData As MemoryBlock) As MemoryBlock
 		  
@@ -11,7 +26,20 @@ Protected Module libsodium
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
 		  If sodium_bin2hex(output, output.Size, BinaryData, BinaryData.Size) = Nil Then Return Nil
-		  Return output.CString(0)
+		  Return output.CString(0).Uppercase
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function GenericHash(InputData As MemoryBlock, Key As String = "") As String
+		  Dim h As GenericHashDigest
+		  If Key = "" Then
+		    h = New GenericHashDigest(Key)
+		  Else
+		    h = New GenericHashDigest()
+		  End If
+		  h.Process(InputData)
+		  Return h.Value
 		End Function
 	#tag EndMethod
 
@@ -120,13 +148,28 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 
+	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_BYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_BYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_CANT_ALLOC, Type = Double, Dynamic = False, Default = \"-5", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_INIT_FAILED, Type = Double, Dynamic = False, Default = \"-2", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_INVALID_STATE, Type = Double, Dynamic = False, Default = \"-11", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_LOCK_DENIED, Type = Double, Dynamic = False, Default = \"-9", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_OUT_OF_BOUNDS, Type = Double, Dynamic = False, Default = \"-10", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_PROTECT_FAILED, Type = Double, Dynamic = False, Default = \"-4", Scope = Protected
@@ -148,7 +191,7 @@ Protected Module libsodium
 	#tag EndConstant
 
 
-	#tag Enum, Name = MemoryProtectionLevel, Type = Integer, Flags = &h1
+	#tag Enum, Name = ProtectionLevel, Flags = &h1
 		ReadWrite
 		  ReadOnly
 		NoAccess
