@@ -112,7 +112,7 @@ Class SecureMemoryBlock
 	#tag Method, Flags = &h21
 		Private Sub Destructor()
 		  If mPtr <> Nil And mFreeable Then
-		    If mProtectionLevel <> libsodium.MemoryProtectionLevel.ReadWrite Then Me.ProtectionLevel = libsodium.MemoryProtectionLevel.ReadWrite
+		    If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Me.ProtectionLevel = libsodium.ProtectionLevel.ReadWrite
 		    If Not mAllowSwap Then Me.AllowSwap = True
 		    sodium_free(mPtr)
 		  End If
@@ -284,7 +284,7 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function StringValue(Offset As UInt64, Length As UInt64) As MemoryBlock
-		  If mProtectionLevel = libsodium.MemoryProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
+		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  Dim mb As MemoryBlock = mPtr
 		  Return mb.StringValue(Offset, Length)
 		End Function
@@ -292,7 +292,8 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub StringValue(Offset As UInt64, Length As UInt64, Assigns NewData As MemoryBlock)
-		  If mProtectionLevel <> libsodium.MemoryProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
+		  If Offset + Length > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
 		  mb.StringValue(Offset, Length) = NewData
 		End Sub
@@ -443,7 +444,7 @@ Class SecureMemoryBlock
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
-		Protected mProtectionLevel As libsodium.MemoryProtectionLevel = libsodium.MemoryProtectionLevel.ReadWrite
+		Protected mProtectionLevel As libsodium.ProtectionLevel = libsodium.ProtectionLevel.ReadWrite
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
@@ -464,18 +465,18 @@ Class SecureMemoryBlock
 			Set
 			  Dim i As Integer
 			  Select Case value
-			  Case libsodium.MemoryProtectionLevel.ReadWrite
+			  Case libsodium.ProtectionLevel.ReadWrite
 			    i = sodium_mprotect_readwrite(mPtr)
-			  Case libsodium.MemoryProtectionLevel.ReadOnly
+			  Case libsodium.ProtectionLevel.ReadOnly
 			    i = sodium_mprotect_readonly(mPtr)
-			  Case libsodium.MemoryProtectionLevel.NoAccess
+			  Case libsodium.ProtectionLevel.NoAccess
 			    i = sodium_mprotect_noaccess(mPtr)
 			  End Select
 			  If i = -1 Then Raise New SodiumException(ERR_PROTECT_FAILED)
 			  mProtectionLevel = value
 			End Set
 		#tag EndSetter
-		ProtectionLevel As libsodium.MemoryProtectionLevel
+		ProtectionLevel As libsodium.ProtectionLevel
 	#tag EndComputedProperty
 
 

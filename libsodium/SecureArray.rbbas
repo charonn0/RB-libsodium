@@ -55,7 +55,7 @@ Class SecureArray
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
-		Protected mProtectionLevel As libsodium.MemoryProtectionLevel = libsodium.MemoryProtectionLevel.ReadWrite
+		Protected mProtectionLevel As libsodium.ProtectionLevel = libsodium.ProtectionLevel.ReadWrite
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
@@ -72,18 +72,18 @@ Class SecureArray
 			Set
 			  Dim i As Integer
 			  Select Case value
-			  Case libsodium.MemoryProtectionLevel.ReadWrite
+			  Case libsodium.ProtectionLevel.ReadWrite
 			    i = sodium_mprotect_readwrite(mPtr)
-			  Case libsodium.MemoryProtectionLevel.ReadOnly
+			  Case libsodium.ProtectionLevel.ReadOnly
 			    i = sodium_mprotect_readonly(mPtr)
-			  Case libsodium.MemoryProtectionLevel.NoAccess
+			  Case libsodium.ProtectionLevel.NoAccess
 			    i = sodium_mprotect_noaccess(mPtr)
 			  End Select
 			  If i = -1 Then Raise New SodiumException(ERR_PROTECT_FAILED)
 			  mProtectionLevel = value
 			End Set
 		#tag EndSetter
-		ProtectionLevel As libsodium.MemoryProtectionLevel
+		ProtectionLevel As libsodium.ProtectionLevel
 	#tag EndComputedProperty
 
 
