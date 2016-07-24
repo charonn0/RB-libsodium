@@ -45,6 +45,12 @@ Class SecureArray
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function TruePtr() As Ptr
+		  Return mPtr
+		End Function
+	#tag EndMethod
+
 
 	#tag Property, Flags = &h21
 		Private mCount As UInt64

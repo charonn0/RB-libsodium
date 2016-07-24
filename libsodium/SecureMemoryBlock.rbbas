@@ -55,12 +55,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h1000
 		Sub Constructor(SecuredArray As libsodium.SecureArray, Index As Integer)
-		  #pragma Warning "Fixme"
-		  'If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
-		  'mFreeable = False
-		  'mSize = SecuredArray.FieldSize
-		  'Dim op As Int32 = Int32(SecuredArray.mPtr) + (Index * mSize)
-		  'mPtr = Ptr(op)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
+		  mFreeable = False
+		  mSize = SecuredArray.FieldSize
+		  Dim op As Int32 = Int32(SecuredArray.TruePtr) + (Index * mSize)
+		  mPtr = Ptr(op)
 		  
 		End Sub
 	#tag EndMethod
@@ -243,18 +242,6 @@ Class SecureMemoryBlock
 		  If Offset + NewString.LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
 		  mb.PString(Offset) = NewString
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function Ptr(Offset As UInt64) As libsodium.SecureMemoryBlock
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Sub Ptr(Offset As UInt64, Assigns NewData As libsodium.SecureMemoryBlock)
-		  
 		End Sub
 	#tag EndMethod
 

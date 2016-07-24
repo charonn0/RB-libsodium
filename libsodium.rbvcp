@@ -11,7 +11,6 @@ Class=GenericHashDigest;libsodium/GenericHashDigest.rbbas;&h3F115FFF;&h7228CFFF;
 Class=SodiumException;libsodium/SodiumException.rbbas;&h5E8C07FF;&h7228CFFF;false
 Class=SecureArray;libsodium/SecureArray.rbbas;&h70CB6FFF;&h7228CFFF;false
 Class=SecureMemoryBlock;libsodium/SecureMemoryBlock.rbbas;&h71AA47FF;&h7228CFFF;false
-Class=SecureInt;libsodium/SecureInt.rbbas;&h7E0D17FF;&h7228CFFF;false
 DefaultWindow=Window1
 AppMenuBar=MenuBar1
 MajorVersion=1
