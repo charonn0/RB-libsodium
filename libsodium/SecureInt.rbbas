@@ -64,7 +64,7 @@ Protected Class SecureInt
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Operator_DivideRught(Numerator As UInt64) As UInt64
+		Function Operator_DivideRight(Numerator As UInt64) As UInt64
 		  
 		End Function
 	#tag EndMethod
