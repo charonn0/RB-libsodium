@@ -96,7 +96,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_bin2hex Lib "libsodium" (HexBuffer As Ptr, HexBufferLength As UInt64, BinBuffer As Ptr, BinBufferLength As UInt64) As Ptr
+		Private Soft Declare Function sodium_bin2hex Lib "libsodium" (HexBuffer As Ptr, HexBufferLength As UInt32, BinBuffer As Ptr, BinBufferLength As UInt32) As Ptr
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -105,6 +105,10 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Sub sodium_free Lib "libsodium" (DataPtr As Ptr)
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_hex2bin Lib "libsodium" (BinBuffer As Ptr, BinSize As UInt32, HexBuffer As Ptr, HexSize As UInt32,) As Ptr
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -147,6 +151,16 @@ Protected Module libsodium
 		Private Soft Declare Function sodium_munlock Lib "libsodium" (Address As Ptr, Length As UInt64) As Integer
 	#tag EndExternalMethod
 
+	#tag Method, Flags = &h1
+		Protected Function StrComp(String1 As String, String2 As String) As Boolean
+		  ' Performs a constant-time comparison of the strings, and returns True if they match.
+		  
+		  Dim mb1 As MemoryBlock = String1
+		  Dim mb2 As MemoryBlock = String2
+		  Return sodium_memcmp(mb1, mb2, Max(mb1.Size, mb2.Size)) = 0
+		End Function
+	#tag EndMethod
+
 
 	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
@@ -158,6 +172,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_CANT_ALLOC, Type = Double, Dynamic = False, Default = \"-5", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_COMPUTATION_FAILED, Type = Double, Dynamic = False, Default = \"-12", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_INIT_FAILED, Type = Double, Dynamic = False, Default = \"-2", Scope = Protected
