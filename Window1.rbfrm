@@ -28,17 +28,5 @@ End
 #tag EndWindow
 
 #tag WindowCode
-	#tag Event
-		Sub Open()
-		  Dim mb As New libsodium.SecureMemoryBlock(64)
-		  Dim s As String = "Hello, world!"
-		  mb.StringValue(0, s.Len) = s
-		  mb.ProtectionLevel = libsodium.MemoryProtectionLevel.NoAccess
-		  MsgBox(mb.StringValue(0, s.Len))
-		  
-		End Sub
-	#tag EndEvent
-
-
 #tag EndWindowCode
 
