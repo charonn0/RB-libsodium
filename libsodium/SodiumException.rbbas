@@ -28,6 +28,12 @@ Inherits RuntimeException
 		  Case ERR_LOCK_DENIED
 		    Me.Message = "The requested memory lock could not be modified."
 		    
+		  Case ERR_INVALID_STATE
+		    Me.Message = "The requested operation is illegal in the current state."
+		    
+		  Case ERR_COMPUTATION_FAILED
+		    Me.Message = "The requested operation failed, possibly due to resource constraints."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    
