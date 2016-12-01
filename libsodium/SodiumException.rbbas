@@ -3,7 +3,7 @@ Protected Class SodiumException
 Inherits RuntimeException
 	#tag Method, Flags = &h0
 		Sub Constructor(ErrorNumber As Integer)
-		  Select Case ErrorNumber 
+		  Select Case ErrorNumber
 		  Case ERR_INIT_FAILED
 		    Me.Message = "libsodium could not be initialized."
 		    
@@ -14,7 +14,7 @@ Inherits RuntimeException
 		    Me.Message = "Unable to set the memory protection level."
 		    
 		  Case ERR_CANT_ALLOC
-		    Me.Message = "Unable to create buffer of the requested size."
+		    Me.Message = "Unable to create a buffer of the requested size."
 		    
 		  Case ERR_TOO_LARGE
 		    Me.Message = "The data is too large for the buffer."
@@ -33,6 +33,9 @@ Inherits RuntimeException
 		    
 		  Case ERR_COMPUTATION_FAILED
 		    Me.Message = "The requested operation failed, possibly due to resource constraints."
+		    
+		  Case ERR_SIZE_MISMATCH
+		    Me.Message = "The requested operation expected input of a different length than what was provided."
 		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."

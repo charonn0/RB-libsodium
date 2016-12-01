@@ -6,6 +6,7 @@ Window=Window1;Window1.rbfrm;&h2C9127FF;&h0;false
 MenuBar=MenuBar1;MenuBar1.rbmnu;&h71027FF;&h0;false
 BuildSteps=Build Automation;Build Automation.rbbas;&h41FEF7FF;&h0;false
 Module=libsodium;libsodium/libsodium.rbbas;&h7228CFFF;&h0;false
+Class=KeyPair;libsodium/KeyPair.rbbas;&h550BD7FF;&h7228CFFF;false
 Class=Password;libsodium/Password.rbbas;&h39B157FF;&h7228CFFF;false
 Class=GenericHashDigest;libsodium/GenericHashDigest.rbbas;&h3F115FFF;&h7228CFFF;false
 Class=SodiumException;libsodium/SodiumException.rbbas;&h5E8C07FF;&h7228CFFF;false
