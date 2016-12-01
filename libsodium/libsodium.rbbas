@@ -1,6 +1,28 @@
 #tag Module
 Protected Module libsodium
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_easy Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag Method, Flags = &h21
+		Private Function crypto_box_MACBYTES() As UInt32
+		  Return crypto_box_ZEROBYTES - crypto_box_BOXZEROBYTES
+		End Function
+	#tag EndMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_open_easy Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_seed_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr, SeedData As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_generichash_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
 	#tag EndExternalMethod
 
@@ -157,6 +179,27 @@ Protected Module libsodium
 	#tag EndMethod
 
 
+	#tag Constant, Name = crypto_box_BEFORENMBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_box_BOXZEROBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_box_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_box_PUBLICKEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_box_SECRETKEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_box_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_box_ZEROBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
 	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
@@ -188,6 +231,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_READ_DENIED, Type = Double, Dynamic = False, Default = \"-7", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_SIZE_MISMATCH, Type = Double, Dynamic = False, Default = \"-13", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_TOO_LARGE, Type = Double, Dynamic = False, Default = \"-6", Scope = Protected
