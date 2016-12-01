@@ -47,11 +47,35 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
+		Protected Function DecryptData(CipherText As MemoryBlock, SenderPublicKey As MemoryBlock, RecipientPrivateKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  
+		  Dim buffer As New MemoryBlock(CipherText.Size)
+		  
+		  If crypto_box_open_easy(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey, RecipientPrivateKey) = 0 Then
+		    Return buffer
+		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function EncodeHex(BinaryData As MemoryBlock) As MemoryBlock
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
 		  If sodium_bin2hex(output, output.Size, BinaryData, BinaryData.Size) = Nil Then Return Nil
 		  Return output.CString(0).Uppercase
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function EncryptData(ClearText As MemoryBlock, SenderPrivateKey As MemoryBlock, RecipientPublicKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  
+		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
+		  
+		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, SenderPrivateKey, RecipientPublicKey) = 0 Then
+		    Return buffer
+		  End If
 		End Function
 	#tag EndMethod
 
