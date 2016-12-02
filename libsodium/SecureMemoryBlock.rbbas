@@ -220,6 +220,15 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Operator_Compare(OtherMB As String) As Integer
+		  If libsodium.StrComp(Me.StringValue(0, Me.LenB), OtherMB) Then Return 0
+		  If OtherMB.LenB < Me.Size Then Return 1
+		  Return -1
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Operator_Convert() As String
 		  Return Me.StringValue(0, mSize)
 		End Function
