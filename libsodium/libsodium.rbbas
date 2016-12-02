@@ -99,6 +99,21 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
+		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
+		  ' decodes ASCII hexadecimal to Binary
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  Dim output As New MemoryBlock(HexData.Size * 2 + 1)
+		  Dim endhex As Ptr
+		  Dim ign As MemoryBlock = IgnoredChars + Chr(0)
+		  Dim sz As UInt32 = output.Size
+		  If sodium_hex2bin(output, output.Size, HexData, HexData.Size, ign, sz, endhex) <> 0 Then Return Nil
+		  Dim p As Ptr = HexData
+		  Return output.StringValue(0, sz)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
 		  ' Decrypt the CipherText using the XSalsa20 stream cipher with a precalulated SharedKey. 
 		  ' Nonce must be precisely the same as the Nonce used to encrypt the CipherText. On error 
@@ -142,7 +157,7 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
 		  ' Encrypt the ClearText using the XSalsa20 stream cipher with a precalulated SharedKey and 
-		  ' the specified Nonce. On error returns Nil. 
+		  ' the specified 24-byte Nonce. On error returns Nil. 
 		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
@@ -304,6 +319,10 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Sub sodium_free Lib "libsodium" (DataPtr As Ptr)
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_hex2bin Lib "libsodium" (BinBuffer As Ptr, BinBufferMaxLength As UInt32, HexBuffer As Ptr, HexBufferLength As UInt32, IgnoreChars As Ptr, ByRef BinBufferLength As UInt32, ByRef HexEnd As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
