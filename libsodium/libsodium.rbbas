@@ -158,6 +158,26 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function GetSharedKey(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock) As MemoryBlock
+		  Dim buffer As New MemoryBlock(crypto_box_BEFORENMBYTES)
+		  
+		  If crypto_box_beforenm(buffer, RecipientPublicKey, SenderPrivateKey) <> 0 Then Return Nil
+		  
+		  Return buffer
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function GetSharedSecret(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock, HashOutput As Boolean = True) As MemoryBlock
+		  Dim buffer As New MemoryBlock(crypto_scalarmult_BYTES)
+		  
+		  If crypto_scalarmult(buffer, SenderPrivateKey, RecipientPublicKey) <> 0 Then Return Nil
+		  
+		  Return buffer
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function IsAvailable() As Boolean
 		  Static available As Boolean
 		  
