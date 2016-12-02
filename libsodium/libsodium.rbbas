@@ -130,6 +130,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function EncodeHex(BinaryData As MemoryBlock) As MemoryBlock
+		  ' Encodes the BinaryData as ASCII hexadecimal
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
 		  If sodium_bin2hex(output, output.Size, BinaryData, BinaryData.Size) = Nil Then Return Nil
@@ -153,8 +155,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the RecipientPublicKey and the specified Nonce;
-		  ' and then prepends a signature for the ClearText generated using the SenderPrivateKey. On error returns Nil.
+		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the RecipientPublicKey and the specified 24-byte
+		  ' Nonce; and then prepends a signature for the ClearText generated using the SenderPrivateKey. On error returns Nil.
 		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
@@ -252,7 +254,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function RandomNonce() As MemoryBlock
-		  ' Returns a MemoryBlock that is suitable for use as a Nonce for EncryptData.
+		  ' Returns 24 random bytes that are suitable to be used as a Nonce for EncryptData.
 		  
 		  Return RandomBytes(crypto_box_NONCEBYTES)
 		End Function
