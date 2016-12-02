@@ -100,6 +100,10 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		  ' Decrypt the CipherText using the XSalsa20 stream cipher with a precalulated SharedKey. 
+		  ' Nonce must be precisely the same as the Nonce used to encrypt the CipherText. On error 
+		  ' returns Nil.
+		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
@@ -111,15 +115,14 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, RecipientPrivateKey As MemoryBlock, SenderPublicKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		  ' Decrypt the CipherText using the RecipientPrivateKey, and verify it using the SenderPublicKey
+		  ' Nonce must be precisely the same as the Nonce used to encrypt the CipherText.
+		  ' On error returns Nil.
+		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
-		  Dim buffer As MemoryBlock
-		  'If VerifySig Then ' the MAC is prepended to the CipherText and will be verified
-		  buffer = New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
+		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
 		  If crypto_box_open_easy(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey, RecipientPrivateKey) <> 0 Then Return Nil
-		  'Else
-		  'If crypto_box_open_detached(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey, RecipientPrivateKey) <> 0 Then Return Nil
-		  'End If
 		  
 		  Return buffer
 		End Function
@@ -136,7 +139,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' uses the XSalsa20 stream cipher
+		  ' Encrypt the ClearText using the XSalsa20 stream cipher with a precalulated SharedKey and 
+		  ' the specified Nonce. On error returns Nil. 
 		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
@@ -149,20 +153,13 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' uses the XSalsa20 stream cipher
+		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the RecipientPublicKey and the specified Nonce;
+		  ' and then prepends a signature for the ClearText generated using the SenderPrivateKey. On error returns Nil.
 		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
-		  Dim buffer As MemoryBlock
-		  
-		  'If IncludeSig Then ' include the MAC in the ciphertext
-		  buffer = New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
+		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
 		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey, SenderPrivateKey) <> 0 Then Return Nil
-		  'Else
-		  'buffer = New MemoryBlock(ClearText.Size)
-		  'Dim mac As New MemoryBlock(crypto_box_MACBYTES) ' detached MAC is discarded
-		  'If crypto_box_detached(buffer, mac, ClearText, ClearText.Size, Nonce, RecipientPublicKey, SenderPrivateKey) <> 0 Then Return Nil
-		  'End If
 		  
 		  Return buffer
 		End Function
@@ -170,6 +167,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function GenericHash(InputData As MemoryBlock, Key As String = "") As String
+		  ' Generates a 512-bit digest of the InputData, optionally using the specified key.
+		  
 		  Dim h As GenericHashDigest
 		  If Key = "" Then
 		    h = New GenericHashDigest(Key)
@@ -183,6 +182,11 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function GetSharedKey(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock) As MemoryBlock
+		  ' Calculates the shared key from the RecipientPublicKey and SenderPrivateKey, for
+		  ' use with the EncryptData and DecryptData methods. This allows the key derivation
+		  ' calculation to be performed once rather than on each invocation of EncryptData
+		  ' and DecryptData.
+		  
 		  Dim buffer As New MemoryBlock(crypto_box_BEFORENMBYTES)
 		  
 		  If crypto_box_beforenm(buffer, RecipientPublicKey, SenderPrivateKey) <> 0 Then Return Nil
@@ -193,6 +197,14 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function GetSharedSecret(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock) As MemoryBlock
+		  ' Computes a shared secret given a SenderPrivateKey and RecipientPublicKey.
+		  ' The return value represents the X coordinate of a point on the curve. As 
+		  ' a result, the number of possible keys is limited to the group size (≈2^252), 
+		  ' and the key distribution is not uniform. For this reason, instead of directly 
+		  ' using the return value as a shared key, it is recommended to use:
+		  '
+		  '  GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
+		  
 		  Dim buffer As New MemoryBlock(crypto_scalarmult_BYTES)
 		  
 		  If crypto_scalarmult(buffer, SenderPrivateKey, RecipientPublicKey) <> 0 Then Return Nil
@@ -203,6 +215,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function IsAvailable() As Boolean
+		  ' Returns True if libsodium is available.
+		  
 		  Static available As Boolean
 		  
 		  If Not available Then available = System.IsFunctionAvailable("sodium_init", "libsodium")
@@ -215,6 +229,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
+		  ' Returns a MemoryBlock filled with Count bytes of cryptographically random data.
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim mb As New MemoryBlock(Count)
 		  randombytes_buf(mb, mb.Size)
@@ -235,7 +251,18 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
+		Protected Function RandomNonce() As MemoryBlock
+		  ' Returns a MemoryBlock that is suitable for use as a Nonce for EncryptData.
+		  
+		  Return RandomBytes(crypto_box_NONCEBYTES)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function RandomUInt32(Optional UpperBound As UInt32) As UInt32
+		  ' Returns a random UInt32. If UpperBound is specified then the value will be 
+		  ' less-than or equal-to UpperBound
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If UpperBound = 0 Then
 		    Return randombytes_random()
@@ -247,6 +274,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function SignData(Message As MemoryBlock, SymmetricKey As MemoryBlock) As MemoryBlock
+		  ' Generate a signature for the Message using SymmetricKey
+		  
 		  If SymmetricKey.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim signature As New MemoryBlock(crypto_auth_BYTES)
@@ -317,7 +346,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function StrComp(String1 As String, String2 As String) As Boolean
-		  ' Performs a constant-time comparison of the strings, and returns True if they match.
+		  ' Performs a constant-time binary comparison of the strings, and returns True if they are identical.
 		  
 		  Dim mb1 As MemoryBlock = String1
 		  Dim mb2 As MemoryBlock = String2
@@ -327,6 +356,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function VerifyData(Signature As MemoryBlock, Message As MemoryBlock, SymmetricKey As MemoryBlock) As Boolean
+		  ' Validate a signature for the Message that wad generated using SymmetricKey
+		  
 		  If SymmetricKey.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Return crypto_auth_verify(signature, Message, Message.Size, SymmetricKey) = 0
