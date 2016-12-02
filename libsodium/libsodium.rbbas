@@ -168,7 +168,7 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GetSharedSecret(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock, HashOutput As Boolean = True) As MemoryBlock
+		Protected Function GetSharedSecret(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock) As MemoryBlock
 		  Dim buffer As New MemoryBlock(crypto_scalarmult_BYTES)
 		  
 		  If crypto_scalarmult(buffer, SenderPrivateKey, RecipientPublicKey) <> 0 Then Return Nil
