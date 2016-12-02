@@ -47,14 +47,29 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DecryptData(CipherText As MemoryBlock, SenderPublicKey As MemoryBlock, RecipientPrivateKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		Protected Function DecryptData(CipherText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
-		  Dim buffer As New MemoryBlock(CipherText.Size)
+		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
+		  If crypto_box_open_easy_afternm(Buffer, CipherText, CipherText.Size, Nonce, SharedKey) <> 0 Then Return Nil
 		  
-		  If crypto_box_open_easy(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey, RecipientPrivateKey) = 0 Then
-		    Return buffer
-		  End If
+		  Return buffer
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function DecryptData(CipherText As MemoryBlock, RecipientPrivateKey As MemoryBlock, SenderPublicKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  
+		  Dim buffer As MemoryBlock
+		  'If VerifySig Then ' the MAC is prepended to the CipherText and will be verified
+		  buffer = New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
+		  If crypto_box_open_easy(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey, RecipientPrivateKey) <> 0 Then Return Nil
+		  'Else
+		  'If crypto_box_open_detached(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey, RecipientPrivateKey) <> 0 Then Return Nil
+		  'End If
+		  
+		  Return buffer
 		End Function
 	#tag EndMethod
 
@@ -68,14 +83,36 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function EncryptData(ClearText As MemoryBlock, SenderPrivateKey As MemoryBlock, RecipientPublicKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		Protected Function EncryptData(ClearText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		  ' uses the XSalsa20 stream cipher
+		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
+		  If crypto_box_easy_afternm(buffer, ClearText, ClearText.Size, Nonce, SharedKey) <> 0 Then Return Nil
 		  
-		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, SenderPrivateKey, RecipientPublicKey) = 0 Then
-		    Return buffer
-		  End If
+		  Return buffer
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		  ' uses the XSalsa20 stream cipher
+		  
+		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  
+		  Dim buffer As MemoryBlock
+		  
+		  'If IncludeSig Then ' include the MAC in the ciphertext
+		  buffer = New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
+		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey, SenderPrivateKey) <> 0 Then Return Nil
+		  'Else
+		  'buffer = New MemoryBlock(ClearText.Size)
+		  'Dim mac As New MemoryBlock(crypto_box_MACBYTES) ' detached MAC is discarded
+		  'If crypto_box_detached(buffer, mac, ClearText, ClearText.Size, Nonce, RecipientPublicKey, SenderPrivateKey) <> 0 Then Return Nil
+		  'End If
+		  
+		  Return buffer
 		End Function
 	#tag EndMethod
 
