@@ -110,14 +110,7 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h21
 		Private Sub Destructor()
-		  If mPtr <> Nil And mFreeable Then
-		    Try
-		      If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Me.ProtectionLevel = libsodium.ProtectionLevel.ReadWrite
-		      If Not mAllowSwap Then Me.AllowSwap = True
-		    Finally
-		      sodium_free(mPtr)
-		    End Try
-		  End If
+		  If mPtr <> Nil And mFreeable Then sodium_free(mPtr)
 		  mPtr = Nil
 		  mSize = 0
 		End Sub
