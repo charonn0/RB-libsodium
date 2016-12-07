@@ -1,9 +1,10 @@
 #tag Class
 Protected Class Password
 	#tag Method, Flags = &h0
-		Sub Constructor(Passwd As libsodium.SecureMemoryBlock)
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
-		  mPassword = Passwd
+		Sub Constructor(Passwd As String)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  mPassword = New SecureMemoryBlock(Passwd.LenB)
+		  mPassword.StringValue(0, mPassword.Size) = Passwd
 		  mPassword.AllowSwap = False
 		  Me.Lock()
 		End Sub
@@ -41,6 +42,12 @@ Protected Class Password
 		Protected Sub Lock()
 		  mPassword.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Operator_Compare(OtherPassword As libsodium.Password) As Integer
+		  Return Operator_Compare(OtherPassword.mPassword)
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
