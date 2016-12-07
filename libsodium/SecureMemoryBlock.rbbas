@@ -202,13 +202,16 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherMB As libsodium.SecureMemoryBlock) As Integer
-		  If OtherMB Is Nil Then Return 1
-		  If sodium_memcmp(mPtr, OtherMB.mPtr, Max(mSize, OtherMB.Size)) = 0 Then Return 0
-		  If OtherMB.Size > mSize Then Return -1
-		  If OtherMB.Size < mSize Then Return 1
-		  If OtherMB.Size > mSize Then Return -1
-		  Return Sign(Integer(mPtr) - Integer(OtherMB.mPtr))
-		  
+		  Select Case True
+		  Case OtherMB Is Nil
+		    Return 1
+		  Case libsodium.StrComp(Me.StringValue(0, Me.Size), OtherMB.StringValue(0, OtherMB.Size))
+		    Return 0
+		  Case OtherMB.Size = mSize
+		    Return Sign(Integer(mPtr) - Integer(OtherMB.mPtr))
+		  Else
+		    Return Sign(mSize - UInt64(OtherMB.Size))
+		  End Select
 		End Function
 	#tag EndMethod
 
