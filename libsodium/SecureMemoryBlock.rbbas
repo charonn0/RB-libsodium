@@ -465,6 +465,18 @@ Class SecureMemoryBlock
 		AllowSwap As Boolean
 	#tag EndComputedProperty
 
+	#tag ComputedProperty, Flags = &h21
+		#tag Getter
+			Get
+			  #If DebugBuild Then
+			    If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Return New MemoryBlock(mSize)
+			    Return Me.StringValue(0, Me.Size)
+			  #endif
+			End Get
+		#tag EndGetter
+		Private Contents As MemoryBlock
+	#tag EndComputedProperty
+
 	#tag Property, Flags = &h21
 		Private mAllowSwap As Boolean = True
 	#tag EndProperty
