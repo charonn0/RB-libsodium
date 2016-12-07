@@ -215,9 +215,9 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function GetSharedSecret(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock) As MemoryBlock
 		  ' Computes a shared secret given a SenderPrivateKey and RecipientPublicKey.
-		  ' The return value represents the X coordinate of a point on the curve. As 
-		  ' a result, the number of possible keys is limited to the group size (≈2^252), 
-		  ' and the key distribution is not uniform. For this reason, instead of directly 
+		  ' The return value represents the X coordinate of a point on the curve. As
+		  ' a result, the number of possible keys is limited to the group size (≈2^252),
+		  ' and the key distribution is not uniform. For this reason, instead of directly
 		  ' using the return value as a shared key, it is recommended to use:
 		  '
 		  '  GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
@@ -266,6 +266,14 @@ Protected Module libsodium
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function randombytes_uniform Lib "libsodium" (UpperBound As UInt32) As UInt32
 	#tag EndExternalMethod
+
+	#tag Method, Flags = &h1
+		Protected Function RandomKey() As MemoryBlock
+		  ' Returns 32 random bytes that are suitable to be used as a secret key.
+		  
+		  Return RandomBytes(crypto_box_SECRETKEYBYTES)
+		End Function
+	#tag EndMethod
 
 	#tag Method, Flags = &h1
 		Protected Function RandomNonce() As MemoryBlock
@@ -376,12 +384,12 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function VerifyData(Signature As MemoryBlock, Message As MemoryBlock, SymmetricKey As MemoryBlock) As Boolean
-		  ' Validate a signature for the Message that wad generated using SymmetricKey
+		Protected Function VerifyMAC(MAC As MemoryBlock, Message As MemoryBlock, SecretKey As MemoryBlock) As Boolean
+		  ' Validate an authentication code for the Message that was generated using SecretKey
 		  
-		  If SymmetricKey.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  If SecretKey.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
-		  Return crypto_auth_verify(signature, Message, Message.Size, SymmetricKey) = 0
+		  Return crypto_auth_verify(MAC, Message, Message.Size, SecretKey) = 0
 		End Function
 	#tag EndMethod
 
