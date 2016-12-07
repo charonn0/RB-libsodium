@@ -2,7 +2,7 @@
 Class SecureArray
 	#tag Method, Flags = &h0
 		Sub Constructor(Count As UInt64, FieldSize As UInt64)
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mPtr = sodium_allocarray(Count, FieldSize)
 		  If mPtr = Nil Then Raise New SodiumException(ERR_CANT_ALLOC)
 		  mFieldSize = FieldSize

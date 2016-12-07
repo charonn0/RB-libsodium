@@ -2,7 +2,7 @@
 Protected Class GenericHashDigest
 	#tag Method, Flags = &h0
 		Sub Constructor(Optional KeyData As MemoryBlock)
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mKey = KeyData
 		  Me.Reset()
 		End Sub

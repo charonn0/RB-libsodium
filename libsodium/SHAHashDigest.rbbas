@@ -2,7 +2,7 @@
 Protected Class SHAHashDigest
 	#tag Method, Flags = &h0
 		Sub Constructor(SHAType As Integer = libsodium.SHAHashDigest.SHA512)
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mType = SHAType
 		  Me.Reset()
 		End Sub

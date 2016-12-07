@@ -37,6 +37,12 @@ Inherits RuntimeException
 		  Case ERR_SIZE_MISMATCH
 		    Me.Message = "The requested operation expected input of a different length than what was provided."
 		    
+		  Case ERR_KEYGEN_FAILED
+		    Me.Message = "Generating a cryptographic key pair failed."
+		    
+		  Case ERR_KEYDERIVE_FAILED
+		    Me.Message = "Deriving a cryptographic key failed."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    

@@ -55,7 +55,7 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h1000
 		Sub Constructor(SecuredArray As libsodium.SecureArray, Index As Integer)
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mFreeable = False
 		  mSize = SecuredArray.FieldSize
 		  Dim op As Int32 = Int32(SecuredArray.TruePtr) + (Index * mSize)
@@ -66,7 +66,7 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub Constructor(Size As UInt64)
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_INIT_FAILED)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mPtr = sodium_malloc(Size)
 		  If mPtr = Nil Then Raise New SodiumException(ERR_CANT_ALLOC)
 		  mSize = Size
