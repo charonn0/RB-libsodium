@@ -241,6 +241,7 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h0
 		Sub Operator_Convert(FromString As String)
+		  If mPtr <> Nil Then Me.Destructor
 		  Me.Constructor(FromString.LenB)
 		  Me.StringValue(0, FromString.LenB) = FromString
 		End Sub
