@@ -52,6 +52,10 @@ Protected Module libsodium
 		Private Soft Declare Function crypto_pwhash_str_verify Lib "libsodium" (Hash As Ptr, Passwd As Ptr, PasswdSize As UInt64) As Int32
 	#tag EndExternalMethod
 
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_shorthash Lib "libsodium" (Buffer As Ptr, InputData As Ptr, InputDataSize As UInt64, Key As Ptr) As UInt32
+	#tag EndExternalMethod
+
 	#tag Method, Flags = &h1
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
 		  ' decodes ASCII hexadecimal to Binary
@@ -140,6 +144,20 @@ Protected Module libsodium
 		  Else
 		    Return randombytes_uniform(UpperBound)
 		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function ShortHash(InputData As MemoryBlock, Key As MemoryBlock) As UInt64
+		  ' Generates a 64-bit hawsh of the InputData using the specified key. This method
+		  ' outputs short but unpredictable (without knowing the secret key) values suitable 
+		  ' for picking a list in a hash table for a given key.
+		  
+		  Dim buffer As New MemoryBlock(crypto_shorthash_BYTES)
+		  
+		  If crypto_shorthash(buffer, InputData, InputData.Size, Key) <> 0 Then buffer = Nil
+		  
+		  If buffer <> Nil Then Return buffer.UInt64Value(0)
 		End Function
 	#tag EndMethod
 
@@ -261,6 +279,12 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_scalarmult_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_shorthash_BYTES, Type = Double, Dynamic = False, Default = \"8", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_shorthash_KEYBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_sign_BYTES, Type = Double, Dynamic = False, Default = \"64", Scope = Private
