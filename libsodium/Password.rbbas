@@ -5,7 +5,6 @@ Implements libsodium.Secureable
 		Sub Constructor(Passwd As String)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mSessionKey = libsodium.SKI.RandomKey
-		  mSessionKey.AllowSwap = False
 		  
 		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.RandomNonce
 		  Passwd = libsodium.SKI.EncryptData(Passwd, mSessionKey, SessionNonce)
@@ -135,7 +134,7 @@ Implements libsodium.Secureable
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mSessionKey As SecureMemoryBlock
+		Private mSessionKey As libsodium.SKI.SecretKey
 	#tag EndProperty
 
 	#tag Property, Flags = &h21

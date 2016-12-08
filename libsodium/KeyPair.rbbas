@@ -4,7 +4,6 @@ Implements libsodium.Secureable
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
 		  mSessionKey = libsodium.SKI.RandomKey
-		  mSessionKey.AllowSwap = False
 		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.RandomNonce
 		  PrivateKeyData.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
 		  PublicKeyData.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
@@ -31,7 +30,7 @@ Implements libsodium.Secureable
 		  Try
 		    mPrivate.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
 		    ret = mPrivate.StringValue(0, mPrivate.Size)
-		    ret = libsodium.SKI.DecryptData(ret, mSessionKey, SessionNonce)
+		    If mSessionKey <> Nil Then ret = libsodium.SKI.DecryptData(ret, mSessionKey, SessionNonce)
 		  Finally
 		    If mPrivate <> Nil Then mPrivate.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		  End Try
@@ -45,7 +44,7 @@ Implements libsodium.Secureable
 		  Try
 		    mPublic.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
 		    ret = mPublic.StringValue(0, mPublic.Size)
-		    ret = libsodium.SKI.DecryptData(ret, mSessionKey, SessionNonce)
+		    If mSessionKey <> Nil Then ret = libsodium.SKI.DecryptData(ret, mSessionKey, SessionNonce)
 		  Finally
 		    If mPublic <> Nil Then mPublic.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		  End Try
@@ -73,7 +72,7 @@ Implements libsodium.Secureable
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mSessionKey As libsodium.SecureMemoryBlock
+		Private mSessionKey As libsodium.SKI.SecretKey
 	#tag EndProperty
 
 	#tag Property, Flags = &h21

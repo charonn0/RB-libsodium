@@ -18,9 +18,8 @@ Protected Module SKI
 
 	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock) As MemoryBlock
-		  ' Decrypt the CipherText using the RecipientPrivateKey, and verify it using the SenderPublicKey
-		  ' Nonce must be precisely the same as the Nonce used to encrypt the CipherText.
-		  ' On error returns Nil.
+		  ' Decrypt the CipherText using the key. Nonce must be precisely the same as the Nonce used 
+		  ' to encrypt the CipherText. On error returns Nil.
 		  
 		  If Nonce.Size <> crypto_secretbox_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
@@ -33,8 +32,8 @@ Protected Module SKI
 
 	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock) As MemoryBlock
-		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the RecipientPublicKey and the specified 24-byte
-		  ' Nonce; and then prepends a signature for the ClearText generated using the SenderPrivateKey. On error returns Nil.
+		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the specified Key and Nonce
+		  ' On error returns Nil.
 		  
 		  If Nonce.Size <> crypto_secretbox_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  If Key.Value.Size <> crypto_secretbox_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
@@ -47,22 +46,24 @@ Protected Module SKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GenerateMAC(Message As MemoryBlock, SecretKey As MemoryBlock) As MemoryBlock
+		Protected Function GenerateMAC(Message As MemoryBlock, Key As libsodium.SKI.SecretKey) As MemoryBlock
 		  ' Generate a HMAC-SHA512256 authentication code for the Message using SecretKey.
 		  
-		  If SecretKey.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  If Key.Value.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim signature As New MemoryBlock(crypto_auth_BYTES)
-		  If crypto_auth(signature, Message, Message.Size, SecretKey) <> 0 Then Return Nil
+		  If crypto_auth(signature, Message, Message.Size, Key.Value) <> 0 Then Return Nil
 		  Return signature
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function RandomKey() As MemoryBlock
+		Protected Function RandomKey() As libsodium.SKI.SecretKey
 		  ' Returns random bytes that are suitable to be used as a secret key.
 		  
-		  Return libsodium.RandomBytes(crypto_secretbox_KEYBYTES)
+		  Return New libsodium.SKI.SecretKey(libsodium.RandomBytes(crypto_secretbox_KEYBYTES))
+		  
+		  
 		End Function
 	#tag EndMethod
 
