@@ -3,8 +3,14 @@ Protected Class KeyPair
 Implements libsodium.Secureable
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
-		  mPrivate = PrivateKeyData
-		  mPublic = PublicKeyData
+		  mSessionKey = libsodium.SKI.RandomKey
+		  mSessionKey.AllowSwap = False
+		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.RandomNonce
+		  mPrivate = libsodium.SKI.EncryptData(PrivateKeyData, mSessionKey, SessionNonce)
+		  mPublic = libsodium.SKI.EncryptData(PublicKeyData, mSessionKey, SessionNonce)
+		  mPublic.AllowSwap = False
+		  mPrivate.AllowSwap = False
+		  
 		End Sub
 	#tag EndMethod
 
@@ -23,11 +29,11 @@ Implements libsodium.Secureable
 		  Try
 		    mPrivate.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
 		    ret = mPrivate.StringValue(0, mPrivate.Size)
+		    ret = libsodium.SKI.DecryptData(ret, mSessionKey, SessionNonce)
 		  Finally
 		    If mPrivate <> Nil Then mPrivate.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		  End Try
 		  Return ret
-		  
 		End Function
 	#tag EndMethod
 
@@ -37,6 +43,7 @@ Implements libsodium.Secureable
 		  Try
 		    mPublic.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
 		    ret = mPublic.StringValue(0, mPublic.Size)
+		    ret = libsodium.SKI.DecryptData(ret, mSessionKey, SessionNonce)
 		  Finally
 		    If mPublic <> Nil Then mPublic.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		  End Try
@@ -56,15 +63,19 @@ Implements libsodium.Secureable
 
 
 	#tag Property, Flags = &h1
-		Protected mLastError As Int32
-	#tag EndProperty
-
-	#tag Property, Flags = &h1
 		Protected mPrivate As libsodium.SecureMemoryBlock
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
 		Protected mPublic As libsodium.SecureMemoryBlock
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private mSessionKey As libsodium.SecureMemoryBlock
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private Shared SessionNonce As MemoryBlock
 	#tag EndProperty
 
 

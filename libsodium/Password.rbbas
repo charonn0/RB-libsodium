@@ -4,9 +4,11 @@ Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(Passwd As String)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  mSessionKey = mSessionKey.Generate
-		  If SessionNonce = Nil Then SessionNonce = libsodium.RandomNonce
-		  Passwd = libsodium.PKI.EncryptData(Passwd, mSessionKey, mSessionKey.PrivateKey, SessionNonce)
+		  mSessionKey = libsodium.SKI.RandomKey
+		  mSessionKey.AllowSwap = False
+		  
+		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.RandomNonce
+		  Passwd = libsodium.SKI.EncryptData(Passwd, mSessionKey, SessionNonce)
 		  mPassword = New SecureMemoryBlock(Passwd.LenB)
 		  mPassword.StringValue(0, mPassword.Size) = Passwd
 		  mPassword.AllowSwap = False
@@ -49,7 +51,7 @@ Implements libsodium.Secureable
 		  Me.Unlock()
 		  Try
 		    Dim clearpw As MemoryBlock = Me.Value
-		    If crypto_pwhash_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then 
+		    If crypto_pwhash_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
 		  Finally
@@ -103,7 +105,7 @@ Implements libsodium.Secureable
 		  Me.Unlock()
 		  Try
 		    ret.StringValue(0, ret.Size) = mPassword.StringValue(0, mPassword.Size)
-		    ret = libsodium.PKI.DecryptData(ret, mSessionKey, mSessionKey.PublicKey, SessionNonce)
+		    ret = libsodium.SKI.DecryptData(ret, mSessionKey, SessionNonce)
 		  Finally
 		    Me.Lock()
 		  End Try
@@ -133,7 +135,7 @@ Implements libsodium.Secureable
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mSessionKey As libsodium.PKI.EncryptionKey
+		Private mSessionKey As SecureMemoryBlock
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
