@@ -1,5 +1,6 @@
 #tag Class
 Protected Class Password
+Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(Passwd As String)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
@@ -61,6 +62,8 @@ Protected Class Password
 
 	#tag Method, Flags = &h1
 		Protected Sub Lock()
+		  // Part of the libsodium.Secureable interface.
+		  
 		  mPassword.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		End Sub
 	#tag EndMethod
@@ -88,6 +91,8 @@ Protected Class Password
 
 	#tag Method, Flags = &h1
 		Protected Sub Unlock()
+		  // Part of the libsodium.Secureable interface.
+		  
 		  mPassword.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
 		End Sub
 	#tag EndMethod
