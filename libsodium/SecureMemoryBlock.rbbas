@@ -36,7 +36,7 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function ColorValue(Offset As UInt64, Bits As Integer) As Color
+		Function ColorValue(Offset As UInt64, Bits As Int32) As Color
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -45,7 +45,7 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub ColorValue(Offset As UInt64, Bits As Integer, Assigns NewColor As Color)
+		Sub ColorValue(Offset As UInt64, Bits As Int32, Assigns NewColor As Color)
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -54,7 +54,7 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h1000
-		Sub Constructor(SecuredArray As libsodium.SecureArray, Index As Integer)
+		Sub Constructor(SecuredArray As libsodium.SecureArray, Index As Int32)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mFreeable = False
 		  mSize = SecuredArray.FieldSize
@@ -189,26 +189,26 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Long(Offset As UInt64) As Integer
+		Function Long(Offset As UInt64) As Int32
 		  Return Me.Int32Value(Offset)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Long(Offset As UInt64, Assigns NewInt As Integer)
+		Sub Long(Offset As UInt64, Assigns NewInt As Int32)
 		  Me.Int32Value(Offset) = NewInt
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherMB As libsodium.SecureMemoryBlock) As Integer
+		Function Operator_Compare(OtherMB As libsodium.SecureMemoryBlock) As Int32
 		  Select Case True
 		  Case OtherMB Is Nil
 		    Return 1
 		  Case libsodium.StrComp(Me.StringValue(0, Me.Size), OtherMB.StringValue(0, OtherMB.Size))
 		    Return 0
 		  Case OtherMB.Size = mSize
-		    Return Sign(Integer(mPtr) - Integer(OtherMB.mPtr))
+		    Return Sign(Int32(mPtr) - Int32(OtherMB.mPtr))
 		  Else
 		    Return Sign(mSize - UInt64(OtherMB.Size))
 		  End Select
@@ -216,7 +216,7 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherMB As String) As Integer
+		Function Operator_Compare(OtherMB As String) As Int32
 		  If libsodium.StrComp(Me.StringValue(0, Me.LenB), OtherMB) Then Return 0
 		  If OtherMB.LenB < Me.Size Then Return 1
 		  Return -1
@@ -455,7 +455,7 @@ Class SecureMemoryBlock
 		#tag EndGetter
 		#tag Setter
 			Set
-			  Dim i As Integer
+			  Dim i As Int32
 			  If value Then
 			    i = sodium_munlock(mPtr, mSize)
 			  Else
@@ -508,7 +508,7 @@ Class SecureMemoryBlock
 		#tag EndGetter
 		#tag Setter
 			Set
-			  Dim i As Integer
+			  Dim i As Int32
 			  Select Case value
 			  Case libsodium.ProtectionLevel.ReadWrite
 			    i = sodium_mprotect_readwrite(mPtr)

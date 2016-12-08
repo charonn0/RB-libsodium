@@ -32,13 +32,13 @@ Class SecureArray
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Operator_Subscript(Index As Integer) As libsodium.SecureMemoryBlock
+		Function Operator_Subscript(Index As Int32) As libsodium.SecureMemoryBlock
 		  Return New libsodium.SecureMemoryBlock(Me, Index)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Operator_Subscript(Index As Integer, Assigns NewData As libsodium.SecureMemoryBlock)
+		Sub Operator_Subscript(Index As Int32, Assigns NewData As libsodium.SecureMemoryBlock)
 		  If NewData.Size > mFieldSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As New libsodium.SecureMemoryBlock(Me, Index)
 		  mb.StringValue(0, NewData.Size) = NewData.StringValue(0, NewData.Size)
@@ -76,7 +76,7 @@ Class SecureArray
 		#tag EndGetter
 		#tag Setter
 			Set
-			  Dim i As Integer
+			  Dim i As Int32
 			  Select Case value
 			  Case libsodium.ProtectionLevel.ReadWrite
 			    i = sodium_mprotect_readwrite(mPtr)

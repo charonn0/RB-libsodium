@@ -1,7 +1,7 @@
 #tag Class
 Protected Class SHAHashDigest
 	#tag Method, Flags = &h0
-		Sub Constructor(SHAType As Integer = libsodium.SHAHashDigest.SHA512)
+		Sub Constructor(SHAType As Int32 = libsodium.SHAHashDigest.SHA512)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mType = SHAType
 		  Me.Reset()
@@ -51,7 +51,7 @@ Protected Class SHAHashDigest
 
 
 	#tag Property, Flags = &h1
-		Protected mLastError As Integer
+		Protected mLastError As Int32
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
@@ -63,7 +63,7 @@ Protected Class SHAHashDigest
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mType As Integer
+		Private mType As Int32
 	#tag EndProperty
 
 

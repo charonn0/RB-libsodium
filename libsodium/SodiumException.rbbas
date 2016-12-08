@@ -2,7 +2,7 @@
 Protected Class SodiumException
 Inherits RuntimeException
 	#tag Method, Flags = &h0
-		Sub Constructor(ErrorNumber As Integer)
+		Sub Constructor(ErrorNumber As Int32)
 		  Select Case ErrorNumber
 		  Case ERR_INIT_FAILED
 		    Me.Message = "libsodium could not be initialized."
@@ -42,6 +42,9 @@ Inherits RuntimeException
 		    
 		  Case ERR_KEYDERIVE_FAILED
 		    Me.Message = "Deriving a cryptographic key failed."
+		    
+		  Case ERR_OPSLIMIT
+		    Me.Message = "The OpsLimit parameter must be greater-than or equal-to 3."
 		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
