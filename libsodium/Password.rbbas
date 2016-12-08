@@ -41,6 +41,24 @@ Protected Class Password
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function GenerateHash(OpsLimit As Int32 = libsodium.Password.OPSLIMIT_INTERACTIVE, MemLimit As Int32 = libsodium.Password.MEMLIMIT_INTERACTIVE) As MemoryBlock
+		  If OpsLimit < 3 Then Raise New SodiumException(ERR_OPSLIMIT)
+		  Dim out As New MemoryBlock(crypto_pwhash_STRBYTES)
+		  Me.Unlock()
+		  Try
+		    Dim clearpw As MemoryBlock = Me.Value
+		    If crypto_pwhash_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then 
+		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		    End If
+		  Finally
+		    Me.Lock()
+		  End Try
+		  
+		  Return out
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Sub Lock()
 		  mPassword.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
@@ -76,6 +94,22 @@ Protected Class Password
 		  Finally
 		    Me.Lock()
 		  End Try
+		  Return ret
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function VerifyHash(HashValue As MemoryBlock) As Boolean
+		  If HashValue.Size <> crypto_pwhash_STRBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  Me.Unlock()
+		  Dim ret As Boolean
+		  Dim clearpw As MemoryBlock = Me.Value
+		  Try
+		    ret = (crypto_pwhash_str_verify(HashValue, clearpw, clearpw.Size) = 0)
+		  Finally
+		    Me.Lock()
+		  End Try
+		  
 		  Return ret
 		End Function
 	#tag EndMethod
