@@ -1,60 +1,6 @@
 #tag Module
 Protected Module libsodium
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_auth Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, SymmetricKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_auth_verify Lib "libsodium" (Signature As Ptr, Message As Ptr, MessageLength As UInt64, SymmetricKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_beforenm Lib "libsodium" (Buffer As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_detached Lib "libsodium" (Buffer As Ptr, MAC As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_detached_afternm Lib "libsodium" (Buffer As Ptr, MAC As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_easy Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_easy_afternm Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag Method, Flags = &h21
-		Private Function crypto_box_MACBYTES() As UInt32
-		  Return crypto_box_ZEROBYTES - crypto_box_BOXZEROBYTES
-		End Function
-	#tag EndMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_open_detached_afternm Lib "libsodium" (Buffer As Ptr, Message As Ptr, MAC As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_open_easy Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_open_easy_afternm Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_seed_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr, SeedData As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_generichash_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
 	#tag EndExternalMethod
 
@@ -95,39 +41,15 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_pwhash Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Passwd As Ptr, PasswdSize As UInt64, SaltBuffer As Ptr, OpsLimit As UInt64, MemLimit As UInt64, Algorithm As Integer) As Integer
+		Private Soft Declare Function crypto_pwhash Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Passwd As Ptr, PasswdSize As UInt64, SaltBuffer As Ptr, OpsLimit As UInt64, MemLimit As UInt64, Algorithm As Int32) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_scalarmult Lib "libsodium" (Buffer As Ptr, PrivateKey As Ptr, PublicKey As Ptr) As Int32
+		Private Soft Declare Function crypto_pwhash_str Lib "libsodium" (Buffer As Ptr, Passwd As Ptr, PasswdSize As UInt64, OpsLimit As UInt64, MemLimit As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_scalarmult_base Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign Lib "libsodium" (Buffer As Ptr, BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_detached Lib "libsodium" (Buffer As Ptr, ByRef BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_open Lib "libsodium" (Buffer As Ptr, ByRef BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_seed_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr, SeedData As Ptr) As Int32
-	#tag EndExternalMethod
-
-	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_verify_detached Lib "libsodium" (Signature As Ptr, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr) As Int32
+		Private Soft Declare Function crypto_pwhash_str_verify Lib "libsodium" (Hash As Ptr, Passwd As Ptr, PasswdSize As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
@@ -145,36 +67,6 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DecryptData(CipherText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' Decrypt the CipherText using the XSalsa20 stream cipher with a precalulated SharedKey. 
-		  ' Nonce must be precisely the same as the Nonce used to encrypt the CipherText. On error 
-		  ' returns Nil.
-		  
-		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  
-		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
-		  If crypto_box_open_easy_afternm(Buffer, CipherText, CipherText.Size, Nonce, SharedKey) <> 0 Then Return Nil
-		  
-		  Return buffer
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function DecryptData(CipherText As MemoryBlock, RecipientPrivateKey As MemoryBlock, SenderPublicKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' Decrypt the CipherText using the RecipientPrivateKey, and verify it using the SenderPublicKey
-		  ' Nonce must be precisely the same as the Nonce used to encrypt the CipherText.
-		  ' On error returns Nil.
-		  
-		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  
-		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
-		  If crypto_box_open_easy(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey, RecipientPrivateKey) <> 0 Then Return Nil
-		  
-		  Return buffer
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
 		Protected Function EncodeHex(BinaryData As MemoryBlock) As MemoryBlock
 		  ' Encodes the BinaryData as ASCII hexadecimal
 		  
@@ -182,34 +74,6 @@ Protected Module libsodium
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
 		  If sodium_bin2hex(output, output.Size, BinaryData, BinaryData.Size) = Nil Then Return Nil
 		  Return output.CString(0).Uppercase
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function EncryptData(ClearText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' Encrypt the ClearText using the XSalsa20 stream cipher with a precalulated SharedKey and 
-		  ' the specified 24-byte Nonce. On error returns Nil. 
-		  
-		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  
-		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
-		  If crypto_box_easy_afternm(buffer, ClearText, ClearText.Size, Nonce, SharedKey) <> 0 Then Return Nil
-		  
-		  Return buffer
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the RecipientPublicKey and the specified 24-byte
-		  ' Nonce; and then prepends a signature for the ClearText generated using the SenderPrivateKey. On error returns Nil.
-		  
-		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  
-		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
-		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey, SenderPrivateKey) <> 0 Then Return Nil
-		  
-		  Return buffer
 		End Function
 	#tag EndMethod
 
@@ -225,39 +89,6 @@ Protected Module libsodium
 		  End If
 		  h.Process(InputData)
 		  Return h.Value
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function GetSharedKey(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock) As MemoryBlock
-		  ' Calculates the shared key from the RecipientPublicKey and SenderPrivateKey, for
-		  ' use with the EncryptData and DecryptData methods. This allows the key derivation
-		  ' calculation to be performed once rather than on each invocation of EncryptData
-		  ' and DecryptData.
-		  
-		  Dim buffer As New MemoryBlock(crypto_box_BEFORENMBYTES)
-		  
-		  If crypto_box_beforenm(buffer, RecipientPublicKey, SenderPrivateKey) <> 0 Then Return Nil
-		  
-		  Return buffer
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function GetSharedSecret(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock) As MemoryBlock
-		  ' Computes a shared secret given a SenderPrivateKey and RecipientPublicKey.
-		  ' The return value represents the X coordinate of a point on the curve. As
-		  ' a result, the number of possible keys is limited to the group size (≈2^252),
-		  ' and the key distribution is not uniform. For this reason, instead of directly
-		  ' using the return value as a shared key, it is recommended to use:
-		  '
-		  '  GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
-		  
-		  Dim buffer As New MemoryBlock(crypto_scalarmult_BYTES)
-		  
-		  If crypto_scalarmult(buffer, SenderPrivateKey, RecipientPublicKey) <> 0 Then Return Nil
-		  
-		  Return buffer
 		End Function
 	#tag EndMethod
 
@@ -328,18 +159,6 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Function SignData(Message As MemoryBlock, SymmetricKey As MemoryBlock) As MemoryBlock
-		  ' Generate a signature for the Message using SymmetricKey
-		  
-		  If SymmetricKey.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  
-		  Dim signature As New MemoryBlock(crypto_auth_BYTES)
-		  If crypto_auth(signature, Message, Message.Size, SymmetricKey) <> 0 Then Return Nil
-		  Return signature
-		End Function
-	#tag EndMethod
-
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Sub sodium_add Lib "libsodium" (BufferA As Ptr, BufferB As Ptr, Length As UInt64)
 	#tag EndExternalMethod
@@ -353,7 +172,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_compare Lib "libsodium" (Buffer1 As Ptr, Buffer2 As Ptr, Lenfth As UInt64) As Integer
+		Private Soft Declare Function sodium_compare Lib "libsodium" (Buffer1 As Ptr, Buffer2 As Ptr, Lenfth As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -369,7 +188,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_init Lib "libsodium" () As Integer
+		Private Soft Declare Function sodium_init Lib "libsodium" () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -377,7 +196,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_memcmp Lib "libsodium" (Buffer1 As Ptr, Buffer2 As Ptr, Length As UInt64) As Integer
+		Private Soft Declare Function sodium_memcmp Lib "libsodium" (Buffer1 As Ptr, Buffer2 As Ptr, Length As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -385,23 +204,23 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_mlock Lib "libsodium" (Address As Ptr, Length As UInt64) As Integer
+		Private Soft Declare Function sodium_mlock Lib "libsodium" (Address As Ptr, Length As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_mprotect_noaccess Lib "libsodium" (DataPtr As Ptr) As Integer
+		Private Soft Declare Function sodium_mprotect_noaccess Lib "libsodium" (DataPtr As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_mprotect_readonly Lib "libsodium" (DataPtr As Ptr) As Integer
+		Private Soft Declare Function sodium_mprotect_readonly Lib "libsodium" (DataPtr As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_mprotect_readwrite Lib "libsodium" (DataPtr As Ptr) As Integer
+		Private Soft Declare Function sodium_mprotect_readwrite Lib "libsodium" (DataPtr As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_munlock Lib "libsodium" (Address As Ptr, Length As UInt64) As Integer
+		Private Soft Declare Function sodium_munlock Lib "libsodium" (Address As Ptr, Length As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
@@ -411,16 +230,6 @@ Protected Module libsodium
 		  Dim mb1 As MemoryBlock = String1
 		  Dim mb2 As MemoryBlock = String2
 		  Return sodium_memcmp(mb1, mb2, Max(mb1.Size, mb2.Size)) = 0
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function VerifyMAC(MAC As MemoryBlock, Message As MemoryBlock, SecretKey As MemoryBlock) As Boolean
-		  ' Validate an authentication code for the Message that was generated using SecretKey
-		  
-		  If SecretKey.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  
-		  Return crypto_auth_verify(MAC, Message, Message.Size, SecretKey) = 0
 		End Function
 	#tag EndMethod
 
@@ -435,6 +244,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_box_BOXZEROBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_box_MACBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_box_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
@@ -459,6 +271,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_generichash_BYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_pwhash_STRBYTES, Type = Double, Dynamic = False, Default = \"128", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_scalarmult_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
@@ -495,6 +310,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_LOCK_DENIED, Type = Double, Dynamic = False, Default = \"-9", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_OPSLIMIT, Type = Double, Dynamic = False, Default = \"-16", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_OUT_OF_BOUNDS, Type = Double, Dynamic = False, Default = \"-10", Scope = Protected
