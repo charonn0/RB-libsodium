@@ -1,5 +1,6 @@
 #tag Class
 Class SecureArray
+Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(Count As UInt64, FieldSize As UInt64)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
@@ -31,14 +32,22 @@ Class SecureArray
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h1
+		Protected Sub Lock()
+		  // Part of the libsodium.Secureable interface.
+		  
+		  Me.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
-		Function Operator_Subscript(Index As Integer) As libsodium.SecureMemoryBlock
+		Function Operator_Subscript(Index As Int32) As libsodium.SecureMemoryBlock
 		  Return New libsodium.SecureMemoryBlock(Me, Index)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Operator_Subscript(Index As Integer, Assigns NewData As libsodium.SecureMemoryBlock)
+		Sub Operator_Subscript(Index As Int32, Assigns NewData As libsodium.SecureMemoryBlock)
 		  If NewData.Size > mFieldSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As New libsodium.SecureMemoryBlock(Me, Index)
 		  mb.StringValue(0, NewData.Size) = NewData.StringValue(0, NewData.Size)
@@ -49,6 +58,14 @@ Class SecureArray
 		Function TruePtr() As Ptr
 		  Return mPtr
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub Unlock()
+		  // Part of the libsodium.Secureable interface.
+		  
+		  Me.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
+		End Sub
 	#tag EndMethod
 
 
@@ -76,7 +93,7 @@ Class SecureArray
 		#tag EndGetter
 		#tag Setter
 			Set
-			  Dim i As Integer
+			  Dim i As Int32
 			  Select Case value
 			  Case libsodium.ProtectionLevel.ReadWrite
 			    i = sodium_mprotect_readwrite(mPtr)
