@@ -3,6 +3,9 @@ Protected Class Password
 	#tag Method, Flags = &h0
 		Sub Constructor(Passwd As String)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  mSessionKey = mSessionKey.Generate
+		  If SessionNonce = Nil Then SessionNonce = libsodium.RandomNonce
+		  Passwd = libsodium.PKI.EncryptData(Passwd, mSessionKey, mSessionKey.PrivateKey, SessionNonce)
 		  mPassword = New SecureMemoryBlock(Passwd.LenB)
 		  mPassword.StringValue(0, mPassword.Size) = Passwd
 		  mPassword.AllowSwap = False
@@ -64,11 +67,12 @@ Protected Class Password
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Value() As libsodium.SecureMemoryBlock
+		Function Value() As String
+		  Dim ret As New MemoryBlock(mPassword.Size)
 		  Me.Unlock()
-		  Dim ret As New SecureMemoryBlock(mPassword.Size)
 		  Try
 		    ret.StringValue(0, ret.Size) = mPassword.StringValue(0, mPassword.Size)
+		    ret = libsodium.PKI.DecryptData(ret, mSessionKey, mSessionKey.PublicKey, SessionNonce)
 		  Finally
 		    Me.Lock()
 		  End Try
@@ -79,6 +83,14 @@ Protected Class Password
 
 	#tag Property, Flags = &h21
 		Private mPassword As libsodium.SecureMemoryBlock
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private mSessionKey As libsodium.PKI.EncryptionKey
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private Shared SessionNonce As MemoryBlock
 	#tag EndProperty
 
 
