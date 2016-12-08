@@ -22,7 +22,7 @@ Protected Module SKI
 		  ' Nonce must be precisely the same as the Nonce used to encrypt the CipherText.
 		  ' On error returns Nil.
 		  
-		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  If Nonce.Size <> crypto_secretbox_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_secretbox_MACBYTES)
 		  If crypto_secretbox_open_easy(Buffer, CipherText, CipherText.Size, Nonce, SecretKey) <> 0 Then Return Nil
