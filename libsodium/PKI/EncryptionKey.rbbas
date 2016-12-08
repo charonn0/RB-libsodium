@@ -4,17 +4,11 @@ Inherits libsodium.KeyPair
 	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  Dim priv As New SecureMemoryBlock(crypto_box_SECRETKEYBYTES)
-		  Dim pub As New SecureMemoryBlock(crypto_box_PUBLICKEYBYTES)
-		  priv.StringValue(0, priv.Size) = PrivateKeyData
-		  Dim err As Int32 = crypto_scalarmult_base(pub.TruePtr, priv.TruePtr)
+		  Dim pub As SecureMemoryBlock = DerivePublicKey(PrivateKeyData)
 		  
-		  If err = 0 Then
+		  If pub <> Nil Then
 		    pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		    priv.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		    Return New EncryptionKey(priv, pub)
-		  Else
-		    Raise New SodiumException(err)
+		    Return New EncryptionKey(PrivateKeyData, pub)
 		  End If
 		  
 		  
@@ -55,5 +49,39 @@ Inherits libsodium.KeyPair
 	#tag EndMethod
 
 
+	#tag ViewBehavior
+		#tag ViewProperty
+			Name="Index"
+			Visible=true
+			Group="ID"
+			InitialValue="-2147483648"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Left"
+			Visible=true
+			Group="Position"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Name"
+			Visible=true
+			Group="ID"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Super"
+			Visible=true
+			Group="ID"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Top"
+			Visible=true
+			Group="Position"
+			InitialValue="0"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+	#tag EndViewBehavior
 End Class
 #tag EndClass
