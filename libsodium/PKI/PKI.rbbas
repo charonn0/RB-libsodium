@@ -57,6 +57,10 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_ed25519_pk_to_curve25519 Lib "libsodium" (ToEncryptionKey As Ptr, FromSigningKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_sign_ed25519_sk_to_pk Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
@@ -81,7 +85,7 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DecryptData(CipherText As MemoryBlock, RecipientPrivateKey As libsodium.PKI.EncryptionKey, SenderPublicKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		Protected Function DecryptData(CipherText As MemoryBlock, SenderPublicKey As MemoryBlock, RecipientPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Decrypt the CipherText using the RecipientPrivateKey, and verify it using the SenderPublicKey
 		  ' Nonce must be precisely the same as the Nonce used to encrypt the CipherText.
 		  ' On error returns Nil.
@@ -111,14 +115,14 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.EncryptionKey, SenderPrivateKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As MemoryBlock, SenderPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the RecipientPublicKey and the specified 24-byte
 		  ' Nonce; and then prepends a signature for the ClearText generated using the SenderPrivateKey. On error returns Nil.
 		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
-		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey.PublicKey, SenderPrivateKey) <> 0 Then Return Nil
+		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey, SenderPrivateKey.PrivateKey) <> 0 Then Return Nil
 		  
 		  Return buffer
 		End Function
