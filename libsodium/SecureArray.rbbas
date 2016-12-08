@@ -1,5 +1,6 @@
 #tag Class
 Class SecureArray
+Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(Count As UInt64, FieldSize As UInt64)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
@@ -31,6 +32,14 @@ Class SecureArray
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h1
+		Protected Sub Lock()
+		  // Part of the libsodium.Secureable interface.
+		  
+		  Me.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Function Operator_Subscript(Index As Int32) As libsodium.SecureMemoryBlock
 		  Return New libsodium.SecureMemoryBlock(Me, Index)
@@ -49,6 +58,14 @@ Class SecureArray
 		Function TruePtr() As Ptr
 		  Return mPtr
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub Unlock()
+		  // Part of the libsodium.Secureable interface.
+		  
+		  Me.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
+		End Sub
 	#tag EndMethod
 
 
