@@ -66,16 +66,24 @@ Protected Class Password
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherPassword As libsodium.Password) As Integer
-		  Return Operator_Compare(OtherPassword.mPassword)
+		Function Operator_Compare(OtherPassword As libsodium.Password) As Int32
+		  If OtherPassword Is Nil Then Return 1
+		  If libsodium.StrComp(Me.Value, OtherPassword.Value) Then Return 0
+		  Return -1
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherPassword As libsodium.SecureMemoryBlock) As Integer
-		  If libsodium.StrComp(mPassword.StringValue(0, mPassword.Size), OtherPassword.StringValue(0, OtherPassword.Size)) Then Return 0
+		Function Operator_Compare(OtherPassword As String) As Int32
+		  If libsodium.StrComp(Me.Value, OtherPassword) Then Return 0
 		  Return -1
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Operator_Convert(FromString As String)
+		  Me.Constructor(FromString)
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
