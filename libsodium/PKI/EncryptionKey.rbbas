@@ -39,6 +39,21 @@ Inherits libsodium.KeyPair
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Sub Operator_Convert(FromSigningKey As libsodium.PKI.SigningKey)
+		  Dim priv As New SecureMemoryBlock(crypto_box_SECRETKEYBYTES)
+		  priv.StringValue(0, priv.Size) = FromSigningKey.PrivateKey
+		  Dim pub As New SecureMemoryBlock(crypto_box_PUBLICKEYBYTES)
+		  
+		  If crypto_sign_ed25519_pk_to_curve25519(pub.TruePtr, priv.TruePtr) = 0 Then
+		    pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
+		    priv.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
+		    Super.Constructor(priv, pub)
+		  End If
+		  
+		End Sub
+	#tag EndMethod
+
 
 End Class
 #tag EndClass
