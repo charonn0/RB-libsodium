@@ -11,23 +11,23 @@ Protected Class Password
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function DeriveKey(KeyLength As Integer, Salt As MemoryBlock, OpsLimit As Integer, MemLimit As Integer, Algorithm As Integer) As MemoryBlock
+		Function DeriveKey(KeyLength As Int32, Salt As MemoryBlock, OpsLimit As Int32, MemLimit As Int32, Algorithm As Int32) As MemoryBlock
 		  Dim out As New MemoryBlock(KeyLength)
 		  Me.Unlock()
+		  Dim clearpw As MemoryBlock = Me.Value
 		  Try
 		    If crypto_pwhash( _
 		      out, out.Size, _
-		      mPassword.StringValue(0, mPassword.Size), mPassword.Size, _
+		      clearpw, clearpw.Size, _
 		      Salt, _
 		      OpsLimit, _
 		      MemLimit, _
 		      Algorithm) = -1 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
-		      
-		      Return out
-		      
 		  Finally
 		    Me.Lock()
 		  End Try
+		  
+		  Return out
 		End Function
 	#tag EndMethod
 
