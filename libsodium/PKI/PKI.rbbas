@@ -172,6 +172,22 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function RandomKey() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a private key.
+		  
+		  Return libsodium.RandomBytes(crypto_box_SECRETKEYBYTES)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function RandomNonce() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a Nonce
+		  
+		  Return RandomBytes(crypto_box_NONCEBYTES)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function SignData(Message As MemoryBlock, SecretKey As MemoryBlock, Detached As Boolean = False) As MemoryBlock
 		  
 		  If SecretKey.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)

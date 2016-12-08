@@ -130,22 +130,6 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function RandomKey() As MemoryBlock
-		  ' Returns 32 random bytes that are suitable to be used as a secret key.
-		  
-		  Return RandomBytes(crypto_box_SECRETKEYBYTES)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function RandomNonce() As MemoryBlock
-		  ' Returns 24 random bytes that are suitable to be used as a Nonce for EncryptData.
-		  
-		  Return RandomBytes(crypto_box_NONCEBYTES)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
 		Protected Function RandomUInt32(Optional UpperBound As UInt32) As UInt32
 		  ' Returns a random UInt32. If UpperBound is specified then the value will be 
 		  ' less-than or equal-to UpperBound

@@ -59,6 +59,22 @@ Protected Module SKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function RandomKey() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a secret key.
+		  
+		  Return libsodium.RandomBytes(crypto_secretbox_KEYBYTES)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function RandomNonce() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a Nonce.
+		  
+		  Return RandomBytes(crypto_secretbox_NONCEBYTES)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function VerifyMAC(MAC As MemoryBlock, Message As MemoryBlock, SecretKey As MemoryBlock) As Boolean
 		  ' Validate a HMAC-SHA512256 authentication code for the Message that was generated using SecretKey
 		  
