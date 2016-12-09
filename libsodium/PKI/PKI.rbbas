@@ -49,7 +49,7 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign Lib "libsodium" (Buffer As Ptr, BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign Lib "libsodium" (Buffer As Ptr, ByRef BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -211,6 +211,7 @@ Protected Module PKI
 		  Dim siglen As UInt64
 		  If Not Detached Then
 		    signature = New MemoryBlock(Message.Size + crypto_sign_BYTES)
+		    siglen = signature.Size
 		    If crypto_sign(signature, siglen, Message, Message.Size, SecretKey) <> 0 Then signature = Nil
 		  Else
 		    signature = New MemoryBlock(crypto_sign_BYTES)
@@ -228,7 +229,9 @@ Protected Module PKI
 		  If SignerPublicKey.Size <> crypto_sign_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  Dim sz As UInt64
 		  If DetachedSignature = Nil Then
-		    Return crypto_sign_open(Nil, sz, SignedMessage, SignedMessage.Size, SignerPublicKey) = 0
+		    Dim tmp As New MemoryBlock(SignedMessage.Size - crypto_sign_BYTES)
+		    sz = tmp.Size
+		    Return crypto_sign_open(tmp, sz, SignedMessage, SignedMessage.Size, SignerPublicKey) = 0
 		  Else
 		    Return crypto_sign_verify_detached(DetachedSignature, SignedMessage, SignedMessage.Size, SignerPublicKey) = 0
 		  End If
