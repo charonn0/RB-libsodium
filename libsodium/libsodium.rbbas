@@ -59,6 +59,7 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
 		  ' decodes ASCII hexadecimal to Binary
+		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(HexData.Size * 2 + 1)
@@ -73,6 +74,7 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function EncodeHex(BinaryData As MemoryBlock) As MemoryBlock
 		  ' Encodes the BinaryData as ASCII hexadecimal
+		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
@@ -84,6 +86,7 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function GenericHash(InputData As MemoryBlock, Key As String = "") As String
 		  ' Generates a 512-bit digest of the InputData, optionally using the specified key.
+		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
 		  Dim h As GenericHashDigest
 		  If Key = "" Then
@@ -113,6 +116,7 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
 		  ' Returns a MemoryBlock filled with Count bytes of cryptographically random data.
+		  ' https://download.libsodium.org/doc/generating_random_data/
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim mb As New MemoryBlock(Count)
@@ -137,6 +141,7 @@ Protected Module libsodium
 		Protected Function RandomUInt32(Optional UpperBound As UInt32) As UInt32
 		  ' Returns a random UInt32. If UpperBound is specified then the value will be 
 		  ' less-than or equal-to UpperBound
+		  ' https://download.libsodium.org/doc/generating_random_data/
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If UpperBound = 0 Then
@@ -152,6 +157,7 @@ Protected Module libsodium
 		  ' Generates a 64-bit hawsh of the InputData using the specified key. This method
 		  ' outputs short but unpredictable (without knowing the secret key) values suitable 
 		  ' for picking a list in a hash table for a given key.
+		  ' https://download.libsodium.org/doc/hashing/short-input_hashing.html
 		  
 		  If Key.Size <> crypto_shorthash_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
@@ -229,6 +235,7 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function StrComp(String1 As String, String2 As String) As Boolean
 		  ' Performs a constant-time binary comparison of the strings, and returns True if they are identical.
+		  ' https://download.libsodium.org/doc/helpers/#constant-time-test-for-equality
 		  
 		  Dim mb1 As MemoryBlock = String1
 		  Dim mb2 As MemoryBlock = String2
