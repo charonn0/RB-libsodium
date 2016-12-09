@@ -3,6 +3,7 @@ Protected Class GenericHashDigest
 	#tag Method, Flags = &h0
 		Sub Constructor(Optional KeyData As MemoryBlock)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If KeyData <> Nil And KeyData.Size <> crypto_generichash_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  mKey = KeyData
 		  Me.Reset()
 		End Sub
@@ -14,6 +15,12 @@ Protected Class GenericHashDigest
 		  mLastError = crypto_generichash_update(mState, NewData, NewData.Size)
 		  
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function RandomKey() As MemoryBlock
+		  Return libsodium.RandomBytes(crypto_generichash_KEYBYTES)
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0

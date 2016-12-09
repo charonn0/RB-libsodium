@@ -84,12 +84,12 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GenericHash(InputData As MemoryBlock, Key As String = "") As String
+		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil) As String
 		  ' Generates a 512-bit digest of the InputData, optionally using the specified key.
 		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
 		  Dim h As GenericHashDigest
-		  If Key = "" Then
+		  If Key = Nil Then
 		    h = New GenericHashDigest(Key)
 		  Else
 		    h = New GenericHashDigest()
@@ -281,6 +281,15 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_generichash_BYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_KEYBYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_KEYBYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_pwhash_STRBYTES, Type = Double, Dynamic = False, Default = \"128", Scope = Private
