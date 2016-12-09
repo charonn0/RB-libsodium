@@ -36,7 +36,7 @@ Protected Module SKI
 		  ' On error returns Nil.
 		  
 		  If Nonce.Size <> crypto_secretbox_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  If Key.Value.Size <> crypto_secretbox_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  'If Key.Value.Size <> crypto_secretbox_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_secretbox_MACBYTES)
 		  If crypto_secretbox_easy(buffer, ClearText, ClearText.Size, Nonce, Key.Value) <> 0 Then Return Nil
@@ -49,7 +49,7 @@ Protected Module SKI
 		Protected Function GenerateMAC(Message As MemoryBlock, Key As libsodium.SKI.SecretKey) As MemoryBlock
 		  ' Generate a HMAC-SHA512256 authentication code for the Message using SecretKey.
 		  
-		  If Key.Value.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  'If Key.Value.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim signature As New MemoryBlock(crypto_auth_BYTES)
 		  If crypto_auth(signature, Message, Message.Size, Key.Value) <> 0 Then Return Nil
@@ -79,7 +79,7 @@ Protected Module SKI
 		Protected Function VerifyMAC(MAC As MemoryBlock, Message As MemoryBlock, Key As libsodium.SKI.SecretKey) As Boolean
 		  ' Validate a HMAC-SHA512256 authentication code for the Message that was generated using SecretKey
 		  
-		  If SecretKey.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  'If Key.Value.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Return crypto_auth_verify(MAC, Message, Message.Size, Key.Value) = 0
 		End Function
