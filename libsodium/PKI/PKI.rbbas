@@ -86,31 +86,34 @@ Protected Module PKI
 
 	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, SenderPublicKey As MemoryBlock, RecipientPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
-		  ' Decrypt the CipherText using the RecipientPrivateKey, and verify it using the SenderPublicKey
-		  ' Nonce must be precisely the same as the Nonce used to encrypt the CipherText.
-		  ' On error returns Nil.
+		  ' Decrypts the CipherText using the XSalsa20 stream cipher with a shared key, which is derived
+		  ' from the SenderPublicKey and RecipientPrivateKey, and a Nonce. A Poly1305 message authentication 
+		  ' code is prepended by the EncryptData method and will be validated by this method. The decrypted 
+		  ' data is returned  on success. On error returns Nil.
+		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
-		  If crypto_box_open_easy(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey, RecipientPrivateKey.PrivateKey) <> 0 Then Return Nil
-		  
-		  Return buffer
+		  If crypto_box_open_easy(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey, RecipientPrivateKey.PrivateKey) = 0 Then
+		    Return buffer
+		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' Decrypt the CipherText using the XSalsa20 stream cipher with a precalulated SharedKey.
-		  ' Nonce must be precisely the same as the Nonce used to encrypt the CipherText. On error
-		  ' returns Nil.
+		  ' Decrypts the CipherText using the XSalsa20 stream cipher with a precalulated shared key and a 
+		  ' Nonce. A Poly1305 message authentication code is prepended by the EncryptData method and will 
+		  ' be validated by this method. The decrypted data is returned  on success. On error returns Nil.
+		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
-		  If crypto_box_open_easy_afternm(Buffer, CipherText, CipherText.Size, Nonce, SharedKey) <> 0 Then Return Nil
-		  
-		  Return buffer
+		  If crypto_box_open_easy_afternm(Buffer, CipherText, CipherText.Size, Nonce, SharedKey) = 0 Then 
+		    Return buffer
+		  End If
 		End Function
 	#tag EndMethod
 
@@ -134,9 +137,9 @@ Protected Module PKI
 		  
 		  Dim buffer As New MemoryBlock(crypto_box_BEFORENMBYTES)
 		  
-		  If crypto_box_beforenm(buffer, RecipientPublicKey, SenderPrivateKey) <> 0 Then Return Nil
-		  
-		  Return buffer
+		  If crypto_box_beforenm(buffer, RecipientPublicKey, SenderPrivateKey) = 0 Then
+		    Return buffer
+		  End If
 		End Function
 	#tag EndMethod
 
@@ -152,45 +155,50 @@ Protected Module PKI
 		  
 		  Dim buffer As New MemoryBlock(crypto_scalarmult_BYTES)
 		  
-		  If crypto_scalarmult(buffer, SenderPrivateKey, RecipientPublicKey) <> 0 Then Return Nil
-		  
-		  Return buffer
+		  If crypto_scalarmult(buffer, SenderPrivateKey, RecipientPublicKey) = 0 Then
+		    Return buffer
+		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As MemoryBlock, SenderPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
-		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the RecipientPublicKey and the specified 24-byte
-		  ' Nonce; and then prepends a signature for the ClearText generated using the SenderPrivateKey. On error returns Nil.
+		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a shared key, which is derived
+		  ' from the RecipientPublicKey and SenderPrivateKey, and a Nonce. A Poly1305 message authentication 
+		  ' code is also generated and prepended to the returned encrypted data. On error returns Nil.
+		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
-		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey, SenderPrivateKey.PrivateKey) <> 0 Then Return Nil
-		  
-		  Return buffer
+		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey, SenderPrivateKey.PrivateKey) = 0 Then
+		    Return buffer
+		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' Encrypt the ClearText using the XSalsa20 stream cipher with a precalulated SharedKey and
-		  ' the specified 24-byte Nonce. On error returns Nil.
+		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a precalculated shared key and a 
+		  ' Nonce. A Poly1305 message authentication code is also generated and prepended to the returned 
+		  ' encrypted data. On error returns Nil.
+		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
 		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
-		  If crypto_box_easy_afternm(buffer, ClearText, ClearText.Size, Nonce, SharedKey) <> 0 Then Return Nil
-		  
-		  Return buffer
+		  If crypto_box_easy_afternm(buffer, ClearText, ClearText.Size, Nonce, SharedKey) = 0 Then
+		    Return buffer
+		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
 		Protected Function RandomKey() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a private key.
+		  ' Returns random bytes that are suitable to be used as a private key. To generate the 
+		  ' corresponding public key use the DerivePublicKey method.
 		  
-		  Return libsodium.RandomBytes(crypto_box_SECRETKEYBYTES)
+		  Return RandomBytes(crypto_box_SECRETKEYBYTES)
 		End Function
 	#tag EndMethod
 
@@ -203,28 +211,36 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function SignData(Message As MemoryBlock, SecretKey As MemoryBlock, Detached As Boolean = False) As MemoryBlock
+		Protected Function SignData(Message As MemoryBlock, SenderKey As libsodium.PKI.SigningKey, Detached As Boolean = False) As MemoryBlock
+		  ' Generate a Ed25519 signature for the Message using the SenderKey. If Detached=True then
+		  ' only the signature is returned; otherwise the signature is prepended to the message and
+		  ' both are returned.
+		  ' See: https://download.libsodium.org/doc/public-key_cryptography/public-key_signatures.html
 		  
-		  If SecretKey.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  'If SenderKey.PrivateKey.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim signature As MemoryBlock
 		  Dim siglen As UInt64
 		  If Not Detached Then
 		    signature = New MemoryBlock(Message.Size + crypto_sign_BYTES)
 		    siglen = signature.Size
-		    If crypto_sign(signature, siglen, Message, Message.Size, SecretKey) <> 0 Then signature = Nil
+		    If crypto_sign(signature, siglen, Message, Message.Size, SenderKey.PrivateKey) <> 0 Then signature = Nil
 		  Else
 		    signature = New MemoryBlock(crypto_sign_BYTES)
-		    If crypto_sign_detached(signature, siglen, Message, Message.Size, SecretKey) <> 0 Then signature = Nil
+		    If crypto_sign_detached(signature, siglen, Message, Message.Size, SenderKey.PrivateKey) <> 0 Then signature = Nil
 		  End If
 		  
-		  Return signature.StringValue(0, siglen)
+		  If signature <> Nil Then Return signature.StringValue(0, siglen)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
 		Protected Function VerifyData(SignedMessage As MemoryBlock, SignerPublicKey As MemoryBlock, DetachedSignature As MemoryBlock = Nil) As Boolean
-		  ' Validate a HMAC-SHA512256 authentication code for the Message that was generated using SecretKey
+		  ' Validate a Ed25519 signature for the Message that was generated using the signer's PRIVATE key.
+		  ' If the signature was not prepended to the message (the default for SignData) then the signature
+		  ' must be passed as DetatchedSignature.
+		  ' See: https://download.libsodium.org/doc/public-key_cryptography/public-key_signatures.html
+		  
 		  
 		  If SignerPublicKey.Size <> crypto_sign_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  Dim sz As UInt64

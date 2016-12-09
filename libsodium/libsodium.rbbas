@@ -58,7 +58,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
-		  ' decodes ASCII hexadecimal to Binary
+		  ' decodes ASCII hexadecimal to Binary. On error, returns Nil. IgnoredChars
+		  ' is an optional string of characters to skip when interpreting the HexData
 		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
@@ -66,8 +67,9 @@ Protected Module libsodium
 		  Dim endhex As Ptr
 		  Dim ign As MemoryBlock = IgnoredChars + Chr(0)
 		  Dim sz As UInt32 = output.Size
-		  If sodium_hex2bin(output, output.Size, HexData, HexData.Size, ign, sz, endhex) <> 0 Then Return Nil
-		  Return output.StringValue(0, sz)
+		  If sodium_hex2bin(output, output.Size, HexData, HexData.Size, ign, sz, endhex) = 0 Then
+		    Return output.StringValue(0, sz)
+		  End If
 		End Function
 	#tag EndMethod
 
@@ -78,8 +80,9 @@ Protected Module libsodium
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
-		  If sodium_bin2hex(output, output.Size, BinaryData, BinaryData.Size) = Nil Then Return Nil
-		  Return output.CString(0).Uppercase
+		  If sodium_bin2hex(output, output.Size, BinaryData, BinaryData.Size) <> Nil Then
+		    Return output.CString(0).Uppercase
+		  End If
 		End Function
 	#tag EndMethod
 
@@ -162,9 +165,9 @@ Protected Module libsodium
 		  If Key.Size <> crypto_shorthash_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(crypto_shorthash_BYTES)
-		  If crypto_shorthash(buffer, InputData, InputData.Size, Key) <> 0 Then buffer = Nil
-		  
-		  If buffer <> Nil Then Return buffer.UInt64Value(0)
+		  If crypto_shorthash(buffer, InputData, InputData.Size, Key) = 0 Then
+		    Return buffer.UInt64Value(0)
+		  End If
 		End Function
 	#tag EndMethod
 

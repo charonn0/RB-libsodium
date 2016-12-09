@@ -19,7 +19,7 @@ Protected Class GenericHashDigest
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomKey() As MemoryBlock
-		  Return libsodium.RandomBytes(crypto_generichash_KEYBYTES)
+		  Return RandomBytes(crypto_generichash_KEYBYTES)
 		End Function
 	#tag EndMethod
 

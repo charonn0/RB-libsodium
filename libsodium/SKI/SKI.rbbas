@@ -18,42 +18,48 @@ Protected Module SKI
 
 	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock) As MemoryBlock
-		  ' Decrypt the CipherText using the key. Nonce must be precisely the same as the Nonce used 
-		  ' to encrypt the CipherText. On error returns Nil.
+		  ' Decrypts the CipherText using the XSalsa20 stream cipher with the specified Key and Nonce. A
+		  ' Poly1305 message authentication code is prepended by the EncryptData method and will be 
+		  ' validated by this method. The decrypted data is returned on success. On error returns Nil.
+		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
 		  
 		  If Nonce.Size <> crypto_secretbox_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_secretbox_MACBYTES)
-		  If crypto_secretbox_open_easy(Buffer, CipherText, CipherText.Size, Nonce, Key.Value) <> 0 Then buffer = Nil
-		  
-		  Return buffer
+		  If crypto_secretbox_open_easy(Buffer, CipherText, CipherText.Size, Nonce, Key.Value) = 0 Then
+		    Return buffer
+		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock) As MemoryBlock
-		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the specified Key and Nonce
-		  ' On error returns Nil.
+		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the specified Key and Nonce. A
+		  ' Poly1305 message authentication code is also generated and prepended to the returned encrypted
+		  ' data. On error returns Nil.
+		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
 		  
 		  If Nonce.Size <> crypto_secretbox_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  'If Key.Value.Size <> crypto_secretbox_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_secretbox_MACBYTES)
-		  If crypto_secretbox_easy(buffer, ClearText, ClearText.Size, Nonce, Key.Value) <> 0 Then Return Nil
-		  
-		  Return buffer
+		  If crypto_secretbox_easy(buffer, ClearText, ClearText.Size, Nonce, Key.Value) = 0 Then 
+		    Return buffer
+		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
 		Protected Function GenerateMAC(Message As MemoryBlock, Key As libsodium.SKI.SecretKey) As MemoryBlock
 		  ' Generate a HMAC-SHA512256 authentication code for the Message using SecretKey.
+		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/secret-key_authentication.html
 		  
 		  'If Key.Value.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim signature As New MemoryBlock(crypto_auth_BYTES)
-		  If crypto_auth(signature, Message, Message.Size, Key.Value) <> 0 Then Return Nil
-		  Return signature
+		  If crypto_auth(signature, Message, Message.Size, Key.Value) = 0 Then
+		    Return signature
+		  End If
 		End Function
 	#tag EndMethod
 

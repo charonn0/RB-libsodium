@@ -20,7 +20,7 @@ Inherits libsodium.KeyPair
 
 	#tag Method, Flags = &h1000
 		Sub Constructor(SecretKeyData As MemoryBlock)
-		  Me.Constructor(SecretKeyData, libsodium.RandomBytes(crypto_secretbox_KEYBYTES))
+		  Me.Constructor(SecretKeyData, RandomBytes(crypto_secretbox_KEYBYTES))
 		End Sub
 	#tag EndMethod
 
