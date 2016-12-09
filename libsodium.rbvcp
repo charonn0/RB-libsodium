@@ -19,6 +19,7 @@ Class=SecureMemoryBlock;libsodium/SecureMemoryBlock.rbbas;&h71AA47FF;&h7228CFFF;
 Class=SHAHashDigest;libsodium/SHAHashDigest.rbbas;&h6D6D67FF;&h7228CFFF;false
 Class=SigningKey;libsodium/PKI/SigningKey.rbbas;&h4BD427FF;&h1F9A4FFF;false
 Class=EncryptionKey;libsodium/PKI/EncryptionKey.rbbas;&h626097FF;&h1F9A4FFF;false
+Module=Testing;Testing.rbbas;&h1B8307FF;&h0;false
 DefaultWindow=Window1
 AppMenuBar=MenuBar1
 MajorVersion=1
