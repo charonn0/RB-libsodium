@@ -86,6 +86,43 @@ Protected Module Testing
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub TestSKIEncrypt()
+		  Dim key As libsodium.SKI.SecretKey = libsodium.SKI.SecretKey.Generate()
+		  Dim nonce As MemoryBlock = libsodium.SKI.RandomNonce
+		  
+		  Dim msg1 As String = "This is a test message."
+		  Dim crypted As String = libsodium.SKI.EncryptData(msg1, key, nonce)
+		  Dim msg2 As String = libsodium.SKI.DecryptData(crypted, key, nonce)
+		  
+		  Assert(msg1 = msg2)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub TestSKIMAC()
+		  Dim key As libsodium.SKI.SecretKey = libsodium.SKI.RandomKey()
+		  
+		  Dim msg As String = "This is a test message."
+		  Dim sig As String = libsodium.SKI.GenerateMAC(msg, key)
+		  Assert(libsodium.SKI.VerifyMAC(sig, msg, key))
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub TestSKIOther()
+		  Dim msg As String = "This is a test message."
+		  Dim hex As String = libsodium.EncodeHex(msg)
+		  Assert(hex = EncodeHex(msg))
+		  Assert(msg = DecodeHex(hex))
+		  
+		  Assert(libsodium.StrComp(msg, msg))
+		  Assert(Not libsodium.StrComp(msg, ConvertEncoding(msg, Encodings.UTF16)))
+		  Assert(Not libsodium.StrComp(msg, "adfsdfsdfsdf"))
+		End Sub
+	#tag EndMethod
+
 
 	#tag Property, Flags = &h1
 		Protected TestResult As Integer
