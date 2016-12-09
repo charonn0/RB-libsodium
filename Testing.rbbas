@@ -65,8 +65,13 @@ Protected Module Testing
 	#tag Method, Flags = &h21
 		Private Sub TestPKIOther()
 		  Dim msg As String = "This is a test message."
-		  Assert(libsodium.EncodeHex(msg) = EncodeHex(msg))
+		  Dim hex As String = libsodium.EncodeHex(msg)
+		  Assert(hex = EncodeHex(msg))
+		  Assert(msg = DecodeHex(hex))
 		  
+		  Assert(libsodium.StrComp(msg, msg))
+		  Assert(Not libsodium.StrComp(msg, ConvertEncoding(msg, Encodings.UTF16)))
+		  Assert(Not libsodium.StrComp(msg, "adfsdfsdfsdf"))
 		End Sub
 	#tag EndMethod
 
