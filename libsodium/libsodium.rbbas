@@ -153,8 +153,9 @@ Protected Module libsodium
 		  ' outputs short but unpredictable (without knowing the secret key) values suitable 
 		  ' for picking a list in a hash table for a given key.
 		  
-		  Dim buffer As New MemoryBlock(crypto_shorthash_BYTES)
+		  If Key.Size <> crypto_shorthash_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
+		  Dim buffer As New MemoryBlock(crypto_shorthash_BYTES)
 		  If crypto_shorthash(buffer, InputData, InputData.Size, Key) <> 0 Then buffer = Nil
 		  
 		  If buffer <> Nil Then Return buffer.UInt64Value(0)
@@ -284,7 +285,7 @@ Protected Module libsodium
 	#tag Constant, Name = crypto_shorthash_BYTES, Type = Double, Dynamic = False, Default = \"8", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_shorthash_KEYBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag Constant, Name = crypto_shorthash_KEYBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_sign_BYTES, Type = Double, Dynamic = False, Default = \"64", Scope = Private
