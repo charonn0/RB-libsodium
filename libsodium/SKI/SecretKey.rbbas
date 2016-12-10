@@ -30,6 +30,14 @@ Inherits libsodium.KeyPair
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function Operator_Compare(OtherKey As libsodium.SKI.SecretKey) As Integer
+		  If OtherKey Is Nil Then Return 1
+		  If libsodium.StrComp(Me.Value, OtherKey.Value) Then Return 0
+		  Return -1
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h21
 		Private Function PrivateKey() As MemoryBlock
 		  If PKSessionKey <> Nil Then 

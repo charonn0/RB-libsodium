@@ -1,6 +1,17 @@
 #tag Class
 Protected Class EncryptionKey
 Inherits libsodium.KeyPair
+	#tag Method, Flags = &h1000
+		Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
+		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  If PublicKeyData.Size <> crypto_box_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  
+		  // Calling the overridden superclass constructor.
+		  Super.Constructor(PrivateKeyData, PublicKeyData)
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
@@ -34,7 +45,17 @@ Inherits libsodium.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Operator_Compare(OtherKey As libsodium.PKI.EncryptionKey) As Integer
+		  If OtherKey Is Nil Then Return 1
+		  If libsodium.StrComp(Me.PrivateKey, OtherKey.PrivateKey) Then Return 0
+		  Return -1
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Operator_Convert(FromSigningKey As libsodium.PKI.SigningKey)
+		  ' Converts the FromSigningKey into a new EncryptionKey
+		  
 		  Dim priv As New SecureMemoryBlock(crypto_box_SECRETKEYBYTES)
 		  priv.StringValue(0, priv.Size) = FromSigningKey.PrivateKey
 		  Dim pub As New SecureMemoryBlock(crypto_box_PUBLICKEYBYTES)
