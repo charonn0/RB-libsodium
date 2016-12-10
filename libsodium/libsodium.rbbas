@@ -87,15 +87,15 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil) As String
+		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil, HashSize As UInt32 = libsodium.crypto_generichash_BYTES_MAX) As String
 		  ' Generates a 512-bit BLAKE2b digest of the InputData, optionally using the specified key.
 		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
 		  Dim h As GenericHashDigest
 		  If Key = Nil Then
-		    h = New GenericHashDigest(Key)
+		    h = New GenericHashDigest(Key, HashSize)
 		  Else
-		    h = New GenericHashDigest()
+		    h = New GenericHashDigest(Nil, HashSize)
 		  End If
 		  h.Process(InputData)
 		  Return h.Value
@@ -277,13 +277,13 @@ Protected Module libsodium
 	#tag Constant, Name = crypto_box_ZEROBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_generichash_BYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Private
+	#tag Constant, Name = crypto_generichash_BYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_generichash_BYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag Constant, Name = crypto_generichash_BYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_generichash_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
@@ -344,6 +344,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_OUT_OF_BOUNDS, Type = Double, Dynamic = False, Default = \"-10", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_OUT_OF_RANGE, Type = Double, Dynamic = False, Default = \"-17", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_PROTECT_FAILED, Type = Double, Dynamic = False, Default = \"-4", Scope = Protected
