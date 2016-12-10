@@ -20,13 +20,21 @@ Inherits libsodium.KeyPair
 
 	#tag Method, Flags = &h1000
 		Sub Constructor(SecretKeyData As MemoryBlock)
-		  Me.Constructor(SecretKeyData, libsodium.RandomBytes(crypto_secretbox_KEYBYTES))
+		  Me.Constructor(SecretKeyData, RandomBytes(crypto_secretbox_KEYBYTES))
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h1000
 		 Shared Function Generate() As libsodium.SKI.SecretKey
 		  Return libsodium.SKI.RandomKey
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Operator_Compare(OtherKey As libsodium.SKI.SecretKey) As Integer
+		  If OtherKey Is Nil Then Return 1
+		  If libsodium.StrComp(Me.Value, OtherKey.Value) Then Return 0
+		  Return -1
 		End Function
 	#tag EndMethod
 

@@ -58,35 +58,41 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
-		  ' decodes ASCII hexadecimal to Binary
+		  ' decodes ASCII hexadecimal to Binary. On error, returns Nil. IgnoredChars
+		  ' is an optional string of characters to skip when interpreting the HexData
+		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(HexData.Size * 2 + 1)
 		  Dim endhex As Ptr
 		  Dim ign As MemoryBlock = IgnoredChars + Chr(0)
 		  Dim sz As UInt32 = output.Size
-		  If sodium_hex2bin(output, output.Size, HexData, HexData.Size, ign, sz, endhex) <> 0 Then Return Nil
-		  Return output.StringValue(0, sz)
+		  If sodium_hex2bin(output, output.Size, HexData, HexData.Size, ign, sz, endhex) = 0 Then
+		    Return output.StringValue(0, sz)
+		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
 		Protected Function EncodeHex(BinaryData As MemoryBlock) As MemoryBlock
 		  ' Encodes the BinaryData as ASCII hexadecimal
+		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
-		  If sodium_bin2hex(output, output.Size, BinaryData, BinaryData.Size) = Nil Then Return Nil
-		  Return output.CString(0).Uppercase
+		  If sodium_bin2hex(output, output.Size, BinaryData, BinaryData.Size) <> Nil Then
+		    Return output.CString(0).Uppercase
+		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GenericHash(InputData As MemoryBlock, Key As String = "") As String
-		  ' Generates a 512-bit digest of the InputData, optionally using the specified key.
+		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil) As String
+		  ' Generates a 512-bit BLAKE2b digest of the InputData, optionally using the specified key.
+		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
 		  Dim h As GenericHashDigest
-		  If Key = "" Then
+		  If Key = Nil Then
 		    h = New GenericHashDigest(Key)
 		  Else
 		    h = New GenericHashDigest()
@@ -113,6 +119,7 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
 		  ' Returns a MemoryBlock filled with Count bytes of cryptographically random data.
+		  ' https://download.libsodium.org/doc/generating_random_data/
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim mb As New MemoryBlock(Count)
@@ -137,6 +144,7 @@ Protected Module libsodium
 		Protected Function RandomUInt32(Optional UpperBound As UInt32) As UInt32
 		  ' Returns a random UInt32. If UpperBound is specified then the value will be 
 		  ' less-than or equal-to UpperBound
+		  ' https://download.libsodium.org/doc/generating_random_data/
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If UpperBound = 0 Then
@@ -152,13 +160,14 @@ Protected Module libsodium
 		  ' Generates a 64-bit hawsh of the InputData using the specified key. This method
 		  ' outputs short but unpredictable (without knowing the secret key) values suitable 
 		  ' for picking a list in a hash table for a given key.
+		  ' https://download.libsodium.org/doc/hashing/short-input_hashing.html
 		  
 		  If Key.Size <> crypto_shorthash_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(crypto_shorthash_BYTES)
-		  If crypto_shorthash(buffer, InputData, InputData.Size, Key) <> 0 Then buffer = Nil
-		  
-		  If buffer <> Nil Then Return buffer.UInt64Value(0)
+		  If crypto_shorthash(buffer, InputData, InputData.Size, Key) = 0 Then
+		    Return buffer.UInt64Value(0)
+		  End If
 		End Function
 	#tag EndMethod
 
@@ -229,6 +238,7 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function StrComp(String1 As String, String2 As String) As Boolean
 		  ' Performs a constant-time binary comparison of the strings, and returns True if they are identical.
+		  ' https://download.libsodium.org/doc/helpers/#constant-time-test-for-equality
 		  
 		  Dim mb1 As MemoryBlock = String1
 		  Dim mb2 As MemoryBlock = String2
@@ -274,6 +284,15 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_generichash_BYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_KEYBYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_KEYBYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_pwhash_STRBYTES, Type = Double, Dynamic = False, Default = \"128", Scope = Private
