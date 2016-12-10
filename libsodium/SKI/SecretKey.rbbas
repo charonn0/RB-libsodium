@@ -1,26 +1,18 @@
 #tag Class
 Protected Class SecretKey
-Inherits libsodium.KeyPair
-	#tag Method, Flags = &h1021
-		Private Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
-		  If PKSessionNonce = Nil Then PKSessionNonce = libsodium.PKI.RandomNonce
-		  Dim key As MemoryBlock = libsodium.PKI.RandomKey
-		  PKSessionKey = libsodium.PKI.DeriveSharedKey(libsodium.PKI.DerivePublicKey(key), key)
-		  PrivateKeyData.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
-		  PublicKeyData.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
-		  mPrivate = libsodium.PKI.EncryptData(PrivateKeyData, PKSessionKey, PKSessionNonce)
-		  mPublic = libsodium.PKI.EncryptData(PublicKeyData, PKSessionKey, PKSessionNonce)
-		  mPrivate.AllowSwap = False
-		  mPublic.AllowSwap = False
-		  mPrivate.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
-		  mPublic.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
-		  
-		End Sub
-	#tag EndMethod
-
+Implements libsodium.Secureable
 	#tag Method, Flags = &h1000
 		Sub Constructor(SecretKeyData As MemoryBlock)
-		  Me.Constructor(SecretKeyData, RandomBytes(crypto_secretbox_KEYBYTES))
+		  If SessionNonce = Nil Then 
+		    SessionNonce = libsodium.PKI.RandomNonce
+		    Dim key As MemoryBlock = libsodium.PKI.RandomKey
+		    SessionKey = libsodium.PKI.DeriveSharedKey(libsodium.PKI.DerivePublicKey(key), key)
+		  End If
+		  mSecret = libsodium.PKI.EncryptData(SecretKeyData, SessionKey, SessionNonce)
+		  mSecret.AllowSwap = False
+		  mSecret.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
+		  
+		  
 		End Sub
 	#tag EndMethod
 
@@ -28,6 +20,14 @@ Inherits libsodium.KeyPair
 		 Shared Function Generate() As libsodium.SKI.SecretKey
 		  Return libsodium.SKI.RandomKey
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub Lock()
+		  // Part of the libsodium.Secureable interface.
+		  
+		  mSecret.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -38,41 +38,39 @@ Inherits libsodium.KeyPair
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h21
-		Private Function PrivateKey() As MemoryBlock
-		  If PKSessionKey <> Nil Then 
-		    Return libsodium.PKI.DecryptData(Super.PrivateKey, PKSessionKey, PKSessionNonce) 
-		  Else 
-		    Return Super.PrivateKey
-		  End If
+	#tag Method, Flags = &h1
+		Protected Sub Unlock()
+		  // Part of the libsodium.Secureable interface.
 		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
-		Private Function PublicKey() As MemoryBlock
-		  If PKSessionKey <> Nil Then
-		    Return libsodium.PKI.DecryptData(Super.PublicKey, PKSessionKey, PKSessionNonce)
-		  Else
-		    Return Super.PublicKey
-		  End If
-		  
-		End Function
+		  mSecret.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function Value() As MemoryBlock
-		  Return Me.PrivateKey
+		  Dim ret As MemoryBlock
+		  Try
+		    mSecret.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
+		    ret = mSecret.StringValue(0, mSecret.Size)
+		    If SessionKey <> Nil Then ret = libsodium.PKI.DecryptData(ret, SessionKey, SessionNonce)
+		  Finally
+		    If mSecret <> Nil Then mSecret.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
+		  End Try
+		  Return ret
 		End Function
 	#tag EndMethod
 
 
-	#tag Property, Flags = &h21
-		Private PKSessionKey As SecureMemoryBlock
+	#tag Property, Flags = &h1
+		Protected mSecret As libsodium.SecureMemoryBlock
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private Shared PKSessionNonce As MemoryBlock
+		Private Shared SessionKey As SecureMemoryBlock
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private Shared SessionNonce As MemoryBlock
 	#tag EndProperty
 
 

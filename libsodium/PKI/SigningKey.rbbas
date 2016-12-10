@@ -1,6 +1,6 @@
 #tag Class
 Protected Class SigningKey
-Inherits libsodium.KeyPair
+Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
 		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
