@@ -80,7 +80,7 @@ Protected Module Testing
 		  Dim senderkey As libsodium.PKI.SigningKey = libsodium.PKI.SigningKey.Generate()
 		  
 		  Dim msg As String = "This is a test message."
-		  Dim sig As String = libsodium.PKI.SignData(msg, senderkey.PrivateKey)
+		  Dim sig As String = libsodium.PKI.SignData(msg, senderkey)
 		  Assert(libsodium.PKI.VerifyData(sig, senderkey.PublicKey))
 		  
 		End Sub
