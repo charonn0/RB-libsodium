@@ -88,7 +88,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil) As String
-		  ' Generates a 512-bit digest of the InputData, optionally using the specified key.
+		  ' Generates a 512-bit BLAKE2b digest of the InputData, optionally using the specified key.
 		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
 		  Dim h As GenericHashDigest
