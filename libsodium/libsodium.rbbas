@@ -1,5 +1,15 @@
 #tag Module
 Protected Module libsodium
+	#tag Method, Flags = &h1
+		Protected Function Argon2(InputData As MemoryBlock) As String
+		  ' Generates an Argon2 digest of the InputData
+		  ' https://download.libsodium.org/doc/password_hashing/the_argon2i_function.html
+		  
+		  Dim p As New libsodium.Password(InputData)
+		  Return p.GenerateHash(Password.Algorithm.Argon2)
+		End Function
+	#tag EndMethod
+
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_generichash_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
 	#tag EndExternalMethod
@@ -172,6 +182,38 @@ Protected Module libsodium
 		  Else
 		    Return randombytes_uniform(UpperBound)
 		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function scrypt(InputData As MemoryBlock) As String
+		  ' Generates a scrypt digest of the InputData
+		  ' https://download.libsodium.org/doc/password_hashing/scrypt.html
+		  
+		  Dim p As New libsodium.Password(InputData)
+		  Return p.GenerateHash(Password.Algorithm.scrypt)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function SHA256(InputData As MemoryBlock) As String
+		  ' Generates a SHA256 digest of the InputData
+		  ' https://download.libsodium.org/doc/advanced/sha-2_hash_function.html
+		  
+		  Dim h As New SHAHashDigest(SHAHashDigest.SHA256)
+		  h.Process(InputData)
+		  Return h.Value
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function SHA512(InputData As MemoryBlock) As String
+		  ' Generates a SHA256 digest of the InputData
+		  ' https://download.libsodium.org/doc/advanced/sha-2_hash_function.html
+		  
+		  Dim h As New SHAHashDigest
+		  h.Process(InputData)
+		  Return h.Value
 		End Function
 	#tag EndMethod
 
