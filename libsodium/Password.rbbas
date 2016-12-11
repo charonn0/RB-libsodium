@@ -52,7 +52,6 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h21
 		Private Sub Destructor()
-		  If mPassword <> Nil Then mPassword.ZeroFill()
 		  mPassword = Nil
 		End Sub
 	#tag EndMethod
