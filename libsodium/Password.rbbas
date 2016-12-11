@@ -16,33 +16,29 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function DeriveKey(KeyLength As Int32, Salt As MemoryBlock, OpsLimit As Int32, MemLimit As Int32, HashAlgorithm As libsodium.Password.Algorithm = libsodium.Password.Algorithm.Argon2) As MemoryBlock
+		Function DeriveKey(KeyLength As Int32, Salt As MemoryBlock, Limits As libsodium.ResourceLimits, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As MemoryBlock
 		  Dim out As New MemoryBlock(KeyLength)
-		  Me.Unlock()
-		  Dim clearpw As MemoryBlock
-		  Try
-		    clearpw = Me.Value
-		  Finally
-		    Me.Lock()
-		  End Try
+		  Dim clearpw As MemoryBlock = Me.Value
+		  Dim memlimit, opslimit As UInt64
+		  GetLimits(HashAlgorithm, Limits, memlimit, opslimit)
 		  
 		  Select Case HashAlgorithm
-		  Case Algorithm.Argon2 
+		  Case ALG_ARGON2
 		    If crypto_pwhash( _
 		      out, out.Size, _
 		      clearpw, clearpw.Size, _
 		      Salt, _
-		      OpsLimit, _
-		      MemLimit, _
+		      opslimit, _
+		      memlimit, _
 		      crypto_pwhash_ALG_DEFAULT) = -1 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		      
-		  Case Algorithm.Scrypt
+		  Case ALG_SCRYPT
 		    If crypto_pwhash_scryptsalsa208sha256( _
 		      out, out.Size, _
 		      clearpw, clearpw.Size, _
 		      Salt, _
-		      OpsLimit, _
-		      MemLimit) = -1 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		      opslimit, _
+		      memlimit) = -1 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		      
 		  End Select
 		  
@@ -57,24 +53,19 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function GenerateHash(HashAlgorithm As libsodium.Password.Algorithm = libsodium.Password.Algorithm.Argon2, OpsLimit As Int32 = libsodium.Password.OPSLIMIT_INTERACTIVE, MemLimit As Int32 = libsodium.Password.MEMLIMIT_INTERACTIVE) As MemoryBlock
-		  If OpsLimit < 3 Then Raise New SodiumException(ERR_OPSLIMIT)
+		Function GenerateHash(HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As MemoryBlock
 		  Dim out As MemoryBlock
-		  Dim clearpw As MemoryBlock
-		  Me.Unlock()
-		  Try
-		    clearpw = Me.Value
-		  Finally
-		    Me.Lock()
-		  End Try
+		  Dim clearpw As MemoryBlock = Me.Value
+		  Dim memlimit, opslimit As UInt64
+		  GetLimits(HashAlgorithm, Limits, memlimit, opslimit)
 		  
-		  Select Case HashAlgorithm 
-		  Case Algorithm.Argon2
+		  Select Case HashAlgorithm
+		  Case ALG_ARGON2
 		    out = New MemoryBlock(crypto_pwhash_STRBYTES)
 		    If crypto_pwhash_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
-		  Case Algorithm.Scrypt
+		  Case ALG_SCRYPT
 		    out = New MemoryBlock(crypto_pwhash_scryptsalsa208sha256_STRBYTES)
 		    If crypto_pwhash_scryptsalsa208sha256_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
@@ -83,6 +74,32 @@ Implements libsodium.Secureable
 		  
 		  Return out
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub GetLimits(Algorithm As Int32, Limits As libsodium.ResourceLimits, ByRef Memlimit As UInt64, ByRef OpsLimit As UInt64)
+		  If Algorithm = ALG_ARGON2 Then
+		    Select Case Limits
+		    Case libsodium.ResourceLimits.Interactive
+		      Memlimit = MEMLIMIT_INTERACTIVE
+		      OpsLimit = OPSLIMIT_INTERACTIVE
+		    Case libsodium.ResourceLimits.Moderate
+		      Memlimit = MEMLIMIT_MODERATE
+		      OpsLimit = OPSLIMIT_MODERATE
+		    Case libsodium.ResourceLimits.Sensitive
+		      Memlimit = MEMLIMIT_SENSITIVE
+		      OpsLimit = OPSLIMIT_SENSITIVE
+		    End Select
+		  Else
+		    If Limits = libsodium.ResourceLimits.Interactive Then
+		      Memlimit = scrypt_MEMLIMIT_INTERACTIVE
+		      OpsLimit = scrypt_OPSLIMIT_INTERACTIVE
+		    Else
+		      Memlimit = scrypt_MEMLIMIT_SENSITIVE
+		      OpsLimit = scrypt_OPSLIMIT_SENSITIVE
+		    End If
+		  End If
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
@@ -137,23 +154,16 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function VerifyHash(HashValue As MemoryBlock, HashAlgorithm As libsodium.Password.Algorithm = libsodium.Password.Algorithm.Argon2) As Boolean
-		  Dim clearpw As MemoryBlock
-		  Me.Unlock()
-		  Try
-		    clearpw = Me.Value
-		  Finally
-		    Me.Lock()
-		  End Try
-		  
+		Function VerifyHash(HashValue As MemoryBlock, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As Boolean
+		  Dim clearpw As SecureMemoryBlock = Me.Value
 		  Select Case HashAlgorithm
-		  Case Algorithm.Argon2
+		  Case ALG_ARGON2
 		    If HashValue.Size <> crypto_pwhash_STRBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		    Return crypto_pwhash_str_verify(HashValue, clearpw, clearpw.Size) = 0
+		    Return crypto_pwhash_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
 		    
-		  Case Algorithm.Scrypt
+		  Case ALG_SCRYPT
 		    If HashValue.Size <> crypto_pwhash_scryptsalsa208sha256_STRBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw, clearpw.Size) = 0
+		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
 		  End Select
 		  
 		End Function
@@ -173,6 +183,12 @@ Implements libsodium.Secureable
 	#tag EndProperty
 
 
+	#tag Constant, Name = ALG_ARGON2, Type = Double, Dynamic = False, Default = \"0", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = ALG_SCRYPT, Type = Double, Dynamic = False, Default = \"1", Scope = Public
+	#tag EndConstant
+
 	#tag Constant, Name = crypto_pwhash_ALG_DEFAULT, Type = Double, Dynamic = False, Default = \"1", Scope = Protected
 	#tag EndConstant
 
@@ -182,41 +198,35 @@ Implements libsodium.Secureable
 	#tag Constant, Name = crypto_pwhash_scryptsalsa208sha256_STRBYTES, Type = Double, Dynamic = False, Default = \"102", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = MEMLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"33554432", Scope = Public
+	#tag Constant, Name = MEMLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"33554432", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = MEMLIMIT_MODERATE, Type = Double, Dynamic = False, Default = \"134217728", Scope = Public
+	#tag Constant, Name = MEMLIMIT_MODERATE, Type = Double, Dynamic = False, Default = \"134217728", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = MEMLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"536870912", Scope = Public
+	#tag Constant, Name = MEMLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"536870912", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = OPSLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"4", Scope = Public
+	#tag Constant, Name = OPSLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"4", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = OPSLIMIT_MODERATE, Type = Double, Dynamic = False, Default = \"6", Scope = Public
+	#tag Constant, Name = OPSLIMIT_MODERATE, Type = Double, Dynamic = False, Default = \"6", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = OPSLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"8", Scope = Public
+	#tag Constant, Name = OPSLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"8", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = Scrypt_MEMLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"16777216", Scope = Public
+	#tag Constant, Name = Scrypt_MEMLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"16777216", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = Scrypt_MEMLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"1073741824", Scope = Public
+	#tag Constant, Name = Scrypt_MEMLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"1073741824", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = Scrypt_OPSLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"524288", Scope = Public
+	#tag Constant, Name = Scrypt_OPSLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"524288", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = Scrypt_OPSLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"33554432", Scope = Public
+	#tag Constant, Name = Scrypt_OPSLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"33554432", Scope = Protected
 	#tag EndConstant
-
-
-	#tag Enum, Name = Algorithm, Type = Integer, Flags = &h0
-		Argon2
-		Scrypt
-	#tag EndEnum
 
 
 	#tag ViewBehavior

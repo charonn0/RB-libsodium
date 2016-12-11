@@ -4,7 +4,7 @@ Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password)
 		  Dim seckey As SecureMemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
-		  PasswordData.OPSLIMIT_INTERACTIVE, PasswordData.MEMLIMIT_INTERACTIVE, libsodium.Password.Algorithm.Scrypt)
+		  ResourceLimits.Interactive, libsodium.Password.ALG_ARGON2)
 		  Dim pubkey As SecureMemoryBlock = libsodium.PKI.DerivePublicKey(seckey)
 		  Me.Constructor(seckey, pubkey)
 		End Sub

@@ -3,8 +3,7 @@ Protected Class SecretKey
 Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(FromPassword As libsodium.Password)
-		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, RandomSalt, _
-		  FromPassword.OPSLIMIT_INTERACTIVE, FromPassword.MEMLIMIT_INTERACTIVE, libsodium.Password.Algorithm.Scrypt)
+		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, RandomSalt, ResourceLimits.Interactive, libsodium.Password.ALG_ARGON2)
 		  Me.Constructor(key)
 		  
 		End Sub
