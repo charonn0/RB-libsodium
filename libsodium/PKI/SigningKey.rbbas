@@ -2,6 +2,16 @@
 Protected Class SigningKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
+		Sub Constructor(PasswordData As libsodium.Password)
+		  // Calling the overridden superclass constructor.
+		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_sign_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
+		  PasswordData.OPSLIMIT_INTERACTIVE, PasswordData.MEMLIMIT_INTERACTIVE, libsodium.Password.Algorithm.Scrypt)
+		  Dim pubkey As MemoryBlock = libsodium.PKI.DerivePublicKey(seckey)
+		  Me.Constructor(seckey, pubkey)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1000
 		Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
 		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  If PublicKeyData.Size <> crypto_sign_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)

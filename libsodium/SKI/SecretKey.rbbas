@@ -1,6 +1,15 @@
 #tag Class
 Protected Class SecretKey
 Implements libsodium.Secureable
+	#tag Method, Flags = &h0
+		Sub Constructor(FromPassword As libsodium.Password)
+		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, RandomSalt, _
+		  FromPassword.OPSLIMIT_INTERACTIVE, FromPassword.MEMLIMIT_INTERACTIVE, libsodium.Password.Algorithm.Scrypt)
+		  Me.Constructor(key)
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h1000
 		Sub Constructor(SecretKeyData As MemoryBlock)
 		  If SessionNonce = Nil Then 
