@@ -16,21 +16,35 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function DeriveKey(KeyLength As Int32, Salt As MemoryBlock, OpsLimit As Int32, MemLimit As Int32, Algorithm As Int32) As MemoryBlock
+		Function DeriveKey(KeyLength As Int32, Salt As MemoryBlock, OpsLimit As Int32, MemLimit As Int32, HashAlgorithm As libsodium.Password.Algorithm = libsodium.Password.Algorithm.Argon2) As MemoryBlock
 		  Dim out As New MemoryBlock(KeyLength)
 		  Me.Unlock()
-		  Dim clearpw As MemoryBlock = Me.Value
+		  Dim clearpw As MemoryBlock
 		  Try
+		    clearpw = Me.Value
+		  Finally
+		    Me.Lock()
+		  End Try
+		  
+		  Select Case HashAlgorithm
+		  Case Algorithm.Argon2 
 		    If crypto_pwhash( _
 		      out, out.Size, _
 		      clearpw, clearpw.Size, _
 		      Salt, _
 		      OpsLimit, _
 		      MemLimit, _
-		      Algorithm) = -1 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
-		  Finally
-		    Me.Lock()
-		  End Try
+		      crypto_pwhash_ALG_DEFAULT) = -1 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		      
+		  Case Algorithm.Scrypt
+		    If crypto_pwhash_scryptsalsa208sha256( _
+		      out, out.Size, _
+		      clearpw, clearpw.Size, _
+		      Salt, _
+		      OpsLimit, _
+		      MemLimit) = -1 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		      
+		  End Select
 		  
 		  Return out
 		End Function
@@ -44,18 +58,29 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function GenerateHash(OpsLimit As Int32 = libsodium.Password.OPSLIMIT_INTERACTIVE, MemLimit As Int32 = libsodium.Password.MEMLIMIT_INTERACTIVE) As MemoryBlock
+		Function GenerateHash(HashAlgorithm As libsodium.Password.Algorithm = libsodium.Password.Algorithm.Argon2, OpsLimit As Int32 = libsodium.Password.OPSLIMIT_INTERACTIVE, MemLimit As Int32 = libsodium.Password.MEMLIMIT_INTERACTIVE) As MemoryBlock
 		  If OpsLimit < 3 Then Raise New SodiumException(ERR_OPSLIMIT)
-		  Dim out As New MemoryBlock(crypto_pwhash_STRBYTES)
+		  Dim out As MemoryBlock
+		  Dim clearpw As MemoryBlock
 		  Me.Unlock()
 		  Try
-		    Dim clearpw As MemoryBlock = Me.Value
-		    If crypto_pwhash_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then
-		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
-		    End If
+		    clearpw = Me.Value
 		  Finally
 		    Me.Lock()
 		  End Try
+		  
+		  Select Case HashAlgorithm 
+		  Case Algorithm.Argon2
+		    out = New MemoryBlock(crypto_pwhash_STRBYTES)
+		    If crypto_pwhash_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then
+		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		    End If
+		  Case Algorithm.Scrypt
+		    out = New MemoryBlock(crypto_pwhash_scryptsalsa208sha256_STRBYTES)
+		    If crypto_pwhash_scryptsalsa208sha256_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then
+		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		    End If
+		  End Select
 		  
 		  Return out
 		End Function
@@ -113,18 +138,25 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function VerifyHash(HashValue As MemoryBlock) As Boolean
-		  If HashValue.Size <> crypto_pwhash_STRBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		Function VerifyHash(HashValue As MemoryBlock, HashAlgorithm As libsodium.Password.Algorithm = libsodium.Password.Algorithm.Argon2) As Boolean
+		  Dim clearpw As MemoryBlock
 		  Me.Unlock()
-		  Dim ret As Boolean
-		  Dim clearpw As MemoryBlock = Me.Value
 		  Try
-		    ret = (crypto_pwhash_str_verify(HashValue, clearpw, clearpw.Size) = 0)
+		    clearpw = Me.Value
 		  Finally
 		    Me.Lock()
 		  End Try
 		  
-		  Return ret
+		  Select Case HashAlgorithm
+		  Case Algorithm.Argon2
+		    If HashValue.Size <> crypto_pwhash_STRBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		    Return crypto_pwhash_str_verify(HashValue, clearpw, clearpw.Size) = 0
+		    
+		  Case Algorithm.Scrypt
+		    If HashValue.Size <> crypto_pwhash_scryptsalsa208sha256_STRBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw, clearpw.Size) = 0
+		  End Select
+		  
 		End Function
 	#tag EndMethod
 
@@ -141,6 +173,15 @@ Implements libsodium.Secureable
 		Private Shared SessionNonce As MemoryBlock
 	#tag EndProperty
 
+
+	#tag Constant, Name = crypto_pwhash_ALG_DEFAULT, Type = Double, Dynamic = False, Default = \"1", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_pwhash_scryptsalsa208sha256_SALTBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_pwhash_scryptsalsa208sha256_STRBYTES, Type = Double, Dynamic = False, Default = \"102", Scope = Protected
+	#tag EndConstant
 
 	#tag Constant, Name = MEMLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"33554432", Scope = Public
 	#tag EndConstant
@@ -159,6 +200,24 @@ Implements libsodium.Secureable
 
 	#tag Constant, Name = OPSLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"8", Scope = Public
 	#tag EndConstant
+
+	#tag Constant, Name = Scrypt_MEMLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"16777216", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = Scrypt_MEMLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"1073741824", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = Scrypt_OPSLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"524288", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = Scrypt_OPSLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"33554432", Scope = Public
+	#tag EndConstant
+
+
+	#tag Enum, Name = Algorithm, Type = Integer, Flags = &h0
+		Argon2
+		Scrypt
+	#tag EndEnum
 
 
 	#tag ViewBehavior
