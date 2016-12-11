@@ -104,14 +104,18 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function EncodeHex(BinaryData As MemoryBlock) As MemoryBlock
+		Protected Function EncodeHex(BinaryData As MemoryBlock, ToUppercase As Boolean = True) As MemoryBlock
 		  ' Encodes the BinaryData as ASCII hexadecimal
 		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
 		  If sodium_bin2hex(output, output.Size, BinaryData, BinaryData.Size) <> Nil Then
-		    Return output.CString(0).Uppercase
+		    If ToUppercase Then
+		      Return output.CString(0).Uppercase
+		    Else
+		      Return output.CString(0)
+		    End If
 		  End If
 		End Function
 	#tag EndMethod
