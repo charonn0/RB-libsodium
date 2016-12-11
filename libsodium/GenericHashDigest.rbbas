@@ -1,10 +1,12 @@
 #tag Class
 Protected Class GenericHashDigest
 	#tag Method, Flags = &h0
-		Sub Constructor(Optional KeyData As MemoryBlock)
+		Sub Constructor(Optional KeyData As MemoryBlock, HashSize As UInt32 = libsodium.crypto_generichash_BYTES_MAX)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If HashSize > crypto_generichash_BYTES_MAX Or HashSize < crypto_generichash_BYTES_MIN Then Raise New SodiumException(ERR_OUT_OF_RANGE)
 		  If KeyData <> Nil And KeyData.Size <> crypto_generichash_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  mKey = KeyData
+		  mHashSize = HashSize
 		  Me.Reset()
 		End Sub
 	#tag EndMethod
@@ -28,9 +30,9 @@ Protected Class GenericHashDigest
 		  Dim sz As UInt64 = crypto_generichash_statebytes()
 		  mState = New MemoryBlock(sz)
 		  If mKey <> Nil Then
-		    mLastError = crypto_generichash_init(mState, mKey, mKey.Size, crypto_generichash_BYTES_MAX)
+		    mLastError = crypto_generichash_init(mState, mKey, mKey.Size, mHashSize)
 		  Else
-		    mLastError = crypto_generichash_init(mState, Nil, 0, crypto_generichash_BYTES_MAX)
+		    mLastError = crypto_generichash_init(mState, Nil, 0, mHashSize)
 		  End If
 		End Sub
 	#tag EndMethod
@@ -38,7 +40,7 @@ Protected Class GenericHashDigest
 	#tag Method, Flags = &h0
 		Function Value() As String
 		  If mOutput = Nil Then
-		    mOutput = New MemoryBlock(crypto_generichash_BYTES_MAX)
+		    mOutput = New MemoryBlock(mHashSize)
 		    mLastError = crypto_generichash_final(mState, mOutput, mOutput.Size)
 		  End If
 		  Return mOutput
@@ -46,6 +48,10 @@ Protected Class GenericHashDigest
 		End Function
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h1
+		Protected mHashSize As UInt32
+	#tag EndProperty
 
 	#tag Property, Flags = &h1
 		Protected mKey As MemoryBlock

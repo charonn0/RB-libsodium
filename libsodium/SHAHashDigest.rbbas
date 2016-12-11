@@ -23,10 +23,10 @@ Protected Class SHAHashDigest
 	#tag Method, Flags = &h0
 		Sub Reset()
 		  If mType = SHA256 Then
-		    mState = New MemoryBlock(crypto_hash_sha256_BYTES * 2)
+		    mState = New MemoryBlock(crypto_hash_sha256_statebytes)
 		    mLastError = crypto_hash_sha256_init(mState)
 		  Else
-		    mState = New MemoryBlock(crypto_hash_sha512_BYTES * 2)
+		    mState = New MemoryBlock(crypto_hash_sha512_statebytes)
 		    mLastError = crypto_hash_sha512_init(mState)
 		  End If
 		  
@@ -38,10 +38,10 @@ Protected Class SHAHashDigest
 		  If mOutput = Nil Then
 		    If mType = SHA256 Then
 		      mOutput = New MemoryBlock(crypto_hash_sha256_BYTES)
-		      mLastError = crypto_hash_sha256_final(mState, mOutput, mOutput.Size)
+		      mLastError = crypto_hash_sha256_final(mState, mOutput)
 		    Else
 		      mOutput = New MemoryBlock(crypto_hash_sha512_BYTES)
-		      mLastError = crypto_hash_sha512_final(mState, mOutput, mOutput.Size)
+		      mLastError = crypto_hash_sha512_final(mState, mOutput)
 		    End If
 		  End If
 		  Return mOutput

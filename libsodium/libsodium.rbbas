@@ -1,5 +1,15 @@
 #tag Module
 Protected Module libsodium
+	#tag Method, Flags = &h1
+		Protected Function Argon2(InputData As MemoryBlock) As String
+		  ' Generates an Argon2 digest of the InputData
+		  ' https://download.libsodium.org/doc/password_hashing/the_argon2i_function.html
+		  
+		  Dim p As New libsodium.Password(InputData)
+		  Return p.GenerateHash(Password.Algorithm.Argon2)
+		End Function
+	#tag EndMethod
+
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_generichash_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
 	#tag EndExternalMethod
@@ -17,7 +27,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_hash_sha256_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
+		Private Soft Declare Function crypto_hash_sha256_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -25,15 +35,23 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_hash_sha256_statebytes Lib "libsodium" () As UInt64
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_hash_sha256_update Lib "libsodium" (State As Ptr, InputBuffer As Ptr, InputSize As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_hash_sha512_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
+		Private Soft Declare Function crypto_hash_sha512_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_hash_sha512_init Lib "libsodium" (State As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_hash_sha512_statebytes Lib "libsodium" () As UInt64
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -42,6 +60,18 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_pwhash Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Passwd As Ptr, PasswdSize As UInt64, SaltBuffer As Ptr, OpsLimit As UInt64, MemLimit As UInt64, Algorithm As Int32) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256 Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Passwd As Ptr, PasswdSize As UInt64, SaltBuffer As Ptr, OpsLimit As UInt64, MemLimit As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_str Lib "libsodium" (Buffer As Ptr, Passwd As Ptr, PasswdSize As UInt64, OpsLimit As UInt64, MemLimit As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_str_verify Lib "libsodium" (Hash As Ptr, Passwd As Ptr, PasswdSize As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -74,28 +104,32 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function EncodeHex(BinaryData As MemoryBlock) As MemoryBlock
+		Protected Function EncodeHex(BinaryData As MemoryBlock, ToUppercase As Boolean = True) As MemoryBlock
 		  ' Encodes the BinaryData as ASCII hexadecimal
 		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
 		  If sodium_bin2hex(output, output.Size, BinaryData, BinaryData.Size) <> Nil Then
-		    Return output.CString(0).Uppercase
+		    If ToUppercase Then
+		      Return output.CString(0).Uppercase
+		    Else
+		      Return output.CString(0)
+		    End If
 		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil) As String
+		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil, HashSize As UInt32 = libsodium.crypto_generichash_BYTES_MAX) As String
 		  ' Generates a 512-bit BLAKE2b digest of the InputData, optionally using the specified key.
 		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
 		  Dim h As GenericHashDigest
 		  If Key = Nil Then
-		    h = New GenericHashDigest(Key)
+		    h = New GenericHashDigest(Key, HashSize)
 		  Else
-		    h = New GenericHashDigest()
+		    h = New GenericHashDigest(Nil, HashSize)
 		  End If
 		  h.Process(InputData)
 		  Return h.Value
@@ -152,6 +186,38 @@ Protected Module libsodium
 		  Else
 		    Return randombytes_uniform(UpperBound)
 		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function scrypt(InputData As MemoryBlock) As String
+		  ' Generates a scrypt digest of the InputData
+		  ' https://download.libsodium.org/doc/password_hashing/scrypt.html
+		  
+		  Dim p As New libsodium.Password(InputData)
+		  Return p.GenerateHash(Password.Algorithm.scrypt)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function SHA256(InputData As MemoryBlock) As String
+		  ' Generates a SHA256 digest of the InputData
+		  ' https://download.libsodium.org/doc/advanced/sha-2_hash_function.html
+		  
+		  Dim h As New SHAHashDigest(SHAHashDigest.SHA256)
+		  h.Process(InputData)
+		  Return h.Value
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function SHA512(InputData As MemoryBlock) As String
+		  ' Generates a SHA256 digest of the InputData
+		  ' https://download.libsodium.org/doc/advanced/sha-2_hash_function.html
+		  
+		  Dim h As New SHAHashDigest
+		  h.Process(InputData)
+		  Return h.Value
 		End Function
 	#tag EndMethod
 
@@ -277,13 +343,13 @@ Protected Module libsodium
 	#tag Constant, Name = crypto_box_ZEROBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_generichash_BYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Private
+	#tag Constant, Name = crypto_generichash_BYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_generichash_BYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag Constant, Name = crypto_generichash_BYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_generichash_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
@@ -344,6 +410,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_OUT_OF_BOUNDS, Type = Double, Dynamic = False, Default = \"-10", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_OUT_OF_RANGE, Type = Double, Dynamic = False, Default = \"-17", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_PROTECT_FAILED, Type = Double, Dynamic = False, Default = \"-4", Scope = Protected

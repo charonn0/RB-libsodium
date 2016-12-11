@@ -1,6 +1,15 @@
 #tag Class
 Protected Class EncryptionKey
-Inherits libsodium.KeyPair
+Inherits libsodium.PKI.KeyPair
+	#tag Method, Flags = &h1000
+		Sub Constructor(PasswordData As libsodium.Password)
+		  Dim seckey As SecureMemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
+		  PasswordData.OPSLIMIT_INTERACTIVE, PasswordData.MEMLIMIT_INTERACTIVE, libsodium.Password.Algorithm.Scrypt)
+		  Dim pubkey As SecureMemoryBlock = libsodium.PKI.DerivePublicKey(seckey)
+		  Me.Constructor(seckey, pubkey)
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h1000
 		Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
 		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)

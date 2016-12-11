@@ -46,6 +46,9 @@ Inherits RuntimeException
 		  Case ERR_OPSLIMIT
 		    Me.Message = "The OpsLimit parameter must be greater-than or equal-to 3."
 		    
+		  Case ERR_OUT_OF_RANGE
+		    Me.Message = "A parameter is invalid because it is outside the expected range."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    
