@@ -19,19 +19,16 @@ Implements libsodium.Secureable
 		Function DeriveKey(KeyLength As Int32, Salt As MemoryBlock, Limits As libsodium.ResourceLimits, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As MemoryBlock
 		  Dim out As New MemoryBlock(KeyLength)
 		  Dim clearpw As MemoryBlock = Me.Value
-		  Dim memlimit, opslimit As UInt64
+		  Dim memlimit, opslimit As UInt32
 		  GetLimits(HashAlgorithm, Limits, memlimit, opslimit)
 		  
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
-		    If crypto_pwhash( _
-		      out, out.Size, _
-		      clearpw, clearpw.Size, _
-		      Salt, _
-		      opslimit, _
-		      memlimit, _
-		      crypto_pwhash_ALG_DEFAULT) = -1 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
-		      
+		    'If Salt.Size <> crypto_pwhash_SALTBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		    If crypto_pwhash(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit, crypto_pwhash_ALG_DEFAULT) = -1 Then 
+		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		    End If
+		    
 		  Case ALG_SCRYPT
 		    If crypto_pwhash_scryptsalsa208sha256( _
 		      out, out.Size, _
@@ -56,7 +53,7 @@ Implements libsodium.Secureable
 		Function GenerateHash(HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As MemoryBlock
 		  Dim out As MemoryBlock
 		  Dim clearpw As MemoryBlock = Me.Value
-		  Dim memlimit, opslimit As UInt64
+		  Dim memlimit, opslimit As UInt32
 		  GetLimits(HashAlgorithm, Limits, memlimit, opslimit)
 		  
 		  Select Case HashAlgorithm
@@ -77,7 +74,7 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Sub GetLimits(Algorithm As Int32, Limits As libsodium.ResourceLimits, ByRef Memlimit As UInt64, ByRef OpsLimit As UInt64)
+		Protected Sub GetLimits(Algorithm As Int32, Limits As libsodium.ResourceLimits, ByRef Memlimit As UInt32, ByRef OpsLimit As UInt32)
 		  If Algorithm = ALG_ARGON2 Then
 		    Select Case Limits
 		    Case libsodium.ResourceLimits.Interactive
