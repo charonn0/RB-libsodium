@@ -49,6 +49,27 @@ Protected Module Testing
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
+		Private Sub TestPassword()
+		  'Dim pass As New libsodium.Password("SeeKritPassW0rd111")
+		  'Const hashval = ""
+		  'Dim key As New libsodium.SKI.SecretKey(pass)
+		  ''Dim sigk As New libsodium.PKI.SigningKey(pass)
+		  '''sigk = sigk.Generate
+		  ''Dim enck As libsodium.PKI.EncryptionKey = sigk
+		  ''Dim deck As libsodium.PKI.EncryptionKey = libsodium.PKI.EncryptionKey.Generate()
+		  'Dim msg As String = "Hello, world!"
+		  'Dim n As MemoryBlock = libsodium.PKI.RandomNonce
+		  'Dim cx As String = libsodium.SKI.EncryptData(msg, key, n)
+		  'If libsodium.SKI.DecryptData(cx, key, n) <> msg Then Break
+		  ''Dim cx As String = libsodium.PKI.EncryptData(msg, deck.PublicKey, enck,n)
+		  ''Dim sx As String = libsodium.PKI.SignData(cx, sigk)
+		  ''If Not libsodium.PKI.VerifyData(sx, sigk.PublicKey) Then Break
+		  ''If libsodium.PKI.DecryptData(cx, enck.PublicKey, deck, n) <> msg Then Break
+		  'Break
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
 		Private Sub TestPKIEncrypt()
 		  Dim senderkey As libsodium.PKI.EncryptionKey = libsodium.PKI.EncryptionKey.Generate()
 		  Dim recipkey As libsodium.PKI.EncryptionKey = libsodium.PKI.EncryptionKey.Derive(libsodium.PKI.RandomEncryptionKey)
