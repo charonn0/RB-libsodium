@@ -3,8 +3,7 @@ Protected Class SecretKey
 Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(FromPassword As libsodium.Password)
-		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, RandomSalt, _
-		  FromPassword.OPSLIMIT_INTERACTIVE, FromPassword.MEMLIMIT_INTERACTIVE, libsodium.Password.Algorithm.Scrypt)
+		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, RandomSalt, ResourceLimits.Interactive, libsodium.Password.ALG_ARGON2)
 		  Me.Constructor(key)
 		  
 		End Sub
@@ -14,8 +13,8 @@ Implements libsodium.Secureable
 		Sub Constructor(SecretKeyData As MemoryBlock)
 		  If SessionNonce = Nil Then 
 		    SessionNonce = libsodium.PKI.RandomNonce
-		    Dim key As MemoryBlock = libsodium.PKI.RandomKey
-		    SessionKey = libsodium.PKI.DeriveSharedKey(libsodium.PKI.DerivePublicKey(key), key)
+		    Dim key As MemoryBlock = libsodium.PKI.RandomEncryptionKey
+		    SessionKey = libsodium.PKI.DeriveSharedKey(libsodium.PKI.DeriveEncryptionKey(key), key)
 		  End If
 		  mSecret = libsodium.PKI.EncryptData(SecretKeyData, SessionKey, SessionNonce)
 		  mSecret.AllowSwap = False

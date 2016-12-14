@@ -49,6 +49,8 @@ Inherits RuntimeException
 		  Case ERR_OUT_OF_RANGE
 		    Me.Message = "A parameter is invalid because it is outside the expected range."
 		    
+		  Case ERR_CONVERSION_FAILED
+		    Me.Message = "The requested key-type conversion failed."
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    

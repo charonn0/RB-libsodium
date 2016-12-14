@@ -3,22 +3,32 @@ Protected Class SigningKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password)
-		  // Calling the overridden superclass constructor.
+		  ' this method sometimes fails inexplicably...
 		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_sign_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
-		  PasswordData.OPSLIMIT_INTERACTIVE, PasswordData.MEMLIMIT_INTERACTIVE, libsodium.Password.Algorithm.Scrypt)
-		  Dim pubkey As MemoryBlock = libsodium.PKI.DerivePublicKey(seckey)
+		  ResourceLimits.Interactive, libsodium.Password.ALG_ARGON2)
+		  Dim pubkey As MemoryBlock = libsodium.PKI.DeriveSigningKey(seckey)
+		  // Calling the overridden superclass constructor.
 		  Me.Constructor(seckey, pubkey)
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1000
-		Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
+	#tag Method, Flags = &h1001
+		Protected Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
 		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  If PublicKeyData.Size <> crypto_sign_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  // Calling the overridden superclass constructor.
 		  Super.Constructor(PrivateKeyData, PublicKeyData)
 		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1000
+		Sub Constructor(PrivateKeyData As MemoryBlock)
+		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
+		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		  Me.Constructor(PrivateKeyData, pub)
 		End Sub
 	#tag EndMethod
 

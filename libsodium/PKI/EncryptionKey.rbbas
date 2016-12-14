@@ -4,14 +4,14 @@ Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password)
 		  Dim seckey As SecureMemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
-		  PasswordData.OPSLIMIT_INTERACTIVE, PasswordData.MEMLIMIT_INTERACTIVE, libsodium.Password.Algorithm.Scrypt)
-		  Dim pubkey As SecureMemoryBlock = libsodium.PKI.DerivePublicKey(seckey)
+		  ResourceLimits.Interactive, libsodium.Password.ALG_ARGON2)
+		  Dim pubkey As SecureMemoryBlock = libsodium.PKI.DeriveEncryptionKey(seckey)
 		  Me.Constructor(seckey, pubkey)
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1000
-		Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
+	#tag Method, Flags = &h1001
+		Protected Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
 		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  If PublicKeyData.Size <> crypto_box_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
@@ -21,10 +21,22 @@ Inherits libsodium.PKI.KeyPair
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h1000
+		Sub Constructor(PrivateKeyData As MemoryBlock)
+		  If PrivateKeyData.Size <> crypto_scalarmult_BYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  Dim pub As New MemoryBlock(crypto_scalarmult_BYTES)
+		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		  Me.Constructor(PrivateKeyData, pub)
+		  
+		  
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  Dim pub As SecureMemoryBlock = DerivePublicKey(PrivateKeyData)
+		  Dim pub As SecureMemoryBlock = DeriveEncryptionKey(PrivateKeyData)
 		  
 		  If pub <> Nil Then
 		    pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
@@ -73,6 +85,8 @@ Inherits libsodium.PKI.KeyPair
 		    pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		    priv.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		    Super.Constructor(priv, pub)
+		  Else
+		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		  End If
 		  
 		End Sub

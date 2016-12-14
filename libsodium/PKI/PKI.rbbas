@@ -118,9 +118,9 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DerivePublicKey(PrivateKeyData As MemoryBlock) As MemoryBlock
-		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
+		Protected Function DeriveEncryptionKey(PrivateKeyData As MemoryBlock) As MemoryBlock
+		  If PrivateKeyData.Size <> crypto_scalarmult_BYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  Dim pub As New MemoryBlock(crypto_scalarmult_BYTES)
 		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Return pub
 		  
 		  
@@ -162,6 +162,17 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function DeriveSigningKey(PrivateKeyData As MemoryBlock) As MemoryBlock
+		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
+		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Return pub
+		  
+		  
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As MemoryBlock, SenderPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a shared key, which is derived
 		  ' from the RecipientPublicKey and SenderPrivateKey, and a Nonce. A Poly1305 message authentication 
@@ -194,8 +205,8 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function RandomKey() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a private key. To generate the 
+		Protected Function RandomEncryptionKey() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a private key. To generate the
 		  ' corresponding public key use the DerivePublicKey method.
 		  
 		  Return RandomBytes(crypto_box_SECRETKEYBYTES)

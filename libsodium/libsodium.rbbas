@@ -6,7 +6,7 @@ Protected Module libsodium
 		  ' https://download.libsodium.org/doc/password_hashing/the_argon2i_function.html
 		  
 		  Dim p As New libsodium.Password(InputData)
-		  Return p.GenerateHash(Password.Algorithm.Argon2)
+		  Return p.GenerateHash(Password.ALG_ARGON2)
 		End Function
 	#tag EndMethod
 
@@ -195,7 +195,7 @@ Protected Module libsodium
 		  ' https://download.libsodium.org/doc/password_hashing/scrypt.html
 		  
 		  Dim p As New libsodium.Password(InputData)
-		  Return p.GenerateHash(Password.Algorithm.scrypt)
+		  Return p.GenerateHash(Password.ALG_SCRYPT)
 		End Function
 	#tag EndMethod
 
@@ -391,6 +391,9 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_COMPUTATION_FAILED, Type = Double, Dynamic = False, Default = \"-12", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_CONVERSION_FAILED, Type = Double, Dynamic = False, Default = \"-18", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_INIT_FAILED, Type = Double, Dynamic = False, Default = \"-2", Scope = Protected
 	#tag EndConstant
 
@@ -441,6 +444,12 @@ Protected Module libsodium
 		ReadWrite
 		  ReadOnly
 		NoAccess
+	#tag EndEnum
+
+	#tag Enum, Name = ResourceLimits, Type = Integer, Flags = &h1
+		Sensitive
+		  Moderate
+		Interactive
 	#tag EndEnum
 
 
