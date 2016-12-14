@@ -205,8 +205,8 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function RandomKey() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a private key. To generate the 
+		Protected Function RandomEncryptionKey() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a private key. To generate the
 		  ' corresponding public key use the DerivePublicKey method.
 		  
 		  Return RandomBytes(crypto_box_SECRETKEYBYTES)

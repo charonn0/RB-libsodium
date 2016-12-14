@@ -391,6 +391,9 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_COMPUTATION_FAILED, Type = Double, Dynamic = False, Default = \"-12", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_CONVERSION_FAILED, Type = Double, Dynamic = False, Default = \"-18", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_INIT_FAILED, Type = Double, Dynamic = False, Default = \"-2", Scope = Protected
 	#tag EndConstant
 

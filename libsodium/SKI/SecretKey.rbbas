@@ -13,7 +13,7 @@ Implements libsodium.Secureable
 		Sub Constructor(SecretKeyData As MemoryBlock)
 		  If SessionNonce = Nil Then 
 		    SessionNonce = libsodium.PKI.RandomNonce
-		    Dim key As MemoryBlock = libsodium.PKI.RandomKey
+		    Dim key As MemoryBlock = libsodium.PKI.RandomEncryptionKey
 		    SessionKey = libsodium.PKI.DeriveSharedKey(libsodium.PKI.DeriveEncryptionKey(key), key)
 		  End If
 		  mSecret = libsodium.PKI.EncryptData(SecretKeyData, SessionKey, SessionNonce)
