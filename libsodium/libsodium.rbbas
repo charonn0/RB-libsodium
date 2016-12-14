@@ -361,6 +361,9 @@ Protected Module libsodium
 	#tag Constant, Name = crypto_generichash_KEYBYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Private
 	#tag EndConstant
 
+	#tag Constant, Name = crypto_pwhash_SALTBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag EndConstant
+
 	#tag Constant, Name = crypto_pwhash_STRBYTES, Type = Double, Dynamic = False, Default = \"128", Scope = Private
 	#tag EndConstant
 

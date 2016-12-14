@@ -3,21 +3,10 @@ Protected Class EncryptionKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password)
-		  Dim seckey As SecureMemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
+		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
 		  ResourceLimits.Interactive, libsodium.Password.ALG_ARGON2)
-		  Dim pubkey As SecureMemoryBlock = libsodium.PKI.DeriveEncryptionKey(seckey)
+		  Dim pubkey As MemoryBlock = libsodium.PKI.DeriveEncryptionKey(seckey)
 		  Me.Constructor(seckey, pubkey)
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h1001
-		Protected Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
-		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  If PublicKeyData.Size <> crypto_box_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  
-		  // Calling the overridden superclass constructor.
-		  Super.Constructor(PrivateKeyData, PublicKeyData)
-		  
 		End Sub
 	#tag EndMethod
 
@@ -33,16 +22,23 @@ Inherits libsodium.PKI.KeyPair
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h1001
+		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
+		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  If PublicKeyData.Size <> crypto_box_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  
+		  // Calling the overridden superclass constructor.
+		  Super.Constructor(PrivateKeyData, PublicKeyData)
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  Dim pub As SecureMemoryBlock = DeriveEncryptionKey(PrivateKeyData)
+		  Dim pub As MemoryBlock = DeriveEncryptionKey(PrivateKeyData)
 		  
-		  If pub <> Nil Then
-		    pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		    Return New EncryptionKey(PrivateKeyData, pub)
-		  End If
-		  
+		  If pub <> Nil Then Return New EncryptionKey(PrivateKeyData, pub)
 		  
 		End Function
 	#tag EndMethod
@@ -77,18 +73,20 @@ Inherits libsodium.PKI.KeyPair
 		Sub Operator_Convert(FromSigningKey As libsodium.PKI.SigningKey)
 		  ' Converts the FromSigningKey into a new EncryptionKey
 		  
-		  Dim priv As New SecureMemoryBlock(crypto_box_SECRETKEYBYTES)
-		  priv.StringValue(0, priv.Size) = FromSigningKey.PrivateKey
-		  Dim pub As New SecureMemoryBlock(crypto_box_PUBLICKEYBYTES)
+		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
+		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
 		  
-		  If crypto_sign_ed25519_pk_to_curve25519(pub.TruePtr, priv.TruePtr) = 0 Then
-		    pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		    priv.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		    Super.Constructor(priv, pub)
-		  Else
-		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		  ' first convert the public key
+		  If crypto_sign_ed25519_pk_to_curve25519(pub, FromSigningKey.PublicKey) <> 0 Then 
+		    Raise New SodiumException(ERR_CONVERSION_FAILED)
 		  End If
 		  
+		  ' then the private key
+		  If crypto_sign_ed25519_sk_to_curve25519(priv, FromSigningKey.PrivateKey) <> 0 Then
+		    Raise New SodiumException(ERR_CONVERSION_FAILED)
+		  End If
+		  
+		  Super.Constructor(priv, pub)
 		End Sub
 	#tag EndMethod
 

@@ -2,11 +2,9 @@
 Protected Class KeyPair
 Implements libsodium.Secureable
 	#tag Method, Flags = &h1001
-		Protected Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
+		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
 		  mSessionKey = libsodium.SKI.RandomKey
 		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.RandomNonce
-		  PrivateKeyData.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
-		  PublicKeyData.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
 		  mPrivate = libsodium.SKI.EncryptData(PrivateKeyData, mSessionKey, SessionNonce)
 		  mPublic = libsodium.SKI.EncryptData(PublicKeyData, mSessionKey, SessionNonce)
 		  mPublic.AllowSwap = False

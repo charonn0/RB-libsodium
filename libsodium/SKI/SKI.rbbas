@@ -101,9 +101,6 @@ Protected Module SKI
 	#tag EndMethod
 
 
-	#tag Constant, Name = crypto_pwhash_SALTBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
-	#tag EndConstant
-
 	#tag Constant, Name = crypto_secretbox_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
