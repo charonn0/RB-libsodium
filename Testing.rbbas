@@ -51,7 +51,7 @@ Protected Module Testing
 	#tag Method, Flags = &h21
 		Private Sub TestPKIEncrypt()
 		  Dim senderkey As libsodium.PKI.EncryptionKey = libsodium.PKI.EncryptionKey.Generate()
-		  Dim recipkey As libsodium.PKI.EncryptionKey = libsodium.PKI.EncryptionKey.Derive(libsodium.PKI.RandomKey)
+		  Dim recipkey As libsodium.PKI.EncryptionKey = libsodium.PKI.EncryptionKey.Derive(libsodium.PKI.RandomEncryptionKey)
 		  Dim nonce As MemoryBlock = libsodium.PKI.RandomNonce
 		  
 		  Dim msg1 As String = "This is a test message."
