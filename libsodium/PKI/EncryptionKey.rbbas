@@ -3,21 +3,10 @@ Protected Class EncryptionKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password)
-		  Dim seckey As SecureMemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
+		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
 		  ResourceLimits.Interactive, libsodium.Password.ALG_ARGON2)
-		  Dim pubkey As SecureMemoryBlock = libsodium.PKI.DeriveEncryptionKey(seckey)
+		  Dim pubkey As MemoryBlock = libsodium.PKI.DeriveEncryptionKey(seckey)
 		  Me.Constructor(seckey, pubkey)
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h1001
-		Protected Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
-		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  If PublicKeyData.Size <> crypto_box_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  
-		  // Calling the overridden superclass constructor.
-		  Super.Constructor(PrivateKeyData, PublicKeyData)
-		  
 		End Sub
 	#tag EndMethod
 
@@ -29,6 +18,17 @@ Inherits libsodium.PKI.KeyPair
 		  Me.Constructor(PrivateKeyData, pub)
 		  
 		  
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1001
+		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
+		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  If PublicKeyData.Size <> crypto_box_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  
+		  // Calling the overridden superclass constructor.
+		  Super.Constructor(PrivateKeyData, PublicKeyData)
 		  
 		End Sub
 	#tag EndMethod
