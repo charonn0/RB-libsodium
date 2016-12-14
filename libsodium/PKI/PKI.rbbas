@@ -118,9 +118,9 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DerivePublicKey(PrivateKeyData As MemoryBlock) As MemoryBlock
-		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
+		Protected Function DeriveEncryptionKey(PrivateKeyData As MemoryBlock) As MemoryBlock
+		  If PrivateKeyData.Size <> crypto_scalarmult_BYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  Dim pub As New MemoryBlock(crypto_scalarmult_BYTES)
 		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Return pub
 		  
 		  
@@ -158,6 +158,17 @@ Protected Module PKI
 		  If crypto_scalarmult(buffer, SenderPrivateKey, RecipientPublicKey) = 0 Then
 		    Return buffer
 		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function DeriveSigningKey(PrivateKeyData As MemoryBlock) As MemoryBlock
+		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
+		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Return pub
+		  
+		  
+		  
 		End Function
 	#tag EndMethod
 

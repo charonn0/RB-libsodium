@@ -7,7 +7,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' this method is wrong and will fail. Need to use crypto_sign_* api somehow
 		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_sign_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
 		  ResourceLimits.Interactive, libsodium.Password.ALG_ARGON2)
-		  Dim pubkey As MemoryBlock = libsodium.PKI.DerivePublicKey(seckey)
+		  Dim pubkey As MemoryBlock = libsodium.PKI.DeriveSigningKey(seckey)
 		  Me.Constructor(seckey, pubkey)
 		End Sub
 	#tag EndMethod

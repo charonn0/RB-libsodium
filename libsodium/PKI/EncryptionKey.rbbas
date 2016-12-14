@@ -5,7 +5,7 @@ Inherits libsodium.PKI.KeyPair
 		Sub Constructor(PasswordData As libsodium.Password)
 		  Dim seckey As SecureMemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
 		  ResourceLimits.Interactive, libsodium.Password.ALG_ARGON2)
-		  Dim pubkey As SecureMemoryBlock = libsodium.PKI.DerivePublicKey(seckey)
+		  Dim pubkey As SecureMemoryBlock = libsodium.PKI.DeriveEncryptionKey(seckey)
 		  Me.Constructor(seckey, pubkey)
 		End Sub
 	#tag EndMethod
@@ -24,7 +24,7 @@ Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  Dim pub As SecureMemoryBlock = DerivePublicKey(PrivateKeyData)
+		  Dim pub As SecureMemoryBlock = DeriveEncryptionKey(PrivateKeyData)
 		  
 		  If pub <> Nil Then
 		    pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
@@ -73,6 +73,8 @@ Inherits libsodium.PKI.KeyPair
 		    pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		    priv.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		    Super.Constructor(priv, pub)
+		  Else
+		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		  End If
 		  
 		End Sub
