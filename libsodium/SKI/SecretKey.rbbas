@@ -14,7 +14,7 @@ Implements libsodium.Secureable
 		  If SessionNonce = Nil Then 
 		    SessionNonce = libsodium.PKI.RandomNonce
 		    Dim key As MemoryBlock = libsodium.PKI.RandomKey
-		    SessionKey = libsodium.PKI.DeriveSharedKey(libsodium.PKI.DerivePublicKey(key), key)
+		    SessionKey = libsodium.PKI.DeriveSharedKey(libsodium.PKI.DeriveEncryptionKey(key), key)
 		  End If
 		  mSecret = libsodium.PKI.EncryptData(SecretKeyData, SessionKey, SessionNonce)
 		  mSecret.AllowSwap = False

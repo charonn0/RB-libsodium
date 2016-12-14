@@ -6,7 +6,7 @@ Inherits libsodium.PKI.KeyPair
 		  // Calling the overridden superclass constructor.
 		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_sign_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
 		  ResourceLimits.Interactive, libsodium.Password.ALG_ARGON2)
-		  Dim pubkey As MemoryBlock = libsodium.PKI.DerivePublicKey(seckey)
+		  Dim pubkey As MemoryBlock = libsodium.PKI.DeriveSigningKey(seckey)
 		  Me.Constructor(seckey, pubkey)
 		End Sub
 	#tag EndMethod
