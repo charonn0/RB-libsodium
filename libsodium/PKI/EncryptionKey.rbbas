@@ -73,6 +73,8 @@ Inherits libsodium.PKI.KeyPair
 		    pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		    priv.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		    Super.Constructor(priv, pub)
+		  Else
+		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		  End If
 		  
 		End Sub
