@@ -24,19 +24,17 @@ Implements libsodium.Secureable
 		  
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
-		    'If Salt.Size <> crypto_pwhash_SALTBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		    If crypto_pwhash(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit, crypto_pwhash_ALG_DEFAULT) = -1 Then 
+		    If Salt.Size <> crypto_pwhash_SALTBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		    If crypto_pwhash(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit, crypto_pwhash_ALG_DEFAULT) = -1 Then
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
 		    
 		  Case ALG_SCRYPT
-		    If crypto_pwhash_scryptsalsa208sha256( _
-		      out, out.Size, _
-		      clearpw, clearpw.Size, _
-		      Salt, _
-		      opslimit, _
-		      memlimit) = -1 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
-		      
+		    If Salt.Size <> crypto_pwhash_scryptsalsa208sha256_SALTBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		    If crypto_pwhash_scryptsalsa208sha256(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit) = -1 Then 
+		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		    End If
+		    
 		  End Select
 		  
 		  Return out
@@ -137,12 +135,11 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Value() As String
-		  Dim ret As New MemoryBlock(mPassword.Size)
+		Function Value() As libsodium.SecureMemoryBlock
+		  Dim ret As New SecureMemoryBlock(mPassword.Size)
 		  Me.Unlock()
 		  Try
-		    ret.StringValue(0, ret.Size) = mPassword.StringValue(0, mPassword.Size)
-		    ret = libsodium.SKI.DecryptData(ret, mSessionKey, SessionNonce)
+		    ret = libsodium.SKI.DecryptData(mPassword.StringValue(0, mPassword.Size), mSessionKey, SessionNonce)
 		  Finally
 		    Me.Lock()
 		  End Try
