@@ -2,8 +2,9 @@
 Protected Class SigningKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
-		Sub Constructor(PasswordData As libsodium.Password)
+		Attributes( deprecated )  Sub Constructor(PasswordData As libsodium.Password)
 		  // Calling the overridden superclass constructor.
+		  ' this method is wrong and will fail. Need to use crypto_sign_* api somehow
 		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_sign_SECRETKEYBYTES, libsodium.SKI.RandomSalt, _
 		  ResourceLimits.Interactive, libsodium.Password.ALG_ARGON2)
 		  Dim pubkey As MemoryBlock = libsodium.PKI.DerivePublicKey(seckey)
