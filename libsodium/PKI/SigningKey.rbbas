@@ -12,6 +12,15 @@ Inherits libsodium.PKI.KeyPair
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h1000
+		Sub Constructor(PrivateKeyData As MemoryBlock)
+		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
+		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		  Me.Constructor(PrivateKeyData, pub)
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
 		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
@@ -23,27 +32,12 @@ Inherits libsodium.PKI.KeyPair
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1000
-		Sub Constructor(PrivateKeyData As MemoryBlock)
-		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
-		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
-		  Me.Constructor(PrivateKeyData, pub)
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.SigningKey
 		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  Dim priv As New SecureMemoryBlock(crypto_sign_SECRETKEYBYTES)
-		  Dim pub As New SecureMemoryBlock(crypto_sign_PUBLICKEYBYTES)
-		  priv.StringValue(0, priv.Size) = PrivateKeyData
+		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
 		  
-		  If crypto_sign_ed25519_sk_to_pk(pub.TruePtr, priv.TruePtr) = 0 Then
-		    pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		    priv.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		    Return New SigningKey(priv, pub)
-		  End If
+		  If crypto_sign_ed25519_sk_to_pk(pub, PrivateKeyData) = 0 Then Return New SigningKey(PrivateKeyData, pub)
 		  
 		  
 		End Function
