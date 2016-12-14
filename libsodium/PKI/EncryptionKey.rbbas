@@ -10,13 +10,25 @@ Inherits libsodium.PKI.KeyPair
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1000
-		Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
+	#tag Method, Flags = &h1001
+		Protected Sub Constructor(PrivateKeyData As libsodium.SecureMemoryBlock, PublicKeyData As libsodium.SecureMemoryBlock)
 		  If PrivateKeyData.Size <> crypto_box_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  If PublicKeyData.Size <> crypto_box_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  // Calling the overridden superclass constructor.
 		  Super.Constructor(PrivateKeyData, PublicKeyData)
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1000
+		Sub Constructor(PrivateKeyData As MemoryBlock)
+		  If PrivateKeyData.Size <> crypto_scalarmult_BYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  Dim pub As New MemoryBlock(crypto_scalarmult_BYTES)
+		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		  Me.Constructor(PrivateKeyData, pub)
+		  
+		  
 		  
 		End Sub
 	#tag EndMethod
