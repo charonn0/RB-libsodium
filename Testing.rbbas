@@ -29,14 +29,14 @@ Protected Module Testing
 		    TestResult = 3
 		    Return False
 		  End Try
-		  '
-		  'Try
-		  'TestMultiHandle()
-		  'Catch
-		  'TestResult = 4
-		  'Return False
-		  'End Try
-		  '
+		  
+		  Try
+		    TestPassword()
+		  Catch
+		    TestResult = 4
+		    Return False
+		  End Try
+		  
 		  'Try
 		  'TestCookieEngine()
 		  'Catch
@@ -50,22 +50,25 @@ Protected Module Testing
 
 	#tag Method, Flags = &h21
 		Private Sub TestPassword()
-		  'Dim pass As New libsodium.Password("SeeKritPassW0rd111")
-		  'Const hashval = ""
-		  'Dim key As New libsodium.SKI.SecretKey(pass)
-		  ''Dim sigk As New libsodium.PKI.SigningKey(pass)
-		  '''sigk = sigk.Generate
-		  ''Dim enck As libsodium.PKI.EncryptionKey = sigk
-		  ''Dim deck As libsodium.PKI.EncryptionKey = libsodium.PKI.EncryptionKey.Generate()
-		  'Dim msg As String = "Hello, world!"
-		  'Dim n As MemoryBlock = libsodium.PKI.RandomNonce
-		  'Dim cx As String = libsodium.SKI.EncryptData(msg, key, n)
-		  'If libsodium.SKI.DecryptData(cx, key, n) <> msg Then Break
-		  ''Dim cx As String = libsodium.PKI.EncryptData(msg, deck.PublicKey, enck,n)
-		  ''Dim sx As String = libsodium.PKI.SignData(cx, sigk)
-		  ''If Not libsodium.PKI.VerifyData(sx, sigk.PublicKey) Then Break
-		  ''If libsodium.PKI.DecryptData(cx, enck.PublicKey, deck, n) <> msg Then Break
-		  'Break
+		  Dim pass As New libsodium.Password("SeeKritPassW0rd111")
+		  Const argon2 = "246172676F6E326924763D31392C6D3D33323736382C743D342C703D31244D6554384445353145506151474243485833596E4D512454316D5843496172675A6547514242766B4D3546446367526848616339755A50616B626A573541424B3077"
+		  Const scrypt = "24372443362E2E2E2E2F2E2E2E2E367458754A5A794D6A59387A4A6351626B7171504B5548734743644C4E70676D523968737169314458712F247772485472494374684A2E6E6539544367704665565A716E7942734378667A51514A387A314F4F7A643442"
+		  Const seckey = "0C668BDF5DEB049832079A064A5F8D7D5B358FC64855EE9A4BB6F4A011ED764C"
+		  Const pubkey = "657C3FC03DBD12EF25E51B6AAB082C8A3C041466144AE265DC3904D0B40D9131"
+		  Const privkey = "CA220B8A84880C290EFBA7F5D8C25637E7C47B05AC88FF98AC881F73781E6E20"
+		  
+		  'Dim skey As New libsodium.SKI.SecretKey(pass)
+		  'Assert(libsodium.StrComp(skey.Value, libsodium.DecodeHex(seckey)))
+		  
+		  'Dim sigk As New libsodium.PKI.SigningKey(pass)
+		  'Assert(libsodium.StrComp(sigk.PrivateKey, libsodium.DecodeHex(privkey)))
+		  'Assert(libsodium.StrComp(sigk.PublicKey, libsodium.DecodeHex(pubkey)))
+		  
+		  Dim enck As New libsodium.PKI.EncryptionKey(pass)
+		  Dim fo As String = libsodium.EncodeHex(enck.PrivateKey)
+		  Dim go As String = libsodium.EncodeHex(enck.PublicKey)
+		  Assert(libsodium.StrComp(enck.PrivateKey, libsodium.DecodeHex(privkey)))
+		  Assert(libsodium.StrComp(enck.PublicKey, libsodium.DecodeHex(pubkey)))
 		End Sub
 	#tag EndMethod
 
