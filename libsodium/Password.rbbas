@@ -67,7 +67,7 @@ Implements libsodium.Secureable
 		    End If
 		  End Select
 		  
-		  Return out
+		  Return out.CString(0)
 		End Function
 	#tag EndMethod
 
@@ -152,7 +152,12 @@ Implements libsodium.Secureable
 		  Dim clearpw As SecureMemoryBlock = Me.Value
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
-		    If HashValue.Size <> crypto_pwhash_STRBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		    Select Case HashValue.Size
+		    Case Is < crypto_pwhash_STRBYTES
+		      HashValue.Size = crypto_pwhash_STRBYTES
+		    Case Is > crypto_pwhash_STRBYTES
+		      Raise New SodiumException(ERR_SIZE_MISMATCH)
+		    End Select
 		    Return crypto_pwhash_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
 		    
 		  Case ALG_SCRYPT
