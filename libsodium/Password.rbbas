@@ -149,6 +149,9 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h0
 		Function VerifyHash(HashValue As MemoryBlock, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As Boolean
+		  ' This method verifies that the HashValue is a valid hash for the password (as generated 
+		  ' by Password.GenerateHash)
+		  
 		  Dim clearpw As SecureMemoryBlock = Me.Value
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
