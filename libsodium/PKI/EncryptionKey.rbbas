@@ -28,8 +28,9 @@ Inherits libsodium.PKI.KeyPair
 		  CheckSize(PublicKeyData, crypto_box_PUBLICKEYBYTES)
 		  
 		  // Calling the overridden superclass constructor.
+		  // Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock) -- From KeyPair
 		  Super.Constructor(PrivateKeyData, PublicKeyData)
-		  
+		  Me.Lock()
 		End Sub
 	#tag EndMethod
 
@@ -45,19 +46,15 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1000
 		 Shared Function Generate(Optional SeedData As MemoryBlock) As libsodium.PKI.EncryptionKey
-		  Dim pub As New SecureMemoryBlock(crypto_box_PUBLICKEYBYTES)
-		  Dim priv As New SecureMemoryBlock(crypto_box_SECRETKEYBYTES)
+		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
+		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
 		  If SeedData = Nil Then
-		    If crypto_box_keypair(pub.TruePtr, priv.TruePtr) = -1 Then Return Nil
+		    If crypto_box_keypair(pub, priv) = -1 Then Return Nil
 		  Else
-		    If SeedData.Size <> crypto_box_SEEDBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		    If crypto_box_seed_keypair(pub.TruePtr, priv.TruePtr, SeedData) = -1 Then Return Nil
+		    CheckSize(SeedData, crypto_box_SEEDBYTES)
+		    If crypto_box_seed_keypair(pub, priv, SeedData) = -1 Then Return Nil
 		  End If
-		  Dim ret As New EncryptionKey(priv, pub)
-		  pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		  priv.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		  
-		  Return ret
+		  Return New EncryptionKey(priv, pub)
 		End Function
 	#tag EndMethod
 

@@ -135,8 +135,8 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Value() As libsodium.SecureMemoryBlock
-		  Dim ret As New SecureMemoryBlock(mPassword.Size)
+		Function Value() As MemoryBlock
+		  Dim ret As New MemoryBlock(mPassword.Size)
 		  Me.Unlock()
 		  Try
 		    ret = libsodium.SKI.DecryptData(mPassword.StringValue(0, mPassword.Size), mSessionKey, SessionNonce)
