@@ -4,7 +4,7 @@ Protected Class GenericHashDigest
 		Sub Constructor(Optional KeyData As MemoryBlock, HashSize As UInt32 = libsodium.crypto_generichash_BYTES_MAX)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If HashSize > crypto_generichash_BYTES_MAX Or HashSize < crypto_generichash_BYTES_MIN Then Raise New SodiumException(ERR_OUT_OF_RANGE)
-		  If KeyData <> Nil And KeyData.Size <> crypto_generichash_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(KeyData, crypto_generichash_KEYBYTES)
 		  mKey = KeyData
 		  mHashSize = HashSize
 		  Me.Reset()

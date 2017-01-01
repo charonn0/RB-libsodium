@@ -12,9 +12,9 @@ Inherits libsodium.PKI.KeyPair
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1000
-		Sub Constructor(PrivateKeyData As MemoryBlock)
-		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+	#tag Method, Flags = &h1001
+		Protected Sub Constructor(PrivateKeyData As MemoryBlock)
+		  CheckSize(PrivateKeyData, crypto_sign_SECRETKEYBYTES)
 		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
 		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		  Me.Constructor(PrivateKeyData, pub)
@@ -23,8 +23,8 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
-		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		  If PublicKeyData.Size <> crypto_sign_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(PrivateKeyData, crypto_sign_SECRETKEYBYTES)
+		  CheckSize(PublicKeyData, crypto_sign_PUBLICKEYBYTES)
 		  
 		  // Calling the overridden superclass constructor.
 		  Super.Constructor(PrivateKeyData, PublicKeyData)
@@ -34,7 +34,9 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.SigningKey
-		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  ' This method extracts the public key from the PrivateKeyData, and returns a SigningKey containing both.
+		  
+		  CheckSize(PrivateKeyData, crypto_sign_SECRETKEYBYTES)
 		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
 		  
 		  If crypto_sign_ed25519_sk_to_pk(pub, PrivateKeyData) = 0 Then Return New SigningKey(PrivateKeyData, pub)
@@ -57,8 +59,8 @@ Inherits libsodium.PKI.KeyPair
 		  If SeedData = Nil Then
 		    If crypto_sign_keypair(pub.TruePtr, priv.TruePtr) = -1 Then Return Nil
 		  Else
-		    If SeedData.Size <> crypto_sign_SEEDBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		    If crypto_sign_seed_keypair(pub.TruePtr, priv.TruePtr, SeedData) = -1 Then Return Nil
+		    CheckSize(SeedData, crypto_sign_SEEDBYTES)
+		    If crypto_sign_seed_keypair(pub, priv, SeedData) = -1 Then Return Nil
 		  End If
 		  Dim ret As New SigningKey(priv, pub)
 		  pub.ProtectionLevel = libsodium.ProtectionLevel.NoAccess

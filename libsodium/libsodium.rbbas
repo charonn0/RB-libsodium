@@ -10,6 +10,16 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub CheckSize(Data As MemoryBlock, Expected As Int64)
+		  If Data <> Nil And Data.Size <> Expected Then 
+		    Dim err As New SodiumException(ERR_SIZE_MISMATCH)
+		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
+		    Raise err
+		  End If
+		End Sub
+	#tag EndMethod
+
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_generichash_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
 	#tag EndExternalMethod
@@ -228,7 +238,7 @@ Protected Module libsodium
 		  ' for picking a list in a hash table for a given key.
 		  ' https://download.libsodium.org/doc/hashing/short-input_hashing.html
 		  
-		  If Key.Size <> crypto_shorthash_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(Key, crypto_shorthash_KEYBYTES)
 		  
 		  Dim buffer As New MemoryBlock(crypto_shorthash_BYTES)
 		  If crypto_shorthash(buffer, InputData, InputData.Size, Key) = 0 Then

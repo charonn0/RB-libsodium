@@ -96,7 +96,7 @@ Protected Module PKI
 		  ' data is returned  on success. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
-		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
 		  If crypto_box_open_easy(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey, RecipientPrivateKey.PrivateKey) = 0 Then
@@ -112,7 +112,7 @@ Protected Module PKI
 		  ' be validated by this method. The decrypted data is returned  on success. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
-		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
 		  If crypto_box_open_easy_afternm(Buffer, CipherText, CipherText.Size, Nonce, SharedKey) = 0 Then 
@@ -123,7 +123,7 @@ Protected Module PKI
 
 	#tag Method, Flags = &h1
 		Protected Function DeriveEncryptionKey(PrivateKeyData As MemoryBlock) As MemoryBlock
-		  If PrivateKeyData.Size <> crypto_scalarmult_BYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(PrivateKeyData, crypto_scalarmult_BYTES)
 		  Dim pub As New MemoryBlock(crypto_scalarmult_BYTES)
 		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Return pub
 		  
@@ -167,7 +167,7 @@ Protected Module PKI
 
 	#tag Method, Flags = &h1
 		Protected Function DeriveSigningKey(PrivateKeyData As MemoryBlock) As MemoryBlock
-		  If PrivateKeyData.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(PrivateKeyData, crypto_sign_SECRETKEYBYTES)
 		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
 		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Return pub
 		  
@@ -183,7 +183,7 @@ Protected Module PKI
 		  ' code is also generated and prepended to the returned encrypted data. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
-		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
 		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey, SenderPrivateKey.PrivateKey) = 0 Then
@@ -199,7 +199,7 @@ Protected Module PKI
 		  ' encrypted data. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
-		  If Nonce.Size <> crypto_box_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
 		  If crypto_box_easy_afternm(buffer, ClearText, ClearText.Size, Nonce, SharedKey) = 0 Then
@@ -257,7 +257,7 @@ Protected Module PKI
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/public-key_signatures.html
 		  
 		  
-		  If SignerPublicKey.Size <> crypto_sign_PUBLICKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(SignerPublicKey, crypto_sign_PUBLICKEYBYTES)
 		  Dim sz As UInt64
 		  If DetachedSignature = Nil Then
 		    Dim tmp As New MemoryBlock(SignedMessage.Size - crypto_sign_BYTES)
