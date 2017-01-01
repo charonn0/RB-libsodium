@@ -35,6 +35,27 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		 Shared Function ConvertSigningKey(FromSigningKey As libsodium.PKI.SigningKey) As libsodium.PKI.EncryptionKey
+		  ' Converts the FromSigningKey into a new EncryptionKey
+		  
+		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
+		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
+		  
+		  ' first convert the public key
+		  If crypto_sign_ed25519_pk_to_curve25519(pub, FromSigningKey.PublicKey) <> 0 Then
+		    Raise New SodiumException(ERR_CONVERSION_FAILED)
+		  End If
+		  
+		  ' then the private key
+		  If crypto_sign_ed25519_sk_to_curve25519(priv, FromSigningKey.PrivateKey) <> 0 Then
+		    Raise New SodiumException(ERR_CONVERSION_FAILED)
+		  End If
+		  
+		  Return New EncryptionKey(priv, pub)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  CheckSize(PrivateKeyData, crypto_box_SECRETKEYBYTES)
 		  Dim pub As MemoryBlock = DeriveEncryptionKey(PrivateKeyData)
@@ -64,27 +85,6 @@ Inherits libsodium.PKI.KeyPair
 		  If libsodium.StrComp(Me.PrivateKey, OtherKey.PrivateKey) Then Return 0
 		  Return -1
 		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Sub Operator_Convert(FromSigningKey As libsodium.PKI.SigningKey)
-		  ' Converts the FromSigningKey into a new EncryptionKey
-		  
-		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
-		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
-		  
-		  ' first convert the public key
-		  If crypto_sign_ed25519_pk_to_curve25519(pub, FromSigningKey.PublicKey) <> 0 Then 
-		    Raise New SodiumException(ERR_CONVERSION_FAILED)
-		  End If
-		  
-		  ' then the private key
-		  If crypto_sign_ed25519_sk_to_curve25519(priv, FromSigningKey.PrivateKey) <> 0 Then
-		    Raise New SodiumException(ERR_CONVERSION_FAILED)
-		  End If
-		  
-		  Super.Constructor(priv, pub)
-		End Sub
 	#tag EndMethod
 
 
