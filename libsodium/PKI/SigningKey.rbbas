@@ -46,13 +46,6 @@ Inherits libsodium.PKI.KeyPair
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function DeriveSeed() As MemoryBlock
-		  Dim seed As New MemoryBlock(crypto_sign_SEEDBYTES)
-		  If crypto_sign_ed25519_sk_to_seed(seed, Me.PrivateKey) = 0 Then Return seed
-		End Function
-	#tag EndMethod
-
 	#tag Method, Flags = &h1000
 		 Shared Function Generate(Optional SeedData As MemoryBlock) As libsodium.PKI.SigningKey
 		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
@@ -72,6 +65,16 @@ Inherits libsodium.PKI.KeyPair
 		  If OtherKey Is Nil Then Return 1
 		  If libsodium.StrComp(Me.PrivateKey, OtherKey.PrivateKey) Then Return 0
 		  Return -1
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Seed() As MemoryBlock
+		  ' This method extracts the seed from the private key. This is either a random seed 
+		  ' or the one passed to SigningKey.Generate.
+		  
+		  Dim seed As New MemoryBlock(crypto_sign_SEEDBYTES)
+		  If crypto_sign_ed25519_sk_to_seed(seed, Me.PrivateKey) = 0 Then Return seed
 		End Function
 	#tag EndMethod
 
