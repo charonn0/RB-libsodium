@@ -23,7 +23,7 @@ Protected Module SKI
 		  ' validated by this method. The decrypted data is returned on success. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
 		  
-		  If Nonce.Size <> crypto_secretbox_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(Nonce, crypto_secretbox_NONCEBYTES)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_secretbox_MACBYTES)
 		  If crypto_secretbox_open_easy(Buffer, CipherText, CipherText.Size, Nonce, Key.Value) = 0 Then
@@ -39,7 +39,7 @@ Protected Module SKI
 		  ' data. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
 		  
-		  If Nonce.Size <> crypto_secretbox_NONCEBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(Nonce, crypto_secretbox_NONCEBYTES)
 		  'If Key.Value.Size <> crypto_secretbox_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_secretbox_MACBYTES)

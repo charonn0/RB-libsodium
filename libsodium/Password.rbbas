@@ -24,14 +24,14 @@ Implements libsodium.Secureable
 		  
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
-		    If Salt.Size <> crypto_pwhash_SALTBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		    CheckSize(Salt, crypto_pwhash_SALTBYTES)
 		    If crypto_pwhash(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit, crypto_pwhash_ALG_DEFAULT) = -1 Then
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
 		    
 		  Case ALG_SCRYPT
-		    If Salt.Size <> crypto_pwhash_scryptsalsa208sha256_SALTBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
-		    If crypto_pwhash_scryptsalsa208sha256(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit) = -1 Then 
+		    CheckSize(Salt, crypto_pwhash_scryptsalsa208sha256_SALTBYTES)
+		    If crypto_pwhash_scryptsalsa208sha256(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit) = -1 Then
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
 		    
@@ -135,8 +135,8 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Value() As libsodium.SecureMemoryBlock
-		  Dim ret As New SecureMemoryBlock(mPassword.Size)
+		Function Value() As MemoryBlock
+		  Dim ret As New MemoryBlock(mPassword.Size)
 		  Me.Unlock()
 		  Try
 		    ret = libsodium.SKI.DecryptData(mPassword.StringValue(0, mPassword.Size), mSessionKey, SessionNonce)
@@ -149,19 +149,17 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h0
 		Function VerifyHash(HashValue As MemoryBlock, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As Boolean
+		  ' This method verifies that the HashValue is a valid hash for the password (as generated 
+		  ' by Password.GenerateHash)
+		  
 		  Dim clearpw As SecureMemoryBlock = Me.Value
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
-		    Select Case HashValue.Size
-		    Case Is < crypto_pwhash_STRBYTES
-		      HashValue.Size = crypto_pwhash_STRBYTES
-		    Case Is > crypto_pwhash_STRBYTES
-		      Raise New SodiumException(ERR_SIZE_MISMATCH)
-		    End Select
+		    If HashValue.Size <= crypto_pwhash_STRBYTES Then HashValue.Size = crypto_pwhash_STRBYTES Else CheckSize(HashValue, crypto_pwhash_STRBYTES)
 		    Return crypto_pwhash_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
 		    
 		  Case ALG_SCRYPT
-		    If HashValue.Size <> crypto_pwhash_scryptsalsa208sha256_STRBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		    CheckSize(HashValue, crypto_pwhash_scryptsalsa208sha256_STRBYTES)
 		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
 		  End Select
 		  
