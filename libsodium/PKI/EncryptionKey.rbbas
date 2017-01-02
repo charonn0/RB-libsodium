@@ -3,6 +3,7 @@ Protected Class EncryptionKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive)
+		  ' Compute an EncryptionKey from a hash of the password
 		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = PasswordData.RandomSalt
 		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, libsodium.Password.ALG_ARGON2)
 		  Dim pubkey As MemoryBlock = libsodium.PKI.EncryptionKey.DerivePublicKey(seckey)
