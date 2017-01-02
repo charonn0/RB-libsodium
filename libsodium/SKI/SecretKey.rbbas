@@ -46,6 +46,22 @@ Implements libsodium.Secureable
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		 Shared Function RandomNonce() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a Nonce.
+		  
+		  Return RandomBytes(crypto_secretbox_NONCEBYTES)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function RandomSalt() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a salt.
+		  
+		  Return RandomBytes(crypto_pwhash_SALTBYTES)
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Sub Unlock()
 		  // Part of the libsodium.Secureable interface.
