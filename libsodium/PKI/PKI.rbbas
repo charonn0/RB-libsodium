@@ -97,6 +97,7 @@ Protected Module PKI
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
+		  CheckSize(SenderPublicKey, crypto_box_PUBLICKEYBYTES)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
 		  If crypto_box_open_easy(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey, RecipientPrivateKey.PrivateKey) = 0 Then
@@ -127,7 +128,7 @@ Protected Module PKI
 		  ' from the RecipientPublicKey and SenderPrivateKey, and a Nonce. A Poly1305 message authentication 
 		  ' code is also generated and prepended to the returned encrypted data. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
-		  
+		  CheckSize(RecipientPublicKey, crypto_box_PUBLICKEYBYTES)
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
