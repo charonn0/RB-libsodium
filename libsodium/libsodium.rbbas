@@ -44,6 +44,10 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_generichash_blake2b_salt_personal Lib "libsodium" (SubKey As Ptr, SubkeySize As UInt32, Message As Ptr, MessageSize As UInt32, MasterKey As Ptr, MasterKeySize As UInt32, Salt As Ptr, Personal As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_generichash_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
 	#tag EndExternalMethod
 
@@ -133,6 +137,22 @@ Protected Module libsodium
 		  If sodium_hex2bin(output, output.Size, HexData, HexData.Size, ign, sz, endhex) = 0 Then
 		    Return output.StringValue(0, sz)
 		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function DeriveSubkey(MasterKey As MemoryBlock, SubkeySize As UInt32, Salt As MemoryBlock, Optional AppID As MemoryBlock) As MemoryBlock
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  CheckSize(Salt, crypto_generichash_blake2b_SALTBYTES)
+		  Dim subkey As New MemoryBlock(SubkeySize)
+		  CheckSize(subkey, 128, 512)
+		  If AppID <> Nil Then
+		    CheckSize(AppID, crypto_generichash_blake2b_PERSONALBYTES)
+		    If crypto_generichash_blake2b_salt_personal(Subkey, Subkey.Size, Nil, 0, MasterKey, MasterKey.Size, Salt, AppID) = 0 Then Return Nil
+		  Else
+		    If crypto_generichash_blake2b_salt_personal(Subkey, Subkey.Size, Nil, 0, MasterKey, MasterKey.Size, Salt, Nil) <> 0 Then Return Nil
+		  End If
+		  Return subkey
 		End Function
 	#tag EndMethod
 
@@ -392,6 +412,12 @@ Protected Module libsodium
 	#tag Constant, Name = crypto_box_ZEROBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
+	#tag Constant, Name = crypto_generichash_blake2b_PERSONALBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_blake2b_SALTBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag EndConstant
+
 	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
 	#tag EndConstant
 
@@ -417,6 +443,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_scalarmult_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_scalarmult_SCALARBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_shorthash_BYTES, Type = Double, Dynamic = False, Default = \"8", Scope = Private
