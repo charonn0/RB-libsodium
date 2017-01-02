@@ -246,6 +246,7 @@ Protected Module libsodium
 		  ' for picking a list in a hash table for a given key.
 		  ' https://download.libsodium.org/doc/hashing/short-input_hashing.html
 		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(Key, crypto_shorthash_KEYBYTES)
 		  
 		  Dim buffer As New MemoryBlock(crypto_shorthash_BYTES)
@@ -323,6 +324,8 @@ Protected Module libsodium
 		Protected Function StrComp(String1 As String, String2 As String) As Boolean
 		  ' Performs a constant-time binary comparison of the strings, and returns True if they are identical.
 		  ' https://download.libsodium.org/doc/helpers/#constant-time-test-for-equality
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
 		  Dim mb1 As MemoryBlock = String1
 		  Dim mb2 As MemoryBlock = String2

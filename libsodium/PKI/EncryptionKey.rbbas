@@ -67,6 +67,10 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1000
 		 Shared Function Generate(Optional SeedData As MemoryBlock) As libsodium.PKI.EncryptionKey
+		  ' This method randomly generates an EncryptionKey pair, optionally using the specified seed.
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
 		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
 		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
 		  If SeedData = Nil Then
