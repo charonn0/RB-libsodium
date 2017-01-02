@@ -31,7 +31,7 @@ Protected Module libsodium
 		  Select Case True
 		  Case Data = Nil
 		    Return
-		  Case Upperbound > 0
+		  Case Upperbound > 0 And (Data.Size > Upperbound Or Data.Size < Expected)
 		    err = New SodiumException(ERR_OUT_OF_RANGE)
 		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
 		  Case Data.Size <> Expected
