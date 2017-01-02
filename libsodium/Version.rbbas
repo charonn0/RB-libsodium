@@ -40,6 +40,26 @@ Protected Module Version
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h1
+		Protected Function MajorNumber() As Integer
+		  If libsodium.IsAvailable Then Return sodium_library_version_major()
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function MinorNumber() As Integer
+		  If libsodium.IsAvailable Then Return sodium_library_version_minor()
+		End Function
+	#tag EndMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_library_version_major Lib "libsodium" () As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_library_version_minor Lib "libsodium" () As Int32
+	#tag EndExternalMethod
+
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function sodium_runtime_has_aesni Lib "libsodium" () As Int32
 	#tag EndExternalMethod
