@@ -54,17 +54,6 @@ Implements libsodium.Secureable
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1000
-		Sub Constructor(SecuredArray As libsodium.SecureArray, Index As Int32)
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  mFreeable = False
-		  mSize = SecuredArray.FieldSize
-		  Dim op As Int32 = Int32(SecuredArray.TruePtr) + (Index * mSize)
-		  mPtr = Ptr(op)
-		  
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h0
 		Sub Constructor(Size As UInt64)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
