@@ -3,13 +3,8 @@ Protected Class KeyPair
 Implements libsodium.Secureable
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
-		  mSessionKey = libsodium.SKI.SecretKey.Generate()
-		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.SecretKey.RandomNonce
-		  mPrivate = libsodium.SKI.EncryptData(PrivateKeyData, mSessionKey, SessionNonce)
-		  mPublic = libsodium.SKI.EncryptData(PublicKeyData, mSessionKey, SessionNonce)
-		  mPublic.AllowSwap = False
-		  mPrivate.AllowSwap = False
-		  
+		  mPrivate = New libsodium.SKI.KeyContainter(PrivateKeyData)
+		  mPublic = New libsodium.SKI.KeyContainter(PublicKeyData)
 		End Sub
 	#tag EndMethod
 
@@ -17,37 +12,20 @@ Implements libsodium.Secureable
 		Protected Sub Lock()
 		  // Part of the libsodium.Secureable interface.
 		  
-		  mPublic.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		  mPrivate.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
+		  Secureable(mPublic).Lock()
+		  Secureable(mPrivate).Lock()
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function PrivateKey() As MemoryBlock
-		  Dim ret As MemoryBlock
-		  Try
-		    mPrivate.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
-		    ret = mPrivate.StringValue(0, mPrivate.Size)
-		    If mSessionKey <> Nil Then ret = libsodium.SKI.DecryptData(ret, mSessionKey, SessionNonce)
-		  Finally
-		    If mPrivate <> Nil Then mPrivate.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		  End Try
-		  Return ret
+		  Return mPrivate.Value()
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function PublicKey() As MemoryBlock
-		  Dim ret As MemoryBlock
-		  Try
-		    mPublic.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
-		    ret = mPublic.StringValue(0, mPublic.Size)
-		    If mSessionKey <> Nil Then ret = libsodium.SKI.DecryptData(ret, mSessionKey, SessionNonce)
-		  Finally
-		    If mPublic <> Nil Then mPublic.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		  End Try
-		  Return ret
-		  
+		  Return mPublic.Value()
 		End Function
 	#tag EndMethod
 
@@ -55,26 +33,18 @@ Implements libsodium.Secureable
 		Protected Sub Unlock()
 		  // Part of the libsodium.Secureable interface.
 		  
-		  mPublic.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
-		  mPrivate.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
+		  Secureable(mPublic).Unlock()
+		  Secureable(mPrivate).Unlock()
 		End Sub
 	#tag EndMethod
 
 
 	#tag Property, Flags = &h1
-		Protected mPrivate As libsodium.SecureMemoryBlock
+		Protected mPrivate As libsodium.SKI.KeyContainter
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
-		Protected mPublic As libsodium.SecureMemoryBlock
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private mSessionKey As libsodium.SKI.SecretKey
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private Shared SessionNonce As MemoryBlock
+		Protected mPublic As libsodium.SKI.KeyContainter
 	#tag EndProperty
 
 
