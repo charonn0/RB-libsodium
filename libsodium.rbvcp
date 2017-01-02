@@ -14,7 +14,6 @@ Class=Password;libsodium/Password.rbbas;&h39B157FF;&h7228CFFF;false
 Class=GenericHashDigest;libsodium/GenericHashDigest.rbbas;&h3F115FFF;&h7228CFFF;false
 Class=SodiumException;libsodium/SodiumException.rbbas;&h5E8C07FF;&h7228CFFF;false
 Class=SecureMemoryBlock;libsodium/SecureMemoryBlock.rbbas;&h71AA47FF;&h7228CFFF;false
-Class=SHAHashDigest;libsodium/SHAHashDigest.rbbas;&h6D6D67FF;&h7228CFFF;false
 Class=SigningKey;libsodium/PKI/SigningKey.rbbas;&h4BD427FF;&h1F9A4FFF;false
 Class=EncryptionKey;libsodium/PKI/EncryptionKey.rbbas;&h626097FF;&h1F9A4FFF;false
 MajorVersion=1

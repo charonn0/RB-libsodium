@@ -139,7 +139,7 @@ Protected Module libsodium
 		  If Key = Nil Then
 		    h = New GenericHashDigest(Key, HashSize)
 		  Else
-		    h = New GenericHashDigest(Nil, HashSize)
+		    h = New GenericHashDigest(HashType.Generic)
 		  End If
 		  h.Process(InputData)
 		  Return h.Value
@@ -214,7 +214,7 @@ Protected Module libsodium
 		  ' Generates a SHA256 digest of the InputData
 		  ' https://download.libsodium.org/doc/advanced/sha-2_hash_function.html
 		  
-		  Dim h As New SHAHashDigest(SHAHashDigest.SHA256)
+		  Dim h As New GenericHashDigest(HashType.SHA256)
 		  h.Process(InputData)
 		  Return h.Value
 		End Function
@@ -225,7 +225,7 @@ Protected Module libsodium
 		  ' Generates a SHA256 digest of the InputData
 		  ' https://download.libsodium.org/doc/advanced/sha-2_hash_function.html
 		  
-		  Dim h As New SHAHashDigest
+		  Dim h As New GenericHashDigest(HashType.SHA512)
 		  h.Process(InputData)
 		  Return h.Value
 		End Function
@@ -452,6 +452,12 @@ Protected Module libsodium
 	#tag Constant, Name = STRICT_CONVERT, Type = Boolean, Dynamic = False, Default = \"False", Scope = Private
 	#tag EndConstant
 
+
+	#tag Enum, Name = HashType, Type = Integer, Flags = &h1
+		Generic
+		  SHA256
+		SHA512
+	#tag EndEnum
 
 	#tag Enum, Name = ProtectionLevel, Flags = &h1
 		ReadWrite
