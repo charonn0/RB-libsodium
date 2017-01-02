@@ -11,12 +11,20 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub CheckSize(Data As MemoryBlock, Expected As Int64)
-		  If Data <> Nil And Data.Size <> Expected Then 
-		    Dim err As New SodiumException(ERR_SIZE_MISMATCH)
+		Private Sub CheckSize(Data As MemoryBlock, Expected As Int64, Upperbound As Int64 = 0)
+		  Dim err As SodiumException
+		  Select Case True
+		  Case Data = Nil
+		    Return
+		  Case Upperbound > 0
+		    err = New SodiumException(ERR_OUT_OF_RANGE)
+		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
+		  Case Data.Size <> Expected
+		    err = New SodiumException(ERR_SIZE_MISMATCH)
 		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
-		    Raise err
-		  End If
+		  End Select
+		  
+		  If err <> Nil Then Raise err
 		End Sub
 	#tag EndMethod
 
