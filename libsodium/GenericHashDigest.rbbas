@@ -31,6 +31,13 @@ Protected Class GenericHashDigest
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub Destructor()
+		  If mOutput = Nil And mState <> Nil Then Call Me.Value
+		  mState = Nil
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub Process(NewData As MemoryBlock)
 		  If mOutput <> Nil Then Raise New SodiumException(ERR_INVALID_STATE)
