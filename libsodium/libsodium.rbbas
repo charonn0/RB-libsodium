@@ -159,7 +159,7 @@ Protected Module libsodium
 		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
 		  Dim h As GenericHashDigest
-		  If Key = Nil Then
+		  If Key <> Nil Then
 		    h = New GenericHashDigest(Key, HashSize)
 		  Else
 		    h = New GenericHashDigest(HashType.Generic)
