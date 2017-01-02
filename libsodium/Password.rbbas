@@ -4,14 +4,7 @@ Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(Passwd As String)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  mSessionKey = libsodium.SKI.SecretKey.Generate()
-		  
-		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.SecretKey.RandomNonce()
-		  Passwd = libsodium.SKI.EncryptData(Passwd, mSessionKey, SessionNonce)
-		  mPassword = New SecureMemoryBlock(Passwd.LenB)
-		  mPassword.StringValue(0, mPassword.Size) = Passwd
-		  mPassword.AllowSwap = False
-		  Me.Lock()
+		  mPassword = New libsodium.SKI.KeyContainter(Passwd)
 		End Sub
 	#tag EndMethod
 
@@ -101,7 +94,7 @@ Implements libsodium.Secureable
 		Protected Sub Lock()
 		  // Part of the libsodium.Secureable interface.
 		  
-		  mPassword.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
+		  Secureable(mPassword).Lock
 		End Sub
 	#tag EndMethod
 
@@ -138,20 +131,13 @@ Implements libsodium.Secureable
 		Protected Sub Unlock()
 		  // Part of the libsodium.Secureable interface.
 		  
-		  mPassword.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
+		  Secureable(mPassword).Unlock
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function Value() As MemoryBlock
-		  Dim ret As New MemoryBlock(mPassword.Size)
-		  Me.Unlock()
-		  Try
-		    ret = libsodium.SKI.DecryptData(mPassword.StringValue(0, mPassword.Size), mSessionKey, SessionNonce)
-		  Finally
-		    Me.Lock()
-		  End Try
-		  Return ret
+		  Return mPassword.Value
 		End Function
 	#tag EndMethod
 
@@ -177,15 +163,7 @@ Implements libsodium.Secureable
 
 
 	#tag Property, Flags = &h21
-		Private mPassword As libsodium.SecureMemoryBlock
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private mSessionKey As libsodium.SKI.SecretKey
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private Shared SessionNonce As MemoryBlock
+		Private mPassword As libsodium.SKI.KeyContainter
 	#tag EndProperty
 
 
