@@ -52,31 +52,40 @@ Protected Module Testing
 		Private Sub TestPassword()
 		  Dim pass As New libsodium.Password("SeeKritPassW0rd111")
 		  Const argon2 = "246172676F6E326924763D31392C6D3D33323736382C743D342C703D31244D6554384445353145506151474243485833596E4D512454316D5843496172675A6547514242766B4D3546446367526848616339755A50616B626A573541424B3077"
-		  Const scrypt = "24372443362E2E2E2E2F2E2E2E2E367458754A5A794D6A59387A4A6351626B7171504B5548734743644C4E70676D523968737169314458712F247772485472494374684A2E6E6539544367704665565A716E7942734378667A51514A387A314F4F7A643442"
-		  Const seckey = "0C668BDF5DEB049832079A064A5F8D7D5B358FC64855EE9A4BB6F4A011ED764C"
-		  Const pubkey = "657C3FC03DBD12EF25E51B6AAB082C8A3C041466144AE265DC3904D0B40D9131"
-		  Const privkey = "CA220B8A84880C290EFBA7F5D8C25637E7C47B05AC88FF98AC881F73781E6E20"
+		  Const scrypt = "24372443362E2E2E2E2F2E2E2E2E714945592F755539347150553161666D77554D5730304F4A43336C74592E6A335373426C79446D57566239247A37345A697579536C5465346C50544A765478435234675542743231514C784C62427943586364354F7132"
+		  Const seckey = "74DD10A2050F3DB5FF7BE69F8DB08A26B70A129C96F370269BD409D6FE679997"
+		  Const sigskey = "9D04B7F72E44E4B8394BB5CD0F7CF63F991FB72AEDC97CC787832D34113B8C80C2AC0CD48B07F6F8218E4FA335E3280152E9E0DC02AA25AF277779A3AB554C28"
+		  Const sigpkey = "C2AC0CD48B07F6F8218E4FA335E3280152E9E0DC02AA25AF277779A3AB554C28"
+		  Const pubkey = "2D8679E52C38E766A7F855C4D55DF1829902D0652DA59232C5A9372CE2408124"
+		  Const privkey = "74DD10A2050F3DB5FF7BE69F8DB08A26B70A129C96F370269BD409D6FE679997"
+		  Const nonce = "263B2C42A510B1A24DB2193AB862A4D0D3703B3A81A79F00"
+		  Const salt = "A5097CF3ED4581A29EABCE98C612C354"
 		  
-		  'Dim skey As New libsodium.SKI.SecretKey(pass)
-		  'Assert(libsodium.StrComp(skey.Value, libsodium.DecodeHex(seckey)))
+		  Assert(pass.VerifyHash(libsodium.DecodeHex(argon2), pass.ALG_ARGON2))
+		  Assert(pass.VerifyHash(libsodium.DecodeHex(scrypt), pass.ALG_SCRYPT))
 		  
-		  'Dim sigk As New libsodium.PKI.SigningKey(pass)
-		  'Assert(libsodium.StrComp(sigk.PrivateKey, libsodium.DecodeHex(privkey)))
-		  'Assert(libsodium.StrComp(sigk.PublicKey, libsodium.DecodeHex(pubkey)))
+		  Dim skey As New libsodium.SKI.SecretKey(pass, libsodium.DecodeHex(salt))
+		  Assert(libsodium.StrComp(skey.Value, libsodium.DecodeHex(seckey)))
 		  
-		  Dim enck As New libsodium.PKI.EncryptionKey(pass)
-		  Dim fo As String = libsodium.EncodeHex(enck.PrivateKey)
-		  Dim go As String = libsodium.EncodeHex(enck.PublicKey)
+		  Dim sigk As New libsodium.PKI.SigningKey(pass, libsodium.DecodeHex(salt))
+		  Assert(libsodium.StrComp(sigk.PrivateKey, libsodium.DecodeHex(sigskey)))
+		  Assert(libsodium.StrComp(sigk.PublicKey, libsodium.DecodeHex(sigpkey)))
+		  
+		  Dim enck As New libsodium.PKI.EncryptionKey(pass, libsodium.DecodeHex(salt))
+		  'Dim fo As String = libsodium.EncodeHex(enck.PrivateKey)
+		  'Dim go As String = libsodium.EncodeHex(enck.PublicKey)
 		  Assert(libsodium.StrComp(enck.PrivateKey, libsodium.DecodeHex(privkey)))
 		  Assert(libsodium.StrComp(enck.PublicKey, libsodium.DecodeHex(pubkey)))
+		  TestPKIEncrypt(enck, libsodium.DecodeHex(nonce))
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub TestPKIEncrypt()
-		  Dim senderkey As libsodium.PKI.EncryptionKey = libsodium.PKI.EncryptionKey.Generate()
-		  Dim recipkey As libsodium.PKI.EncryptionKey = libsodium.PKI.EncryptionKey.Derive(libsodium.PKI.RandomEncryptionKey)
-		  Dim nonce As MemoryBlock = libsodium.PKI.RandomNonce
+		Private Sub TestPKIEncrypt(SenderKey As libsodium.PKI.EncryptionKey = Nil, Nonce As MemoryBlock = Nil)
+		  If SenderKey = Nil Then SenderKey = libsodium.PKI.EncryptionKey.Generate()
+		  Dim recipkey As libsodium.PKI.EncryptionKey
+		  recipkey = recipkey.Derive(recipkey.RandomPrivateKey)
+		  If nonce = Nil Then nonce = recipkey.RandomNonce
 		  
 		  Dim msg1 As String = "This is a test message."
 		  Dim crypted As String = libsodium.PKI.EncryptData(msg1, recipkey.PublicKey, senderkey, nonce)
@@ -113,7 +122,7 @@ Protected Module Testing
 	#tag Method, Flags = &h21
 		Private Sub TestSKIEncrypt()
 		  Dim key As libsodium.SKI.SecretKey = libsodium.SKI.SecretKey.Generate()
-		  Dim nonce As MemoryBlock = libsodium.SKI.RandomNonce
+		  Dim nonce As MemoryBlock = key.RandomNonce
 		  
 		  Dim msg1 As String = "This is a test message."
 		  Dim crypted As String = libsodium.SKI.EncryptData(msg1, key, nonce)
@@ -125,7 +134,8 @@ Protected Module Testing
 
 	#tag Method, Flags = &h21
 		Private Sub TestSKIMAC()
-		  Dim key As libsodium.SKI.SecretKey = libsodium.SKI.RandomKey()
+		  Dim key As libsodium.SKI.SecretKey
+		  key = key.Generate()
 		  
 		  Dim msg As String = "This is a test message."
 		  Dim sig As String = libsodium.SKI.GenerateMAC(msg, key)
