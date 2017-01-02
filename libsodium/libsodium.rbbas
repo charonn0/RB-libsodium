@@ -1,5 +1,20 @@
 #tag Module
 Protected Module libsodium
+	#tag Method, Flags = &h0
+		Sub AllowSwap(Extends m As MemoryBlock, Size As Int32 = -1, Assigns Allow As Boolean)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
+		  If Size = -1 Then Size = m.Size
+		  If Size = -1 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  If Allow Then
+		    If sodium_munlock(m, Size) <> 0 Then Raise New SodiumException(ERR_LOCK_DENIED)
+		  Else
+		    If sodium_mlock(m, Size) <> 0 Then Raise New SodiumException(ERR_LOCK_DENIED)
+		  End If
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Function Argon2(InputData As MemoryBlock) As String
 		  ' Generates an Argon2 digest of the InputData
@@ -11,12 +26,20 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub CheckSize(Data As MemoryBlock, Expected As Int64)
-		  If Data <> Nil And Data.Size <> Expected Then 
-		    Dim err As New SodiumException(ERR_SIZE_MISMATCH)
+		Private Sub CheckSize(Data As MemoryBlock, Expected As Int64, Upperbound As Int64 = 0)
+		  Dim err As SodiumException
+		  Select Case True
+		  Case Data = Nil
+		    Return
+		  Case Upperbound > 0
+		    err = New SodiumException(ERR_OUT_OF_RANGE)
+		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
+		  Case Data.Size <> Expected
+		    err = New SodiumException(ERR_SIZE_MISMATCH)
 		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
-		    Raise err
-		  End If
+		  End Select
+		  
+		  If err <> Nil Then Raise err
 		End Sub
 	#tag EndMethod
 
@@ -139,7 +162,7 @@ Protected Module libsodium
 		  If Key = Nil Then
 		    h = New GenericHashDigest(Key, HashSize)
 		  Else
-		    h = New GenericHashDigest(Nil, HashSize)
+		    h = New GenericHashDigest(HashType.Generic)
 		  End If
 		  h.Process(InputData)
 		  Return h.Value
@@ -214,7 +237,7 @@ Protected Module libsodium
 		  ' Generates a SHA256 digest of the InputData
 		  ' https://download.libsodium.org/doc/advanced/sha-2_hash_function.html
 		  
-		  Dim h As New SHAHashDigest(SHAHashDigest.SHA256)
+		  Dim h As New GenericHashDigest(HashType.SHA256)
 		  h.Process(InputData)
 		  Return h.Value
 		End Function
@@ -225,7 +248,7 @@ Protected Module libsodium
 		  ' Generates a SHA256 digest of the InputData
 		  ' https://download.libsodium.org/doc/advanced/sha-2_hash_function.html
 		  
-		  Dim h As New SHAHashDigest
+		  Dim h As New GenericHashDigest(HashType.SHA512)
 		  h.Process(InputData)
 		  Return h.Value
 		End Function
@@ -238,6 +261,7 @@ Protected Module libsodium
 		  ' for picking a list in a hash table for a given key.
 		  ' https://download.libsodium.org/doc/hashing/short-input_hashing.html
 		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(Key, crypto_shorthash_KEYBYTES)
 		  
 		  Dim buffer As New MemoryBlock(crypto_shorthash_BYTES)
@@ -316,10 +340,25 @@ Protected Module libsodium
 		  ' Performs a constant-time binary comparison of the strings, and returns True if they are identical.
 		  ' https://download.libsodium.org/doc/helpers/#constant-time-test-for-equality
 		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
 		  Dim mb1 As MemoryBlock = String1
 		  Dim mb2 As MemoryBlock = String2
 		  Return sodium_memcmp(mb1, mb2, Max(mb1.Size, mb2.Size)) = 0
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub ZeroFill(Extends m As MemoryBlock, Size As Int32 = -1)
+		  ' Zero-fill the MemoryBlock
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
+		  If m <> Nil Then
+		    If Size = -1 Then Size = m.Size
+		    sodium_memzero(m, Size)
+		  End If
+		End Sub
 	#tag EndMethod
 
 
@@ -452,6 +491,12 @@ Protected Module libsodium
 	#tag Constant, Name = STRICT_CONVERT, Type = Boolean, Dynamic = False, Default = \"False", Scope = Private
 	#tag EndConstant
 
+
+	#tag Enum, Name = HashType, Type = Integer, Flags = &h1
+		Generic
+		  SHA256
+		SHA512
+	#tag EndEnum
 
 	#tag Enum, Name = ProtectionLevel, Flags = &h1
 		ReadWrite

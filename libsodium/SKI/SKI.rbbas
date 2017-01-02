@@ -40,7 +40,7 @@ Protected Module SKI
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
 		  
 		  CheckSize(Nonce, crypto_secretbox_NONCEBYTES)
-		  'If Key.Value.Size <> crypto_secretbox_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(Key.Value, crypto_secretbox_KEYBYTES)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_secretbox_MACBYTES)
 		  If crypto_secretbox_easy(buffer, ClearText, ClearText.Size, Nonce, Key.Value) = 0 Then 
@@ -64,32 +64,6 @@ Protected Module SKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function RandomKey() As libsodium.SKI.SecretKey
-		  ' Returns random bytes that are suitable to be used as a secret key.
-		  
-		  Return New libsodium.SKI.SecretKey(RandomBytes(crypto_secretbox_KEYBYTES))
-		  
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function RandomNonce() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a Nonce.
-		  
-		  Return RandomBytes(crypto_secretbox_NONCEBYTES)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function RandomSalt() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a salt.
-		  
-		  Return RandomBytes(crypto_pwhash_SALTBYTES)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
 		Protected Function VerifyMAC(MAC As MemoryBlock, Message As MemoryBlock, Key As libsodium.SKI.SecretKey) As Boolean
 		  ' Validate a HMAC-SHA512256 authentication code for the Message that was generated using SecretKey
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/secret-key_authentication.html
@@ -107,7 +81,7 @@ Protected Module SKI
 	#tag Constant, Name = crypto_secretbox_MACBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_secretbox_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
+	#tag Constant, Name = crypto_secretbox_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Protected
 	#tag EndConstant
 
 

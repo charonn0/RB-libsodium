@@ -4,9 +4,9 @@ Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(Passwd As String)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  mSessionKey = libsodium.SKI.RandomKey
+		  mSessionKey = libsodium.SKI.SecretKey.Generate()
 		  
-		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.RandomNonce
+		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.SecretKey.RandomNonce()
 		  Passwd = libsodium.SKI.EncryptData(Passwd, mSessionKey, SessionNonce)
 		  mPassword = New SecureMemoryBlock(Passwd.LenB)
 		  mPassword.StringValue(0, mPassword.Size) = Passwd
@@ -124,6 +124,14 @@ Implements libsodium.Secureable
 		Sub Operator_Convert(FromString As String)
 		  Me.Constructor(FromString)
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function RandomSalt() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a salt for use with an DeriveKey
+		  
+		  Return libsodium.SKI.SecretKey.RandomSalt()
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
