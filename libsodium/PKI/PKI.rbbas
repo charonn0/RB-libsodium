@@ -122,61 +122,6 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DeriveEncryptionKey(PrivateKeyData As MemoryBlock) As MemoryBlock
-		  CheckSize(PrivateKeyData, crypto_scalarmult_BYTES)
-		  Dim pub As New MemoryBlock(crypto_scalarmult_BYTES)
-		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Return pub
-		  
-		  
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function DeriveSharedKey(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock) As MemoryBlock
-		  ' Calculates the shared key from the RecipientPublicKey and SenderPrivateKey, for
-		  ' use with the EncryptData and DecryptData methods. This allows the key derivation
-		  ' calculation to be performed once rather than on each invocation of EncryptData
-		  ' and DecryptData.
-		  
-		  Dim buffer As New MemoryBlock(crypto_box_BEFORENMBYTES)
-		  
-		  If crypto_box_beforenm(buffer, RecipientPublicKey, SenderPrivateKey) = 0 Then
-		    Return buffer
-		  End If
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function DeriveSharedSecret(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock) As MemoryBlock
-		  ' Computes a shared secret given a SenderPrivateKey and RecipientPublicKey.
-		  ' The return value represents the X coordinate of a point on the curve. As
-		  ' a result, the number of possible keys is limited to the group size (≈2^252),
-		  ' and the key distribution is not uniform. For this reason, instead of directly
-		  ' using the return value as a shared key, it is recommended to use:
-		  '
-		  '  GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
-		  
-		  Dim buffer As New MemoryBlock(crypto_scalarmult_BYTES)
-		  
-		  If crypto_scalarmult(buffer, SenderPrivateKey, RecipientPublicKey) = 0 Then
-		    Return buffer
-		  End If
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function DeriveSigningKey(PrivateKeyData As MemoryBlock) As MemoryBlock
-		  CheckSize(PrivateKeyData, crypto_sign_SECRETKEYBYTES)
-		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
-		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Return pub
-		  
-		  
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As MemoryBlock, SenderPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a shared key, which is derived
 		  ' from the RecipientPublicKey and SenderPrivateKey, and a Nonce. A Poly1305 message authentication 
@@ -205,23 +150,6 @@ Protected Module PKI
 		  If crypto_box_easy_afternm(buffer, ClearText, ClearText.Size, Nonce, SharedKey) = 0 Then
 		    Return buffer
 		  End If
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function RandomEncryptionKey() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a private key. To generate the
-		  ' corresponding public key use the DerivePublicKey method.
-		  
-		  Return RandomBytes(crypto_box_SECRETKEYBYTES)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function RandomNonce() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a Nonce
-		  
-		  Return RandomBytes(crypto_box_NONCEBYTES)
 		End Function
 	#tag EndMethod
 
