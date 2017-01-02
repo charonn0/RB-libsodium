@@ -1,5 +1,20 @@
 #tag Module
 Protected Module libsodium
+	#tag Method, Flags = &h0
+		Sub AllowSwap(Extends m As MemoryBlock, Size As Int32 = -1, Assigns Allow As Boolean)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
+		  If Size = -1 Then Size = m.Size
+		  If Size = -1 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  If Allow Then
+		    If sodium_munlock(m, Size) <> 0 Then Raise New SodiumException(ERR_LOCK_DENIED)
+		  Else
+		    If sodium_mlock(m, Size) <> 0 Then Raise New SodiumException(ERR_LOCK_DENIED)
+		  End If
+		  
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Function Argon2(InputData As MemoryBlock) As String
 		  ' Generates an Argon2 digest of the InputData
@@ -331,6 +346,19 @@ Protected Module libsodium
 		  Dim mb2 As MemoryBlock = String2
 		  Return sodium_memcmp(mb1, mb2, Max(mb1.Size, mb2.Size)) = 0
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub ZeroFill(Extends m As MemoryBlock, Size As Int32 = -1)
+		  ' Zero-fill the MemoryBlock
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
+		  If m <> Nil Then
+		    If Size = -1 Then Size = m.Size
+		    sodium_memzero(m, Size)
+		  End If
+		End Sub
 	#tag EndMethod
 
 
