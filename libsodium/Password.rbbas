@@ -167,6 +167,7 @@ Implements libsodium.Secureable
 		    Return crypto_pwhash_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
 		    
 		  Case ALG_SCRYPT
+		    HashValue = HashValue + Chr(0)
 		    CheckSize(HashValue, crypto_pwhash_scryptsalsa208sha256_STRBYTES)
 		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
 		  End Select
