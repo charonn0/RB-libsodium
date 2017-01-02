@@ -64,16 +64,6 @@ Protected Module SKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function RandomKey() As libsodium.SKI.SecretKey
-		  ' Returns random bytes that are suitable to be used as a secret key.
-		  
-		  Return New libsodium.SKI.SecretKey(RandomBytes(crypto_secretbox_KEYBYTES))
-		  
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
 		Protected Function VerifyMAC(MAC As MemoryBlock, Message As MemoryBlock, Key As libsodium.SKI.SecretKey) As Boolean
 		  ' Validate a HMAC-SHA512256 authentication code for the Message that was generated using SecretKey
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/secret-key_authentication.html

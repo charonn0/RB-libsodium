@@ -9,12 +9,12 @@ Implements libsodium.Secureable
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1000
-		Sub Constructor(SecretKeyData As MemoryBlock)
-		  If SessionNonce = Nil Then 
-		    SessionNonce = libsodium.PKI.RandomNonce
-		    Dim key As MemoryBlock = libsodium.PKI.RandomEncryptionKey
-		    SessionKey = libsodium.PKI.DeriveSharedKey(libsodium.PKI.DeriveEncryptionKey(key), key)
+	#tag Method, Flags = &h1001
+		Protected Sub Constructor(SecretKeyData As MemoryBlock)
+		  If SessionNonce = Nil Then
+		    Dim key As MemoryBlock = libsodium.PKI.EncryptionKey.RandomPrivateKey()
+		    SessionNonce = libsodium.PKI.EncryptionKey.RandomNonce
+		    SessionKey = libsodium.PKI.EncryptionKey.DeriveSharedKey(libsodium.PKI.EncryptionKey.DerivePublicKey(key), key)
 		  End If
 		  mSecret = libsodium.PKI.EncryptData(SecretKeyData, SessionKey, SessionNonce)
 		  mSecret.AllowSwap = False
@@ -26,7 +26,9 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h1000
 		 Shared Function Generate() As libsodium.SKI.SecretKey
-		  Return libsodium.SKI.RandomKey
+		  ' Returns random bytes that are suitable to be used as a secret key.
+		  
+		  Return New libsodium.SKI.SecretKey(RandomBytes(crypto_secretbox_KEYBYTES))
 		End Function
 	#tag EndMethod
 
