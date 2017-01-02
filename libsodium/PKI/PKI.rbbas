@@ -161,7 +161,7 @@ Protected Module PKI
 		  ' both are returned.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/public-key_signatures.html
 		  
-		  'If SenderKey.PrivateKey.Size <> crypto_sign_SECRETKEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(SenderKey.PrivateKey, crypto_sign_SECRETKEYBYTES)
 		  
 		  Dim signature As MemoryBlock
 		  Dim siglen As UInt64

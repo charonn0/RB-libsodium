@@ -23,10 +23,16 @@ Protected Module SKI
 		  ' validated by this method. The decrypted data is returned on success. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
 		  
+		  Return DecryptData(CipherText, Key.Value, Nonce)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function DecryptData(CipherText As MemoryBlock, Key As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
 		  CheckSize(Nonce, crypto_secretbox_NONCEBYTES)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_secretbox_MACBYTES)
-		  If crypto_secretbox_open_easy(Buffer, CipherText, CipherText.Size, Nonce, Key.Value) = 0 Then
+		  If crypto_secretbox_open_easy(Buffer, CipherText, CipherText.Size, Nonce, Key) = 0 Then
 		    Return buffer
 		  End If
 		End Function
@@ -39,11 +45,17 @@ Protected Module SKI
 		  ' data. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
 		  
+		  Return EncryptData(ClearText, Key.Value, Nonce)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function EncryptData(ClearText As MemoryBlock, Key As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
 		  CheckSize(Nonce, crypto_secretbox_NONCEBYTES)
-		  CheckSize(Key.Value, crypto_secretbox_KEYBYTES)
+		  CheckSize(Key, crypto_secretbox_KEYBYTES)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_secretbox_MACBYTES)
-		  If crypto_secretbox_easy(buffer, ClearText, ClearText.Size, Nonce, Key.Value) = 0 Then 
+		  If crypto_secretbox_easy(buffer, ClearText, ClearText.Size, Nonce, Key) = 0 Then
 		    Return buffer
 		  End If
 		End Function
