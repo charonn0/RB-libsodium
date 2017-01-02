@@ -183,6 +183,16 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function IsZero(Extends m As MemoryBlock, Size As Int32 = - 1) As Boolean
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
+		  If Size = -1 Then Size = m.Size
+		  If Size = -1 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  Return sodium_is_zero(m, Size) = 1
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
 		  ' Returns a MemoryBlock filled with Count bytes of cryptographically random data.
@@ -301,6 +311,10 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function sodium_init Lib "libsodium" () As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_is_zero Lib "libsodium" (DataPtr As Ptr, Length As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21

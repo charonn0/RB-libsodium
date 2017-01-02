@@ -178,6 +178,12 @@ Implements libsodium.Secureable
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function IsZero() As Boolean
+		  Return sodium_is_zero(mPtr, Me.Size) = 1
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Sub Lock()
 		  // Part of the libsodium.Secureable interface.
