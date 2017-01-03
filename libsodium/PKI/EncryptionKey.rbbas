@@ -67,55 +67,6 @@ Inherits libsodium.PKI.KeyPair
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function DeriveSharedKey(RecipientPublicKey As MemoryBlock) As MemoryBlock
-		  ' Calculates the shared key from the RecipientPublicKey and SenderPrivateKey, for
-		  ' use with the EncryptData and DecryptData methods. This allows the key derivation
-		  ' calculation to be performed once rather than on each invocation of EncryptData
-		  ' and DecryptData.
-		  
-		  Return DeriveSharedKey(Me.PrivateKey, RecipientPublicKey)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		 Shared Function DeriveSharedKey(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock) As MemoryBlock
-		  ' Calculates the shared key from the RecipientPublicKey and SenderPrivateKey, for
-		  ' use with the EncryptData and DecryptData methods. This allows the key derivation
-		  ' calculation to be performed once rather than on each invocation of EncryptData
-		  ' and DecryptData.
-		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
-		  CheckSize(RecipientPublicKey, crypto_box_PUBLICKEYBYTES)
-		  CheckSize(SenderPrivateKey, crypto_box_SECRETKEYBYTES)
-		  
-		  Dim buffer As New MemoryBlock(crypto_box_BEFORENMBYTES)
-		  If crypto_box_beforenm(buffer, RecipientPublicKey, SenderPrivateKey) = 0 Then
-		    Return buffer
-		  End If
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function DeriveSharedSecret(RecipientPublicKey As MemoryBlock) As MemoryBlock
-		  ' Computes a shared secret given a SenderPrivateKey and RecipientPublicKey.
-		  ' The return value represents the X coordinate of a point on the curve. As
-		  ' a result, the number of possible keys is limited to the group size (≈2^252),
-		  ' and the key distribution is not uniform. For this reason, instead of directly
-		  ' using the return value as a shared key, it is recommended to use:
-		  '
-		  '  GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
-		  
-		  CheckSize(RecipientPublicKey, crypto_scalarmult_BYTES)
-		  
-		  Dim buffer As New MemoryBlock(crypto_scalarmult_BYTES)
-		  If crypto_scalarmult(buffer, Me.PrivateKey, RecipientPublicKey) = 0 Then
-		    Return buffer
-		  End If
-		End Function
-	#tag EndMethod
-
 	#tag Method, Flags = &h1000
 		 Shared Function Generate(Optional SeedData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  ' This method randomly generates an EncryptionKey pair, optionally using the specified seed.
