@@ -122,12 +122,12 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function DoubleValue(Offset As UInt64, Assigns NewDouble As Double) As Double
+		Sub DoubleValue(Offset As UInt64, Assigns NewDouble As Double)
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
 		  mb.DoubleValue(Offset) = NewDouble
-		End Function
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
