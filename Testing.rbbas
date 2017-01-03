@@ -37,12 +37,12 @@ Protected Module Testing
 		    Return False
 		  End Try
 		  
-		  'Try
-		  'TestCookieEngine()
-		  'Catch
-		  'TestResult = 5
-		  'Return False
-		  'End Try
+		  Try
+		    TestSecureMemory()
+		  Catch
+		    TestResult = 5
+		    Return False
+		  End Try
 		  
 		  Return True
 		End Function
@@ -92,6 +92,12 @@ Protected Module Testing
 		  Dim msg2 As String = libsodium.PKI.DecryptData(crypted, senderkey.PublicKey, recipkey, nonce)
 		  
 		  Assert(msg1 = msg2)
+		  
+		  Dim sharedkey As New libsodium.PKI.SharedSecret(recipkey.PublicKey, senderkey)
+		  crypted = libsodium.PKI.EncryptData(msg1, sharedkey, nonce)
+		  msg2 = libsodium.PKI.DecryptData(crypted, sharedkey, nonce)
+		  
+		  Assert(msg1 = msg2)
 		End Sub
 	#tag EndMethod
 
@@ -116,6 +122,86 @@ Protected Module Testing
 		  Dim sig As String = libsodium.PKI.SignData(msg, senderkey)
 		  Assert(libsodium.PKI.VerifyData(sig, senderkey.PublicKey))
 		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub TestSecureMemory()
+		  Dim data As SecureMemoryBlock = "Hello, world!"
+		  data = New SecureMemoryBlock(64)
+		  data.ZeroFill
+		  
+		  data.BooleanValue(0) = True
+		  Assert(data.BooleanValue(0))
+		  data.ZeroFill
+		  
+		  data.ByteValue(0) = 123
+		  Assert(data.ByteValue(0) = 123)
+		  data.ZeroFill
+		  
+		  data.ColorValue(0, 32) = &cFFFFFF00
+		  Assert(data.ColorValue(0, 32) = &cFFFFFF00)
+		  data.ZeroFill
+		  
+		  data.CString(0) = "123"
+		  Assert(data.CString(0) = "123")
+		  data.ZeroFill
+		  
+		  data.CurrencyValue(0) = 123.456
+		  Assert(data.CurrencyValue(0) = 123.456)
+		  data.ZeroFill
+		  
+		  data.DoubleValue(0) = 123.456
+		  Assert(data.DoubleValue(0) = 123.456)
+		  data.ZeroFill
+		  
+		  data.Int16Value(0) = 123
+		  Assert(data.Int16Value(0) = 123)
+		  data.ZeroFill
+		  
+		  data.Int32Value(0) = 123
+		  Assert(data.Int32Value(0) = 123)
+		  data.ZeroFill
+		  
+		  data.Int64Value(0) = 123
+		  Assert(data.Int64Value(0) = 123)
+		  data.ZeroFill
+		  
+		  data.Long(0) = 123
+		  Assert(data.Long(0) = 123)
+		  data.ZeroFill
+		  
+		  data.PString(0) = "123"
+		  Assert(data.PString(0) = "123")
+		  data.ZeroFill
+		  
+		  data.SingleValue(0) = 123.4
+		  Assert(data.SingleValue(0) > 123.39)
+		  Assert(data.SingleValue(0) < 123.41)
+		  data.ZeroFill
+		  
+		  data.StringValue(0, 5) = "123.4"
+		  Assert(data.StringValue(0, 5) = "123.4")
+		  data.ZeroFill
+		  
+		  data.UInt16Value(0) = 123
+		  Assert(data.UInt16Value(0) = 123)
+		  data.ZeroFill
+		  
+		  data.UInt32Value(0) = 123
+		  Assert(data.UInt32Value(0) = 123)
+		  data.ZeroFill
+		  
+		  data.UInt64Value(0) = 123
+		  Assert(data.UInt64Value(0) = 123)
+		  data.ZeroFill
+		  
+		  data.UInt8Value(0) = 123
+		  Assert(data.UInt8Value(0) = 123)
+		  data.ZeroFill
+		  
+		  data.WString(0) = "123"
+		  Assert(data.WString(0) = "123")
 		End Sub
 	#tag EndMethod
 
