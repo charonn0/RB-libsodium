@@ -7,6 +7,7 @@ Implements libsodium.Secureable
 		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.SecretKey.RandomNonce
 		  mKeyData = libsodium.SKI.EncryptData(KeyData, mSessionKey, SessionNonce)
 		  mKeyData.AllowSwap = False
+		  Me.Lock
 		End Sub
 	#tag EndMethod
 

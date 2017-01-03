@@ -31,7 +31,7 @@ Protected Module libsodium
 		  Select Case True
 		  Case Data = Nil
 		    Return
-		  Case Upperbound > 0
+		  Case Upperbound > 0 And (Data.Size > Upperbound Or Data.Size < Expected)
 		    err = New SodiumException(ERR_OUT_OF_RANGE)
 		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
 		  Case Data.Size <> Expected
@@ -159,7 +159,7 @@ Protected Module libsodium
 		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
 		  Dim h As GenericHashDigest
-		  If Key = Nil Then
+		  If Key <> Nil Then
 		    h = New GenericHashDigest(Key, HashSize)
 		  Else
 		    h = New GenericHashDigest(HashType.Generic)
@@ -180,6 +180,16 @@ Protected Module libsodium
 		    If sodium_init() = -1 Then available = False
 		  End If
 		  Return available
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function IsZero(Extends m As MemoryBlock, Size As Int32 = - 1) As Boolean
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
+		  If Size = -1 Then Size = m.Size
+		  If Size = -1 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  Return sodium_is_zero(m, Size) = 1
 		End Function
 	#tag EndMethod
 
@@ -301,6 +311,10 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function sodium_init Lib "libsodium" () As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_is_zero Lib "libsodium" (DataPtr As Ptr, Length As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
