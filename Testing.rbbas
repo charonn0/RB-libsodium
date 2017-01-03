@@ -44,8 +44,27 @@ Protected Module Testing
 		    Return False
 		  End Try
 		  
+		  Try
+		    TestHash()
+		  Catch
+		    TestResult = 6
+		    Return False
+		  End Try
+		  
 		  Return True
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub TestHash()
+		  Const key = "27F2B73F7A94144A7F459792892D2CFFB78FB442FE64D451EDB63B08DA940C27"
+		  Const hash = "2D4B92842EACAE0B7B3804FC70092CB0A1D09691D12AC8477B58D36701F1C79926FE8DC8397CC54CB5013BA024A037DDBAB3EE6BB2F1863779A4BD6AA0515068"
+		  
+		  Assert(libsodium.StrComp(libsodium.EncodeHex(libsodium.GenericHash("Hello, world!", DecodeHex(key))), hash))
+		  
+		  Assert(libsodium.EncodeHex(libsodium.SHA256("Hello, world!")) = "315F5BDB76D078C43B8AC0064E4A0164612B1FCE77C869345BFC94C75894EDD3")
+		  Assert(libsodium.EncodeHex(libsodium.SHA512("Hello, world!")) = "C1527CD893C124773D811911970C8FE6E857D6DF5DC9226BD8A160614C0CD963A4DDEA2B94BB7D36021EF9D865D5CEA294A82DD49A0BB269F51F6E7A57F79421")
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
@@ -66,7 +85,7 @@ Protected Module Testing
 		  
 		  Dim skey As New libsodium.SKI.SecretKey(pass, libsodium.DecodeHex(salt))
 		  Assert(libsodium.StrComp(skey.Value, libsodium.DecodeHex(seckey)))
-		  
+		  TestSKIEncrypt(skey)
 		  Dim sigk As New libsodium.PKI.SigningKey(pass, libsodium.DecodeHex(salt))
 		  Assert(libsodium.StrComp(sigk.PrivateKey, libsodium.DecodeHex(sigskey)))
 		  Assert(libsodium.StrComp(sigk.PublicKey, libsodium.DecodeHex(sigpkey)))
@@ -206,13 +225,13 @@ Protected Module Testing
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub TestSKIEncrypt()
-		  Dim key As libsodium.SKI.SecretKey = libsodium.SKI.SecretKey.Generate()
-		  Dim nonce As MemoryBlock = key.RandomNonce
+		Private Sub TestSKIEncrypt(SecretKey As libsodium.SKI.SecretKey = Nil, Nonce As MemoryBlock = Nil)
+		  If SecretKey = Nil Then SecretKey = libsodium.SKI.SecretKey.Generate()
+		  If Nonce = Nil Then nonce = SecretKey.RandomNonce
 		  
 		  Dim msg1 As String = "This is a test message."
-		  Dim crypted As String = libsodium.SKI.EncryptData(msg1, key, nonce)
-		  Dim msg2 As String = libsodium.SKI.DecryptData(crypted, key, nonce)
+		  Dim crypted As String = libsodium.SKI.EncryptData(msg1, SecretKey, nonce)
+		  Dim msg2 As String = libsodium.SKI.DecryptData(crypted, SecretKey, nonce)
 		  
 		  Assert(msg1 = msg2)
 		End Sub
