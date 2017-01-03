@@ -89,10 +89,26 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
+		Protected Function DecryptData(CipherText As MemoryBlock, SharedKey As libsodium.PKI.SharedSecret, Nonce As MemoryBlock) As MemoryBlock
+		  ' Decrypts the CipherText using the XSalsa20 stream cipher with a precalulated shared key and a
+		  ' Nonce. A Poly1305 message authentication code is prepended by the EncryptData method and will
+		  ' be validated by this method. The decrypted data is returned  on success. On error returns Nil.
+		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
+		  
+		  CheckSize(Nonce, crypto_box_NONCEBYTES)
+		  
+		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
+		  If crypto_box_open_easy_afternm(Buffer, CipherText, CipherText.Size, Nonce, SharedKey.Value) = 0 Then
+		    Return buffer
+		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, SenderPublicKey As MemoryBlock, RecipientPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Decrypts the CipherText using the XSalsa20 stream cipher with a shared key, which is derived
-		  ' from the SenderPublicKey and RecipientPrivateKey, and a Nonce. A Poly1305 message authentication 
-		  ' code is prepended by the EncryptData method and will be validated by this method. The decrypted 
+		  ' from the SenderPublicKey and RecipientPrivateKey, and a Nonce. A Poly1305 message authentication
+		  ' code is prepended by the EncryptData method and will be validated by this method. The decrypted
 		  ' data is returned  on success. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
@@ -107,16 +123,16 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DecryptData(CipherText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' Decrypts the CipherText using the XSalsa20 stream cipher with a precalulated shared key and a 
-		  ' Nonce. A Poly1305 message authentication code is prepended by the EncryptData method and will 
-		  ' be validated by this method. The decrypted data is returned  on success. On error returns Nil.
+		Protected Function EncryptData(ClearText As MemoryBlock, SharedKey As libsodium.PKI.SharedSecret, Nonce As MemoryBlock) As MemoryBlock
+		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a precalculated shared key and a
+		  ' Nonce. A Poly1305 message authentication code is also generated and prepended to the returned
+		  ' encrypted data. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  
-		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
-		  If crypto_box_open_easy_afternm(Buffer, CipherText, CipherText.Size, Nonce, SharedKey) = 0 Then 
+		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
+		  If crypto_box_easy_afternm(buffer, ClearText, ClearText.Size, Nonce, SharedKey.Value) = 0 Then
 		    Return buffer
 		  End If
 		End Function
@@ -125,7 +141,7 @@ Protected Module PKI
 	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As MemoryBlock, SenderPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a shared key, which is derived
-		  ' from the RecipientPublicKey and SenderPrivateKey, and a Nonce. A Poly1305 message authentication 
+		  ' from the RecipientPublicKey and SenderPrivateKey, and a Nonce. A Poly1305 message authentication
 		  ' code is also generated and prepended to the returned encrypted data. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  CheckSize(RecipientPublicKey, crypto_box_PUBLICKEYBYTES)
@@ -133,22 +149,6 @@ Protected Module PKI
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
 		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey, SenderPrivateKey.PrivateKey) = 0 Then
-		    Return buffer
-		  End If
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Function EncryptData(ClearText As MemoryBlock, SharedKey As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a precalculated shared key and a 
-		  ' Nonce. A Poly1305 message authentication code is also generated and prepended to the returned 
-		  ' encrypted data. On error returns Nil.
-		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
-		  
-		  CheckSize(Nonce, crypto_box_NONCEBYTES)
-		  
-		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
-		  If crypto_box_easy_afternm(buffer, ClearText, ClearText.Size, Nonce, SharedKey) = 0 Then
 		    Return buffer
 		  End If
 		End Function

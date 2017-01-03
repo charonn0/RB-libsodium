@@ -100,7 +100,13 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h21
 		Private Sub Destructor()
-		  If mPtr <> Nil And mFreeable Then sodium_free(mPtr)
+		  If mPtr <> Nil Then
+		    If mFreeable Then
+		      sodium_free(mPtr)
+		    Else
+		      Me.ZeroFill()
+		    End If
+		  End If
 		  mPtr = Nil
 		  mSize = 0
 		End Sub
