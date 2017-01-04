@@ -13,19 +13,25 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1000
 		Sub Constructor(FromSigningKey As libsodium.PKI.SigningKey)
-		  ' Converts the FromSigningKey into a new EncryptionKey
+		  ' Converts the FromSigningKey(Ed25519) into an EncryptionKey(Curve25519), 
+		  ' so that the same key pair can be used both for authenticated encryption and
+		  ' for signatures.
 		  
 		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
 		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
 		  
 		  ' first convert the public key
 		  If crypto_sign_ed25519_pk_to_curve25519(pub, FromSigningKey.PublicKey) <> 0 Then
-		    Raise New SodiumException(ERR_CONVERSION_FAILED)
+		    Dim err As New SodiumException(ERR_CONVERSION_FAILED)
+		    err.Message = "This public key cannot be converted."
+		    Raise err
 		  End If
 		  
 		  ' then the private key
 		  If crypto_sign_ed25519_sk_to_curve25519(priv, FromSigningKey.PrivateKey) <> 0 Then
-		    Raise New SodiumException(ERR_CONVERSION_FAILED)
+		    Dim err As New SodiumException(ERR_CONVERSION_FAILED)
+		    err.Message = "This private key cannot be converted."
+		    Raise err
 		  End If
 		  
 		  Me.Constructor(priv, pub)
