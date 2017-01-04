@@ -10,6 +10,8 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h0
 		Function DeriveKey(KeyLength As Int32, Salt As MemoryBlock, Limits As libsodium.ResourceLimits, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As MemoryBlock
+		  ' Computes a key of the specified KeySize using the password, Salt, and other parameters.
+		  
 		  Dim out As New MemoryBlock(KeyLength)
 		  Dim clearpw As MemoryBlock = Me.Value
 		  Dim memlimit, opslimit As UInt32
@@ -108,6 +110,7 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherPassword As String) As Int32
+		  ' Performs a constant-time binary comparison to the OtherPassword
 		  If libsodium.StrComp(Me.Value, OtherPassword) Then Return 0
 		  Return -1
 		End Function
