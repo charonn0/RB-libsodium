@@ -66,7 +66,7 @@ Protected Module SKI
 		  ' Generate a HMAC-SHA512256 authentication code for the Message using SecretKey.
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/secret-key_authentication.html
 		  
-		  'If Key.Value.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(Key.Value, crypto_auth_KEYBYTES)
 		  
 		  Dim signature As New MemoryBlock(crypto_auth_BYTES)
 		  If crypto_auth(signature, Message, Message.Size, Key.Value) = 0 Then
@@ -80,12 +80,18 @@ Protected Module SKI
 		  ' Validate a HMAC-SHA512256 authentication code for the Message that was generated using SecretKey
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/secret-key_authentication.html
 		  
-		  'If Key.Value.Size <> crypto_auth_KEYBYTES Then Raise New SodiumException(ERR_SIZE_MISMATCH)
+		  CheckSize(Key.Value, crypto_auth_KEYBYTES)
 		  
 		  Return crypto_auth_verify(MAC, Message, Message.Size, Key.Value) = 0
 		End Function
 	#tag EndMethod
 
+
+	#tag Constant, Name = crypto_auth_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_auth_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
 
 	#tag Constant, Name = crypto_secretbox_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
