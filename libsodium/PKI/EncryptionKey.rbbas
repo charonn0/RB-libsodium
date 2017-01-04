@@ -53,8 +53,8 @@ Inherits libsodium.PKI.KeyPair
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		 Shared Function DerivePublicKey(PrivateKeyData As MemoryBlock) As MemoryBlock
+	#tag Method, Flags = &h1
+		Protected Shared Function DerivePublicKey(PrivateKeyData As MemoryBlock) As MemoryBlock
 		  ' Given a user's private key, this method computes their public key
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
