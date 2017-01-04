@@ -52,6 +52,38 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 
+	#tag Note, Name = Usage
+		This class contains a symmetric key for use with secret key encryption and message authentication. Encryption, 
+		decryption, and MAC generation/validation use the same key, so it must be kept secret at all times.
+		
+		You may use a SecretKey with these utility methods:
+		
+		  * libsodium.SKI.EncryptData: Encrypt a message and generate its MAC; the MAC is prepended to the 
+		    encrypted message and returned.
+		  * libsodium.SKI.DecryptData: Authenticate the MAC and return the decrypted the message.
+		  * libsodium.SKI.GenerateMAC: Generate a Poly1305 message authentication code for an unencrypted message.
+		  * libsodium.SKI.VerifyMAC: Authenticate a Poly1305 message authentication code for an unencrypted message.
+		
+		Encryption is done using the XSalsa20 stream cipher. Message authentication uses Poly1305 authentication codes.
+		
+		
+		To generate a brand new secret key use the libsodium.SKI.SecretKey.Generate() method:
+		
+		     Dim sk As libsodium.SKI.SecretKey = libsodium.SKI.SecretKey.Generate()
+		
+		To derive a secret key from a password string use the Constructor method. Derivation requires a random salt, 
+		which you should get from the SecretKey.RandomSalt() shared method:
+		
+		     Dim pw As libsodium.Password = "seekrit"
+		     Dim salt As MemoryBlock = libsodium.SKI.SecretKey.RandomSalt()
+		     Dim sk As New libsodium.SKI.SecretKey(pw, salt)
+		
+		
+		Encryption/decryption needs a Nonce value to work. Use the SecretKey.RandomNonce shared method to generate
+		securely random nonces.
+	#tag EndNote
+
+
 	#tag ViewBehavior
 		#tag ViewProperty
 			Name="Index"

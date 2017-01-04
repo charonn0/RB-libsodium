@@ -11,20 +11,8 @@ Inherits libsodium.PKI.KeyPair
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1001
-		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
-		  CheckSize(PrivateKeyData, crypto_box_SECRETKEYBYTES)
-		  CheckSize(PublicKeyData, crypto_box_PUBLICKEYBYTES)
-		  
-		  // Calling the overridden superclass constructor.
-		  // Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock) -- From KeyPair
-		  Super.Constructor(PrivateKeyData, PublicKeyData)
-		  Me.Lock()
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		 Shared Function ConvertSigningKey(FromSigningKey As libsodium.PKI.SigningKey) As libsodium.PKI.EncryptionKey
+	#tag Method, Flags = &h1000
+		Sub Constructor(FromSigningKey As libsodium.PKI.SigningKey)
 		  ' Converts the FromSigningKey into a new EncryptionKey
 		  
 		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
@@ -40,8 +28,20 @@ Inherits libsodium.PKI.KeyPair
 		    Raise New SodiumException(ERR_CONVERSION_FAILED)
 		  End If
 		  
-		  Return New EncryptionKey(priv, pub)
-		End Function
+		  Me.Constructor(priv, pub)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1001
+		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
+		  CheckSize(PrivateKeyData, crypto_box_SECRETKEYBYTES)
+		  CheckSize(PublicKeyData, crypto_box_PUBLICKEYBYTES)
+		  
+		  // Calling the overridden superclass constructor.
+		  // Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock) -- From KeyPair
+		  Super.Constructor(PrivateKeyData, PublicKeyData)
+		  Me.Lock()
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -53,8 +53,8 @@ Inherits libsodium.PKI.KeyPair
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		 Shared Function DerivePublicKey(PrivateKeyData As MemoryBlock) As MemoryBlock
+	#tag Method, Flags = &h1
+		Protected Shared Function DerivePublicKey(PrivateKeyData As MemoryBlock) As MemoryBlock
 		  ' Given a user's private key, this method computes their public key
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)

@@ -2,8 +2,9 @@
 Protected Class SodiumException
 Inherits RuntimeException
 	#tag Method, Flags = &h0
-		Sub Constructor(ErrorNumber As Int32)
-		  Select Case ErrorNumber
+		Sub Constructor(ErrorCode As Int32)
+		  Me.ErrorNumber = ErrorCode
+		  Select Case ErrorCode
 		  Case ERR_INIT_FAILED
 		    Me.Message = "libsodium could not be initialized."
 		    

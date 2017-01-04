@@ -46,8 +46,8 @@ Inherits libsodium.PKI.KeyPair
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		 Shared Function DerivePublicKey(PrivateKeyData As MemoryBlock) As MemoryBlock
+	#tag Method, Flags = &h1
+		Protected Shared Function DerivePublicKey(PrivateKeyData As MemoryBlock) As MemoryBlock
 		  ' Given a user's private key, this method computes their public key
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
@@ -94,5 +94,29 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 
+	#tag Note, Name = Usage
+		This class contains a key pair for use with public key signatures. 
+		
+		You may use a SigningKey with these utility methods:
+		
+		  * libsodium.PKI.SignData: Sign a message.
+		  * libsodium.PKI.VerifyData: Verify a signed message.
+		
+		Signing is done using the Ed25519 digital signature algorithm.
+		
+		
+		To generate a brand new signing key use the libsodium.PKI.SigningKey.Generate() method, optionally
+		passing in some seed data.
+		
+		     Dim sigk As libsodium.PKI.SigningKey = libsodium.PKI.SigningKey.Generate()
+		
+		To derive SigningKey key from a password string use the Constructor method. Derivation requires a random salt, 
+		which you should get from the SecretKey.RandomSalt() shared method:
+		
+		     Dim pw As libsodium.Password = "seekrit"
+		     Dim salt As MemoryBlock = libsodium.SKI.SecretKey.RandomSalt()
+		     Dim sigk As New libsodium.PKI.SigningKey(pw, salt)
+		
+	#tag EndNote
 End Class
 #tag EndClass

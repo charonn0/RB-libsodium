@@ -1,7 +1,14 @@
 #tag Module
 Protected Module libsodium
 	#tag Method, Flags = &h0
-		Sub AllowSwap(Extends m As MemoryBlock, Size As Int32 = -1, Assigns Allow As Boolean)
+		Sub AllowSwap(Extends m As MemoryBlock, Size As Int32 = - 1, Assigns Allow As Boolean)
+		  ' Locks at least Size bytes of memory starting at m. This can help avoid swapping sensitive data to disk.
+		  ' This method wraps mlock() and VirtualLock(). Note: Many systems place limits on the amount of memory
+		  ' that may be locked by a process. Care should be taken to raise those limits (e.g. Unix ulimits) where
+		  ' neccessary. This method will raise an exception when any limit is reached.
+		  ' On systems where it is supported, locking  advises the kernel not to include the locked memory in core
+		  ' dumps. Unlocking also undoes this additional protection.
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
 		  If Size = -1 Then Size = m.Size
@@ -176,8 +183,8 @@ Protected Module libsodium
 		  Static available As Boolean
 		  
 		  If Not available Then available = System.IsFunctionAvailable("sodium_init", "libsodium")
-		  If available Then 
-		    If sodium_init() = -1 Then available = False
+		  If available Then
+		    If sodium_init() = -1 Then available = False Else available = True
 		  End If
 		  Return available
 		End Function
@@ -195,8 +202,13 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
-		  ' Returns a MemoryBlock filled with Count bytes of cryptographically random data.
-		  ' https://download.libsodium.org/doc/generating_random_data/
+		  ' Returns a MemoryBlock filled with the requested number of bytes of
+		  ' cryptographically random data.
+		  '   On Win32, the RtlGenRandom() function is used
+		  '   On BSD, the arc4random() function is used
+		  '   On recent Linux kernels, the getrandom system call is used (since Sodium 1.0.3)
+		  '   On other Unices, the /dev/urandom device is used
+		  '   https://download.libsodium.org/doc/generating_random_data/
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim mb As New MemoryBlock(Count)
@@ -219,8 +231,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function RandomUInt32(Optional UpperBound As UInt32) As UInt32
-		  ' Returns a random UInt32. If UpperBound is specified then the value will be 
-		  ' less-than or equal-to UpperBound
+		  ' Returns a random UInt32 between 0 and &hffffffff. If UpperBound is specified
+		  ' then the value will be less-than or equal-to UpperBound
 		  ' https://download.libsodium.org/doc/generating_random_data/
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
@@ -376,36 +388,6 @@ Protected Module libsodium
 	#tag EndMethod
 
 
-	#tag Constant, Name = crypto_auth_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_auth_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_BEFORENMBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_BOXZEROBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_MACBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_PUBLICKEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_SECRETKEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_ZEROBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
 	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
 	#tag EndConstant
 
@@ -430,25 +412,10 @@ Protected Module libsodium
 	#tag Constant, Name = crypto_pwhash_STRBYTES, Type = Double, Dynamic = False, Default = \"128", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_scalarmult_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
 	#tag Constant, Name = crypto_shorthash_BYTES, Type = Double, Dynamic = False, Default = \"8", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_shorthash_KEYBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_BYTES, Type = Double, Dynamic = False, Default = \"64", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_PUBLICKEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_SECRETKEYBYTES, Type = Double, Dynamic = False, Default = \"64", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_CANT_ALLOC, Type = Double, Dynamic = False, Default = \"-5", Scope = Protected
