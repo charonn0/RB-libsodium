@@ -41,7 +41,7 @@ Protected Module libsodium
 		  Case Upperbound > 0 And (Data.Size > Upperbound Or Data.Size < Expected)
 		    err = New SodiumException(ERR_OUT_OF_RANGE)
 		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
-		  Case Data.Size <> Expected
+		  Case Data.Size <> Expected And Upperbound = 0
 		    err = New SodiumException(ERR_SIZE_MISMATCH)
 		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
 		  End Select
