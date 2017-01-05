@@ -1,12 +1,12 @@
 #tag Class
 Protected Class GenericHashDigest
 	#tag Method, Flags = &h0
-		Sub Constructor(Type As libsodium.HashType)
+		Sub Constructor(Type As libsodium.HashType = libsodium.HashType.Generic, KeyData As MemoryBlock = Nil)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
 		  Select Case Type
 		  Case HashType.Generic
-		    Me.Constructor(Nil, crypto_generichash_BYTES_MAX)
+		    Me.Constructor(KeyData, crypto_generichash_BYTES_MAX)
 		  Case HashType.SHA256
 		    mType = HashType.SHA256
 		    mHashSize = crypto_hash_sha256_BYTES
