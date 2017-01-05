@@ -66,14 +66,6 @@ Implements libsodium.Secureable
 		Protected mKeyData As libsodium.SKI.KeyContainter
 	#tag EndProperty
 
-	#tag Property, Flags = &h21
-		Private Shared mSessionKey As MemoryBlock
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private Shared SessionNonce As MemoryBlock
-	#tag EndProperty
-
 
 	#tag ViewBehavior
 		#tag ViewProperty

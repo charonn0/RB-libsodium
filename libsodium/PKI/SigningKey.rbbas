@@ -63,6 +63,8 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1000
 		 Shared Function Generate(Optional SeedData As MemoryBlock) As libsodium.PKI.SigningKey
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
 		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
 		  Dim priv As New MemoryBlock(crypto_sign_SECRETKEYBYTES)
 		  If SeedData = Nil Then
