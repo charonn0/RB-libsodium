@@ -21,16 +21,7 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h0
 		Function Export() As MemoryBlock
-		  Dim data As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(data)
-		  
-		  bs.Write("-----BEGIN XSALSA20 KEY BLOCK-----" + EndOfLine.Windows)
-		  bs.Write(EndOfLine.Windows)
-		  bs.Write(EncodeBase64(Me.Value) + EndOfLine.Windows)
-		  bs.Write("-----END XSALSA20 KEY BLOCK-----" + EndOfLine.Windows)
-		  
-		  bs.Close
-		  Return data
+		  Return PackKey(Me.Value, ExportPrefix, ExportSuffix)
 		End Function
 	#tag EndMethod
 
@@ -44,22 +35,8 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h0
 		 Shared Function Import(ExportedKey As MemoryBlock) As libsodium.SKI.SecretKey
-		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
-		  If lines(0) <> "-----BEGIN XSALSA20 KEY BLOCK-----" Then Return Nil
-		  Dim sk As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(sk)
-		  Dim i As Integer
-		  For i = 1 To UBound(lines)
-		    If lines(i) <> "-----END XSALSA20 KEY BLOCK-----" Then
-		      bs.Write(lines(i) + EndOfLine.Windows)
-		    Else
-		      Exit For
-		    End If
-		  Next
-		  bs.Close
-		  
-		  sk = DecodeBase64(sk)
-		  Return New SecretKey(sk)
+		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportPrefix, ExportSuffix)
+		  If sk <> Nil Then Return New SecretKey(sk)
 		End Function
 	#tag EndMethod
 
@@ -118,6 +95,13 @@ Implements libsodium.Secureable
 		Encryption/decryption needs a Nonce value to work. Use the SecretKey.RandomNonce shared method to generate
 		securely random nonces.
 	#tag EndNote
+
+
+	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN XSALSA20 KEY BLOCK-----", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = ExportSuffix, Type = String, Dynamic = False, Default = \"-----END XSALSA20 KEY BLOCK-----", Scope = Public
+	#tag EndConstant
 
 
 	#tag ViewBehavior
