@@ -66,15 +66,8 @@ Inherits libsodium.PKI.KeyPair
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
 		  
-		  bs.Write("-----BEGIN ED25519 PUBLIC KEY BLOCK-----" + EndOfLine.Windows)
-		  bs.Write(EndOfLine.Windows)
-		  bs.Write(EncodeBase64(Me.PublicKey) + EndOfLine.Windows)
-		  bs.Write("-----END ED25519 PUBLIC KEY BLOCK-----" + EndOfLine.Windows)
-		  
-		  bs.Write("-----BEGIN ED25519 PRIVATE KEY BLOCK-----" + EndOfLine.Windows)
-		  bs.Write(EndOfLine.Windows)
-		  bs.Write(EncodeBase64(Me.PrivateKey) + EndOfLine.Windows)
-		  bs.Write("-----END ED25519 PRIVATE KEY BLOCK-----" + EndOfLine.Windows)
+		  bs.Write(PackKey(Me.PublicKey, PublicPrefix, PublicSuffix))
+		  bs.Write(PackKey(Me.PrivateKey, PrivatePrefix, PrivateSuffix))
 		  
 		  bs.Close
 		  Return data
@@ -99,34 +92,9 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		 Shared Function Import(ExportedKey As MemoryBlock) As libsodium.PKI.SigningKey
-		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
-		  If lines(0) <> "-----BEGIN ED25519 PUBLIC KEY BLOCK-----" Then Return Nil
-		  Dim pk As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(pk)
-		  Dim i As Integer
-		  For i = 1 To UBound(lines)
-		    If lines(i) <> "-----END ED25519 PUBLIC KEY BLOCK-----" Then
-		      bs.Write(lines(i) + EndOfLine.Windows)
-		    Else
-		      Exit For
-		    End If
-		  Next
-		  bs.Close
-		  i = i + 1
-		  If lines(i) <> "-----BEGIN ED25519 PRIVATE KEY BLOCK-----" Then Return Nil
-		  i = i + 1
-		  Dim sk As New MemoryBlock(0)
-		  bs = New BinaryStream(sk)
-		  For i = i To UBound(lines)
-		    If lines(i) <> "-----END ED25519 PRIVATE KEY BLOCK-----" Then
-		      bs.Write(lines(i) + EndOfLine.Windows)
-		    Else
-		      Exit For
-		    End If
-		  Next
-		  bs.Close
-		  
-		  Return Derive(DecodeBase64(sk))
+		  'Dim pk As MemoryBlock = ExtractKey(ExportedKey, PublicPrefix, PublicSuffix)
+		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, PrivatePrefix, PrivateSuffix)
+		  If sk <> Nil Then Return Derive(sk)
 		End Function
 	#tag EndMethod
 
@@ -183,5 +151,18 @@ Inherits libsodium.PKI.KeyPair
 		     Dim sigk As New libsodium.PKI.SigningKey(pw, salt)
 		
 	#tag EndNote
+
+
+	#tag Constant, Name = PrivatePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PRIVATE KEY BLOCK-----", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = PrivateSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PRIVATE KEY BLOCK-----", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = PublicPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PUBLIC KEY BLOCK-----", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = PublicSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PUBLIC KEY BLOCK-----", Scope = Public
+	#tag EndConstant
 End Class
 #tag EndClass
