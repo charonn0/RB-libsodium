@@ -89,6 +89,26 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
+		Protected Function DecodeSignature(SigData As MemoryBlock) As MemoryBlock
+		  Dim lines() As String = SplitB(SigData, EndOfLine.Windows)
+		  If lines(0) <> "-----BEGIN ED25519 SIGNATURE-----" Then Return Nil
+		  Dim sig As New MemoryBlock(0)
+		  Dim bs As New BinaryStream(sig)
+		  Dim i As Integer
+		  For i = 1 To UBound(lines)
+		    If lines(i) <> "-----END ED25519 SIGNATURE-----" Then
+		      bs.Write(lines(i) + EndOfLine.Windows)
+		    Else
+		      Exit For
+		    End If
+		  Next
+		  bs.Close
+		  
+		  Return DecodeBase64(sig)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, SenderPublicKey As libsodium.PKI.ForeignKey, RecipientPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Decrypts the CipherText using the XSalsa20 stream cipher with a shared key, which is derived
 		  ' from the SenderPublicKey and RecipientPrivateKey, and a Nonce. A Poly1305 message authentication
@@ -119,6 +139,19 @@ Protected Module PKI
 		  If crypto_box_open_easy_afternm(Buffer, CipherText, CipherText.Size, Nonce, SharedKey.Value) = 0 Then
 		    Return buffer
 		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function EncodeSignature(SigData As MemoryBlock) As MemoryBlock
+		  Dim out As New MemoryBlock(0)
+		  Dim bs As New BinaryStream(out)
+		  bs.Write("-----BEGIN ED25519 SIGNATURE-----" + EndOfLine.Windows)
+		  bs.Write(EndOfLine.Windows)
+		  bs.Write(EncodeBase64(SigData) + EndOfLine.Windows)
+		  bs.Write("-----END ED25519 SIGNATURE-----" + EndOfLine.Windows)
+		  bs.Close
+		  Return out
 		End Function
 	#tag EndMethod
 
@@ -191,7 +224,6 @@ Protected Module PKI
 		  CheckSize(SignerPublicKey.Value, crypto_sign_PUBLICKEYBYTES)
 		  Dim tmp As New MemoryBlock(SignedMessage.Size - crypto_sign_BYTES)
 		  Dim sz As UInt64 = tmp.Size
-		  sz = tmp.Size
 		  If crypto_sign_open(tmp, sz, SignedMessage, SignedMessage.Size, SignerPublicKey.Value) = 0 Then
 		    tmp.Size = sz
 		    Return tmp
