@@ -9,6 +9,7 @@ Module=SKI;libsodium/SKI/SKI.rbbas;&hD91BFFF;&h7228CFFF;false
 Class=KeyContainter;libsodium/SKI/KeyContainter.rbbas;&h61966FFF;&hD91BFFF;false
 Class=SecretKey;libsodium/SKI/SecretKey.rbbas;&hE4397FF;&hD91BFFF;false
 Module=PKI;libsodium/PKI/PKI.rbbas;&h1F9A4FFF;&h7228CFFF;false
+Class=ForeignKey;libsodium/PKI/ForeignKey.rbbas;&h4534FFFF;&h1F9A4FFF;false
 Class=SharedSecret;libsodium/PKI/SharedSecret.rbbas;&h545C47FF;&h1F9A4FFF;false
 Class=KeyPair;libsodium/PKI/KeyPair.rbbas;&h550BD7FF;&h1F9A4FFF;false
 Interface=Secureable;libsodium/Secureable.rbbas;&h755FCFFF;&h7228CFFF;false
