@@ -17,16 +17,16 @@ Protected Class ForeignKey
 	#tag Method, Flags = &h0
 		Sub Constructor(KeyData As MemoryBlock)
 		  Select Case True
-		  Case InStrB(KeyData, "-----BEGIN ED25519 PUBLIC KEY BLOCK-----") > 0
-		    mKeyData = ImportSigningKey(KeyData)
+		  Case InStrB(KeyData, libsodium.PKI.SigningKey.PublicPrefix) > 0
+		    mKeyData = ExtractKey(KeyData, libsodium.PKI.SigningKey.PublicPrefix, libsodium.PKI.SigningKey.PublicSuffix)
 		    mType = KeyType.Signature
 		    CheckSize(mKeyData, crypto_sign_PUBLICKEYBYTES)
-		  Case InStrB(KeyData, "-----BEGIN CURVE25519 PUBLIC KEY BLOCK-----") > 0
-		    mKeyData = ImportEncryptionKey(KeyData)
+		  Case InStrB(KeyData, libsodium.PKI.EncryptionKey.PublicPrefix) > 0
+		    mKeyData = ExtractKey(KeyData, libsodium.PKI.EncryptionKey.PublicPrefix, libsodium.PKI.EncryptionKey.PublicSuffix)
 		    mType = KeyType.Encryption
 		    CheckSize(mKeyData, crypto_box_PUBLICKEYBYTES)
-		  Case InStrB(KeyData, "-----BEGIN PUBLIC KEY BLOCK-----") > 0
-		    mKeyData = ImportGenericKey(KeyData)
+		  Case InStrB(KeyData, ExportPrefix) > 0
+		    mKeyData = ExtractKey(KeyData, ExportPrefix, ExportSuffix)
 		    mType = KeyType.Generic
 		  Else
 		    mKeyData = KeyData
@@ -51,83 +51,22 @@ Protected Class ForeignKey
 		Function Export() As MemoryBlock
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
-		  
+		  Dim prefix, suffix As String
 		  Select Case mType
 		  Case KeyType.Signature
-		    bs.Write("-----BEGIN ED25519 PUBLIC KEY BLOCK-----" + EndOfLine.Windows)
+		    prefix = libsodium.PKI.SigningKey.PublicPrefix
+		    suffix = libsodium.PKI.SigningKey.PublicSuffix
 		  Case KeyType.Encryption
-		    bs.Write("-----BEGIN CURVE25519 PUBLIC KEY BLOCK-----" + EndOfLine.Windows)
+		    prefix = libsodium.PKI.EncryptionKey.PublicPrefix
+		    suffix = libsodium.PKI.EncryptionKey.PublicSuffix
 		  Else
-		    bs.Write("-----BEGIN PUBLIC KEY BLOCK-----" + EndOfLine.Windows)
+		    prefix = ExportPrefix
+		    suffix = ExportSuffix
 		  End Select
-		  bs.Write(EndOfLine.Windows)
-		  bs.Write(EncodeBase64(Me.Value) + EndOfLine.Windows)
-		  
-		  Select Case mType
-		  Case KeyType.Signature
-		    bs.Write("-----END ED25519 PUBLIC KEY BLOCK-----" + EndOfLine.Windows)
-		  Case KeyType.Encryption
-		    bs.Write("-----END CURVE25519 PUBLIC KEY BLOCK-----" + EndOfLine.Windows)
-		  Else
-		    bs.Write("-----END PUBLIC KEY BLOCK-----" + EndOfLine.Windows)
-		  End Select
-		  
+		  bs.Write(PackKey(Me.Value, prefix, suffix))
 		  bs.Close
 		  Return data
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Shared Function ImportEncryptionKey(ExportedKey As MemoryBlock) As MemoryBlock
-		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
-		  Dim pk As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(pk)
-		  Dim i As Integer
-		  For i = 1 To UBound(lines)
-		    If lines(i) <> "-----END CURVE25519 PUBLIC KEY BLOCK-----" Then
-		      bs.Write(lines(i) + EndOfLine.Windows)
-		    Else
-		      Exit For
-		    End If
-		  Next
-		  bs.Close
-		  Return DecodeBase64(pk)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Shared Function ImportGenericKey(ExportedKey As MemoryBlock) As MemoryBlock
-		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
-		  Dim kd As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(kd)
-		  Dim i As Integer
-		  For i = 1 To UBound(lines)
-		    If lines(i) <> "-----END PUBLIC KEY BLOCK-----" Then
-		      bs.Write(lines(i) + EndOfLine.Windows)
-		    Else
-		      Exit For
-		    End If
-		  Next
-		  bs.Close
-		  Return DecodeBase64(kd)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Shared Function ImportSigningKey(ExportedKey As MemoryBlock) As MemoryBlock
-		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
-		  Dim pk As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(pk)
-		  Dim i As Integer
-		  For i = 1 To UBound(lines)
-		    If lines(i) <> "-----END ED25519 PUBLIC KEY BLOCK-----" Then
-		      bs.Write(lines(i) + EndOfLine.Windows)
-		    Else
-		      Exit For
-		    End If
-		  Next
-		  bs.Close
-		  Return DecodeBase64(pk)
+		  
 		End Function
 	#tag EndMethod
 
@@ -179,6 +118,13 @@ Protected Class ForeignKey
 	#tag Property, Flags = &h21
 		Private mType As libsodium.PKI.ForeignKey.KeyType
 	#tag EndProperty
+
+
+	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN PUBLIC KEY BLOCK-----", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ExportSuffix, Type = String, Dynamic = False, Default = \"-----END PUBLIC KEY BLOCK-----", Scope = Protected
+	#tag EndConstant
 
 
 	#tag Enum, Name = KeyType, Type = Integer, Flags = &h0
