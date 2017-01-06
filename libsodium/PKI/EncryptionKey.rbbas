@@ -73,6 +73,26 @@ Inherits libsodium.PKI.KeyPair
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function Export() As MemoryBlock
+		  Dim data As New MemoryBlock(0)
+		  Dim bs As New BinaryStream(data)
+		  
+		  bs.Write("-----BEGIN CURVE25519 PUBLIC KEY BLOCK-----" + EndOfLine.Windows)
+		  bs.Write(EndOfLine.Windows)
+		  bs.Write(EncodeBase64(Me.PublicKey) + EndOfLine.Windows)
+		  bs.Write("-----END CURVE25519 PUBLIC KEY BLOCK-----" + EndOfLine.Windows)
+		  
+		  bs.Write("-----BEGIN CURVE25519 PRIVATE KEY BLOCK-----" + EndOfLine.Windows)
+		  bs.Write(EndOfLine.Windows)
+		  bs.Write(EncodeBase64(Me.PrivateKey) + EndOfLine.Windows)
+		  bs.Write("-----END CURVE25519 PRIVATE KEY BLOCK-----" + EndOfLine.Windows)
+		  
+		  bs.Close
+		  Return data
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1000
 		 Shared Function Generate(Optional SeedData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  ' This method randomly generates an EncryptionKey pair, optionally using the specified seed.
@@ -88,6 +108,39 @@ Inherits libsodium.PKI.KeyPair
 		    If crypto_box_seed_keypair(pub, priv, SeedData) = -1 Then Return Nil
 		  End If
 		  Return New EncryptionKey(priv, pub)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As MemoryBlock) As libsodium.PKI.EncryptionKey
+		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
+		  If lines(0) <> "-----BEGIN CURVE25519 PUBLIC KEY BLOCK-----" Then Return Nil
+		  Dim pk As New MemoryBlock(0)
+		  Dim bs As New BinaryStream(pk)
+		  Dim i As Integer
+		  For i = 1 To UBound(lines)
+		    If lines(i) <> "-----END CURVE25519 PUBLIC KEY BLOCK-----" Then
+		      bs.Write(lines(i) + EndOfLine.Windows)
+		    Else
+		      Exit For
+		    End If
+		  Next
+		  bs.Close
+		  i = i + 1
+		  If lines(i) <> "-----BEGIN CURVE25519 PRIVATE KEY BLOCK-----" Then Return Nil
+		  i = i + 1
+		  Dim sk As New MemoryBlock(0)
+		  bs = New BinaryStream(sk)
+		  For i = i To UBound(lines)
+		    If lines(i) <> "-----END CURVE25519 PRIVATE KEY BLOCK-----" Then
+		      bs.Write(lines(i) + EndOfLine.Windows)
+		    Else
+		      Exit For
+		    End If
+		  Next
+		  bs.Close
+		  
+		  Return Derive(DecodeBase64(sk))
 		End Function
 	#tag EndMethod
 
