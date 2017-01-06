@@ -138,6 +138,30 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Function ExtractKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String) As MemoryBlock
+		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
+		  Dim i As Integer
+		  Do Until Ubound(lines) <= i Or lines(i) = Prefix
+		    i = i + 1
+		  Loop
+		  If i = UBound(lines) Then Return Nil
+		  
+		  Dim key As New MemoryBlock(0)
+		  Dim bs As New BinaryStream(key)
+		  
+		  For i = i + 1 To UBound(lines)
+		    If lines(i) <> Suffix Then
+		      bs.Write(lines(i) + EndOfLine.Windows)
+		    Else
+		      Exit For
+		    End If
+		  Next
+		  bs.Close
+		  Return DecodeBase64(Trim(key))
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil, HashSize As UInt32 = libsodium.crypto_generichash_BYTES_MAX) As String
 		  ' Generates a 512-bit BLAKE2b digest of the InputData, optionally using the specified key.
@@ -165,6 +189,21 @@ Protected Module libsodium
 		    If sodium_init() = -1 Then available = False Else available = True
 		  End If
 		  Return available
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function PackKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String) As MemoryBlock
+		  Dim data As New MemoryBlock(0)
+		  Dim bs As New BinaryStream(data)
+		  
+		  bs.Write(Prefix + EndOfLine.Windows)
+		  bs.Write(EndOfLine.Windows)
+		  bs.Write(EncodeBase64(ExportedKey) + EndOfLine.Windows)
+		  bs.Write(Suffix + EndOfLine.Windows)
+		  
+		  bs.Close
+		  Return data
 		End Function
 	#tag EndMethod
 
