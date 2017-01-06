@@ -19,11 +19,47 @@ Implements libsodium.Secureable
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function Export() As MemoryBlock
+		  Dim data As New MemoryBlock(0)
+		  Dim bs As New BinaryStream(data)
+		  
+		  bs.Write("-----BEGIN XSALSA20 KEY BLOCK-----" + EndOfLine.Windows)
+		  bs.Write(EndOfLine.Windows)
+		  bs.Write(EncodeBase64(Me.Value) + EndOfLine.Windows)
+		  bs.Write("-----END XSALSA20 KEY BLOCK-----" + EndOfLine.Windows)
+		  
+		  bs.Close
+		  Return data
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1000
 		 Shared Function Generate() As libsodium.SKI.SecretKey
 		  ' Returns random bytes that are suitable to be used as a secret key.
 		  
 		  Return New libsodium.SKI.SecretKey(RandomBytes(crypto_secretbox_KEYBYTES))
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As MemoryBlock) As libsodium.SKI.SecretKey
+		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
+		  If lines(0) <> "-----BEGIN XSALSA20 KEY BLOCK-----" Then Return Nil
+		  Dim sk As New MemoryBlock(0)
+		  Dim bs As New BinaryStream(sk)
+		  Dim i As Integer
+		  For i = 1 To UBound(lines)
+		    If lines(i) <> "-----END XSALSA20 KEY BLOCK-----" Then
+		      bs.Write(lines(i) + EndOfLine.Windows)
+		    Else
+		      Exit For
+		    End If
+		  Next
+		  bs.Close
+		  
+		  sk = DecodeBase64(sk)
+		  Return New SecretKey(sk)
 		End Function
 	#tag EndMethod
 

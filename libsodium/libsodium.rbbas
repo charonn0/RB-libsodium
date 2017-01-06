@@ -1,27 +1,5 @@
 #tag Module
 Protected Module libsodium
-	#tag Method, Flags = &h0
-		Sub AllowSwap(Extends m As MemoryBlock, Size As Int32 = - 1, Assigns Allow As Boolean)
-		  ' Locks at least Size bytes of memory starting at m. This can help avoid swapping sensitive data to disk.
-		  ' This method wraps mlock() and VirtualLock(). Note: Many systems place limits on the amount of memory
-		  ' that may be locked by a process. Care should be taken to raise those limits (e.g. Unix ulimits) where
-		  ' neccessary. This method will raise an exception when any limit is reached.
-		  ' On systems where it is supported, locking  advises the kernel not to include the locked memory in core
-		  ' dumps. Unlocking also undoes this additional protection.
-		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
-		  If Size = -1 Then Size = m.Size
-		  If Size = -1 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
-		  If Allow Then
-		    If sodium_munlock(m, Size) <> 0 Then Raise New SodiumException(ERR_LOCK_DENIED)
-		  Else
-		    If sodium_mlock(m, Size) <> 0 Then Raise New SodiumException(ERR_LOCK_DENIED)
-		  End If
-		  
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h1
 		Protected Function Argon2(InputData As MemoryBlock) As String
 		  ' Generates an Argon2 digest of the InputData
@@ -41,7 +19,7 @@ Protected Module libsodium
 		  Case Upperbound > 0 And (Data.Size > Upperbound Or Data.Size < Expected)
 		    err = New SodiumException(ERR_OUT_OF_RANGE)
 		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
-		  Case Data.Size <> Expected
+		  Case Data.Size <> Expected And Upperbound = 0
 		    err = New SodiumException(ERR_SIZE_MISMATCH)
 		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
 		  End Select
@@ -187,16 +165,6 @@ Protected Module libsodium
 		    If sodium_init() = -1 Then available = False Else available = True
 		  End If
 		  Return available
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function IsZero(Extends m As MemoryBlock, Size As Int32 = - 1) As Boolean
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
-		  If Size = -1 Then Size = m.Size
-		  If Size = -1 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
-		  Return sodium_is_zero(m, Size) = 1
 		End Function
 	#tag EndMethod
 
@@ -372,19 +340,6 @@ Protected Module libsodium
 		  Dim mb2 As MemoryBlock = String2
 		  Return sodium_memcmp(mb1, mb2, Max(mb1.Size, mb2.Size)) = 0
 		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Sub ZeroFill(Extends m As MemoryBlock, Size As Int32 = -1)
-		  ' Zero-fill the MemoryBlock
-		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
-		  If m <> Nil Then
-		    If Size = -1 Then Size = m.Size
-		    sodium_memzero(m, Size)
-		  End If
-		End Sub
 	#tag EndMethod
 
 

@@ -55,6 +55,16 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub Constructor(RealMB As Ptr, RealSize As UInt64)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If RealMB = Nil Then Raise New NilObjectException
+		  mPtr = RealMB
+		  mFreeable = False
+		  mSize = RealSize
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Constructor(Size As UInt64)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mPtr = sodium_malloc(Size)
