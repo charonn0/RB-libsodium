@@ -139,6 +139,16 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		 Shared Function RandomSeed() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a seed for SigningKey.Generate
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
+		  Return RandomBytes(crypto_sign_SEEDBYTES)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Seed() As MemoryBlock
 		  ' This method extracts the seed from the private key. This is either a random seed 
 		  ' or the one passed to SigningKey.Generate.
