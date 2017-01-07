@@ -59,7 +59,7 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Export(Optional Password As libsodium.Password) As MemoryBlock
+		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
 		  ' Exports the SigningKey in a format that is understood by SigningKey.Import
 		  '
 		  ' See:
@@ -68,8 +68,8 @@ Inherits libsodium.PKI.KeyPair
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
 		  
-		  bs.Write(PackKey(Me.PublicKey, PublicPrefix, PublicSuffix))
-		  bs.Write(PackKey(Me.PrivateKey, PrivatePrefix, PrivateSuffix))
+		  bs.Write(PackKey(Me.PublicKey, PublicPrefix, PublicSuffix, Nil))
+		  bs.Write(PackKey(Me.PrivateKey, PrivatePrefix, PrivateSuffix, Passwd))
 		  
 		  bs.Close
 		  Return data
