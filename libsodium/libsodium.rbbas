@@ -108,7 +108,9 @@ Protected Module libsodium
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
 		  ' decodes ASCII hexadecimal to Binary. On error, returns Nil. IgnoredChars
 		  ' is an optional string of characters to skip when interpreting the HexData
-		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.DecodeHex
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(HexData.Size * 2 + 1)
@@ -124,7 +126,9 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function EncodeHex(BinaryData As MemoryBlock, ToUppercase As Boolean = True) As MemoryBlock
 		  ' Encodes the BinaryData as ASCII hexadecimal
-		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.EncodeHex
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
@@ -139,7 +143,7 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function ExtractKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String) As MemoryBlock
+		Private Function ExtractKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password) As MemoryBlock
 		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
 		  Dim i As Integer
 		  Do Until Ubound(lines) <= i Or lines(i) = Prefix
@@ -148,17 +152,43 @@ Protected Module libsodium
 		  If i = UBound(lines) Then Return Nil
 		  
 		  Dim key As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(key)
-		  
+		  Dim output As New BinaryStream(key)
+		  Dim PasswdSalt, Nonce As MemoryBlock
+		  Dim Limits As libsodium.ResourceLimits
 		  For i = i + 1 To UBound(lines)
-		    If lines(i) <> Suffix Then
-		      bs.Write(lines(i) + EndOfLine.Windows)
-		    Else
+		    Dim s As String = lines(i)
+		    Select Case True
+		    Case Left(s, 6) = "#Salt="
+		      PasswdSalt = DecodeBase64(Right(s, s.Len - 6))
+		    Case Left(s, 7) = "#Nonce="
+		      Nonce = DecodeBase64(Right(s, s.Len - 7))
+		    Case Left(s, 8) = "#Limits="
+		      Select Case Right(s, s.Len - 8)
+		      Case "Interactive"
+		        Limits = ResourceLimits.Interactive
+		      Case "Moderate"
+		        Limits = ResourceLimits.Moderate
+		      Case "Sensitive"
+		        Limits = ResourceLimits.Sensitive
+		      Else
+		        Raise New UnsupportedFormatException
+		      End Select
+		    Case Left(s, 1) = "#", s.Trim = "" ' comment/blank line
+		      Continue
+		    Case s = Suffix
 		      Exit For
-		    End If
+		    Else
+		      output.Write(s + EndOfLine.Windows)
+		    End Select
 		  Next
-		  bs.Close
-		  Return DecodeBase64(Trim(key))
+		  output.Close
+		  key = DecodeBase64(key)
+		  If Passwd <> Nil Then
+		    Dim sk As New libsodium.SKI.SecretKey(Passwd, PasswdSalt, Limits)
+		    key = libsodium.SKI.DecryptData(key, sk, Nonce)
+		  End If
+		  
+		  Return Trim(key)
 		End Function
 	#tag EndMethod
 
@@ -181,6 +211,9 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function IsAvailable() As Boolean
 		  ' Returns True if libsodium is available.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.IsAvailable
 		  
 		  Static available As Boolean
 		  
@@ -193,16 +226,33 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function PackKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String) As MemoryBlock
+		Private Function PackKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password, Salt As MemoryBlock = Nil, Nonce As MemoryBlock = Nil, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As MemoryBlock
 		  Dim data As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(data)
+		  Dim output As New BinaryStream(data)
+		  output.Write(Prefix + EndOfLine.Windows)
 		  
-		  bs.Write(Prefix + EndOfLine.Windows)
-		  bs.Write(EndOfLine.Windows)
-		  bs.Write(EncodeBase64(ExportedKey) + EndOfLine.Windows)
-		  bs.Write(Suffix + EndOfLine.Windows)
+		  If Passwd <> Nil Then
+		    If Salt = Nil Then Salt = Passwd.RandomSalt
+		    Dim key As libsodium.SKI.SecretKey
+		    If Nonce = Nil Then Nonce = key.RandomNonce
+		    key = New libsodium.SKI.SecretKey(Passwd, Salt, Limits)
+		    ExportedKey = libsodium.SKI.EncryptData(ExportedKey, key, Nonce)
+		    output.Write("#Salt=" + EncodeBase64(Salt) + EndOfLine.Windows)
+		    output.Write("#Nonce=" + EncodeBase64(Nonce) + EndOfLine.Windows)
+		    Select Case Limits
+		    Case ResourceLimits.Interactive
+		      output.Write("#Limits=Interactive" + EndOfLine.Windows)
+		    Case ResourceLimits.Moderate
+		      output.Write("#Limits=Moderate" + EndOfLine.Windows)
+		    Case ResourceLimits.Sensitive
+		      output.Write("#Limits=Sensitive" + EndOfLine.Windows)
+		    End Select
+		  End If
+		  output.Write(EndOfLine.Windows)
+		  output.Write(EncodeBase64(ExportedKey) + EndOfLine.Windows)
+		  output.Write(Suffix + EndOfLine.Windows)
 		  
-		  bs.Close
+		  output.Close
 		  Return data
 		End Function
 	#tag EndMethod
@@ -215,7 +265,9 @@ Protected Module libsodium
 		  '   On BSD, the arc4random() function is used
 		  '   On recent Linux kernels, the getrandom system call is used (since Sodium 1.0.3)
 		  '   On other Unices, the /dev/urandom device is used
-		  '   https://download.libsodium.org/doc/generating_random_data/
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.RandomBytes
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim mb As New MemoryBlock(Count)
@@ -288,7 +340,9 @@ Protected Module libsodium
 		  ' Generates a 64-bit hawsh of the InputData using the specified key. This method
 		  ' outputs short but unpredictable (without knowing the secret key) values suitable 
 		  ' for picking a list in a hash table for a given key.
-		  ' https://download.libsodium.org/doc/hashing/short-input_hashing.html
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.ShortHash
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(Key, crypto_shorthash_KEYBYTES)

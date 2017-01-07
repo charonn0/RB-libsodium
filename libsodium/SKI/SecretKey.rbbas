@@ -20,13 +20,13 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Export() As MemoryBlock
+		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
 		  ' Exports the SecretKey in a format that is understood by SecretKey.Import
 		  '
 		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Export
 		  
-		  Return PackKey(Me.Value, ExportPrefix, ExportSuffix)
+		  Return PackKey(Me.Value, ExportPrefix, ExportSuffix, Passwd)
 		End Function
 	#tag EndMethod
 
@@ -39,13 +39,13 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Import(ExportedKey As MemoryBlock) As libsodium.SKI.SecretKey
+		 Shared Function Import(ExportedKey As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.SKI.SecretKey
 		  ' Import an SecretKey that was exported using SecretKey.Export
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
 		  
-		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportPrefix, ExportSuffix)
+		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportPrefix, ExportSuffix, Passwd)
 		  If sk <> Nil Then Return New SecretKey(sk)
 		End Function
 	#tag EndMethod
