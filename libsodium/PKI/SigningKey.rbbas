@@ -3,12 +3,15 @@ Protected Class SigningKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
-		  ' this method sometimes fails inexplicably...
-		  ' Compute a SigningKey from a hash of the password
+		  ' Generates a key pair by deriving it from a password.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Constructor
+		  
 		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = libsodium.SKI.SecretKey.RandomSalt
 		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_sign_SECRETKEYBYTES, Salt, Limits, HashAlgorithm)
 		  Dim pubkey As MemoryBlock = DerivePublicKey(seckey)
-		  // Calling the overridden superclass constructor.
+		  
 		  Me.Constructor(seckey, pubkey)
 		End Sub
 	#tag EndMethod
@@ -36,7 +39,10 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.SigningKey
-		  ' This method extracts the public key from the PrivateKeyData, and returns a SigningKey containing both.
+		  ' Given a user's private key, this method generates a SigningKey pair
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Derive
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
@@ -63,6 +69,11 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		Function Export() As MemoryBlock
+		  ' Exports the SigningKey in a format that is understood by SigningKey.Import
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Export
+		  
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
 		  
@@ -76,6 +87,11 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1000
 		 Shared Function Generate(Optional SeedData As MemoryBlock) As libsodium.PKI.SigningKey
+		  ' This method randomly generates a SigningKey pair, optionally using the specified seed.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Generate
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
 		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
@@ -92,6 +108,11 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		 Shared Function Import(ExportedKey As MemoryBlock) As libsodium.PKI.SigningKey
+		  ' Import a SigningKey that was exported using SigningKey.Export
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Import
+		  
 		  'Dim pk As MemoryBlock = ExtractKey(ExportedKey, PublicPrefix, PublicSuffix)
 		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, PrivatePrefix, PrivateSuffix)
 		  If sk <> Nil Then Return Derive(sk)
@@ -100,6 +121,13 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherKey As libsodium.PKI.SigningKey) As Integer
+		  ' This method overloads the comparison operator (=) allowing direct comparisons between
+		  ' instances of SigningKey. The comparison operation itself is a constant-time binary
+		  ' comparison of the private key halves of both key pairs; the public halves are not compared.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Operator_Compare
+		  
 		  If OtherKey Is Nil Then Return 1
 		  If libsodium.StrComp(Me.PrivateKey, OtherKey.PrivateKey) Then Return 0
 		  Return -1
@@ -109,6 +137,9 @@ Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h0
 		 Shared Function RandomSeed() As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a seed for SigningKey.Generate
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.RandomSeed
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
@@ -118,8 +149,11 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		Function Seed() As MemoryBlock
-		  ' This method extracts the seed from the private key. This is either a random seed 
+		  ' This method extracts the seed from the private key. This is either a random seed
 		  ' or the one passed to SigningKey.Generate.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Seed
 		  
 		  Dim seed As New MemoryBlock(crypto_sign_SEEDBYTES)
 		  If crypto_sign_ed25519_sk_to_seed(seed, Me.PrivateKey) = 0 Then Return seed
@@ -149,7 +183,6 @@ Inherits libsodium.PKI.KeyPair
 		     Dim pw As libsodium.Password = "seekrit"
 		     Dim salt As MemoryBlock = libsodium.SKI.SecretKey.RandomSalt()
 		     Dim sigk As New libsodium.PKI.SigningKey(pw, salt)
-		
 	#tag EndNote
 
 

@@ -2,6 +2,11 @@
 Protected Class GenericHashDigest
 	#tag Method, Flags = &h0
 		Sub Constructor(Type As libsodium.HashType = libsodium.HashType.Generic, KeyData As MemoryBlock = Nil)
+		  ' Instantiates the processor for hashing. If KeyData is specified then the hash is keyed.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Constructor
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
 		  Select Case Type
@@ -21,7 +26,14 @@ Protected Class GenericHashDigest
 
 	#tag Method, Flags = &h0
 		Sub Constructor(KeyData As MemoryBlock, HashSize As UInt32)
+		  ' Instantiates the processor for generic hashing. If KeyData is specified then
+		  ' the hash is keyed.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Constructor
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
 		  If HashSize > crypto_generichash_BYTES_MAX Or HashSize < crypto_generichash_BYTES_MIN Then Raise New SodiumException(ERR_OUT_OF_RANGE)
 		  CheckSize(KeyData, crypto_generichash_KEYBYTES)
 		  mType = HashType.Generic
@@ -40,6 +52,11 @@ Protected Class GenericHashDigest
 
 	#tag Method, Flags = &h0
 		Sub Process(NewData As MemoryBlock)
+		  ' Processes the NewData into a running hash.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Process
+		  
 		  If mOutput <> Nil Then Raise New SodiumException(ERR_INVALID_STATE)
 		  Select Case mType
 		  Case HashType.Generic
@@ -56,12 +73,24 @@ Protected Class GenericHashDigest
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomKey() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a key for GenericHashDigest.Constructor
+		  '
+		  ' See: 
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.RandomKey
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
 		  Return RandomBytes(crypto_generichash_KEYBYTES)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub Reset()
+		  ' Resets the processor state so that a new hash value can be computed.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Reset
+		  
 		  Select Case mType
 		  Case HashType.Generic
 		    Dim sz As UInt64 = crypto_generichash_statebytes()
@@ -83,6 +112,13 @@ Protected Class GenericHashDigest
 
 	#tag Method, Flags = &h0
 		Function Value() As String
+		  ' Finalizes the digest operation and returns the hash value.
+		  ' Once you call this method the processor can accept no more input until 
+		  ' the processor is Reset().
+		  '
+		  ' See: 
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Value
+		  
 		  If mOutput <> Nil Then Return mOutput
 		  mOutput = New MemoryBlock(mHashSize)
 		  Select Case mType

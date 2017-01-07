@@ -3,9 +3,12 @@ Protected Class SharedSecret
 Implements libsodium.Secureable
 	#tag Method, Flags = &h1000
 		Sub Constructor(RecipientPublicKey As MemoryBlock, SenderPrivateKey As libsodium.PKI.EncryptionKey)
-		  ' Calculates the shared secret from the RecipientPublicKey and SenderPrivateKey. 
-		  ' This allows the key derivation calculation to be performed once rather than on 
-		  ' Encrypt/Decrypt
+		  ' Derives the shared secret key from the public half of the recipient's key pair 
+		  ' and the private half of the sender's key pair. This allows the key derivation 
+		  ' calculation to be performed once rather than on each Encrypt/Decrypt operation.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Constructor
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(RecipientPublicKey, crypto_box_PUBLICKEYBYTES)
@@ -29,6 +32,9 @@ Implements libsodium.Secureable
 		  '  GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
 		  '
 		  ' Or just call the Constructor
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.DeriveSharedSecret
 		  
 		  CheckSize(RecipientPublicKey, crypto_scalarmult_BYTES)
 		  
@@ -57,6 +63,11 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h0
 		Function Value() As MemoryBlock
+		  ' Returns an unprotected copy of the shared key.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Value
+		  
 		  Return mKeyData.Value
 		End Function
 	#tag EndMethod

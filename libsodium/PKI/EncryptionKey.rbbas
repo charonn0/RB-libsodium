@@ -3,7 +3,11 @@ Protected Class EncryptionKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive)
-		  ' Compute an EncryptionKey from a hash of the password
+		  ' Generates a key pair by deriving it from a password.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
+		  
 		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = PasswordData.RandomSalt
 		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, libsodium.Password.ALG_ARGON2)
 		  Dim pubkey As MemoryBlock = DerivePublicKey(seckey)
@@ -13,9 +17,11 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1000
 		Sub Constructor(FromSigningKey As libsodium.PKI.SigningKey)
-		  ' Converts the FromSigningKey(Ed25519) into an EncryptionKey(Curve25519), 
-		  ' so that the same key pair can be used both for authenticated encryption and
-		  ' for signatures.
+		  ' Converts the FromSigningKey(Ed25519) into an EncryptionKey(Curve25519), so that the same 
+		  ' key pair can be used both for authenticated encryption and for signatures.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
 		  
 		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
 		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
@@ -53,6 +59,9 @@ Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  ' Given a user's private key, this method generates an EncryptionKey pair
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Derive
 		  
 		  Return New EncryptionKey(PrivateKeyData, DerivePublicKey(PrivateKeyData))
 		  
@@ -75,6 +84,11 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		Function Export() As MemoryBlock
+		  ' Exports the EncryptionKey in a format that is understood by EncryptionKey.Import
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Export
+		  
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
 		  
@@ -89,6 +103,9 @@ Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		 Shared Function Generate(Optional SeedData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  ' This method randomly generates an EncryptionKey pair, optionally using the specified seed.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Generate
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
@@ -106,6 +123,11 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		 Shared Function Import(ExportedKey As MemoryBlock) As libsodium.PKI.EncryptionKey
+		  ' Import an EncryptionKey that was exported using EncryptionKey.Export
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Import
+		  
 		  'Dim pk As MemoryBlock = ExtractKey(ExportedKey, PublicPrefix, PublicSuffix)
 		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, PrivatePrefix, PrivateSuffix)
 		  If sk <> Nil Then Return Derive(sk)
@@ -115,6 +137,13 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherKey As libsodium.PKI.EncryptionKey) As Integer
+		  ' This method overloads the comparison operator (=) allowing direct comparisons between 
+		  ' instances of EncryptionKey. The comparison operation itself is a constant-time binary 
+		  ' comparison of the private key halves of both key pairs; the public halves are not compared.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Operator_Compare
+		  
 		  If OtherKey Is Nil Then Return 1
 		  If libsodium.StrComp(Me.PrivateKey, OtherKey.PrivateKey) Then Return 0
 		  Return -1
@@ -124,6 +153,9 @@ Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h0
 		 Shared Function RandomNonce() As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a Nonce for use with an EncryptionKey
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomNonce
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
@@ -135,6 +167,9 @@ Inherits libsodium.PKI.KeyPair
 		 Shared Function RandomPrivateKey() As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a private key for encryption. To generate the
 		  ' corresponding public key use the EncryptionKey.Derive method.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomPrivateKey
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
@@ -145,6 +180,9 @@ Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h0
 		 Shared Function RandomSeed() As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a seed for EncryptionKey.Generate
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomSeed
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
