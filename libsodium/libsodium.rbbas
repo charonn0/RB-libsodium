@@ -259,7 +259,9 @@ Protected Module libsodium
 		  '   On BSD, the arc4random() function is used
 		  '   On recent Linux kernels, the getrandom system call is used (since Sodium 1.0.3)
 		  '   On other Unices, the /dev/urandom device is used
-		  '   https://download.libsodium.org/doc/generating_random_data/
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.RandomBytes
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim mb As New MemoryBlock(Count)
