@@ -184,8 +184,6 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomSeed
 		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
 		  Return RandomBytes(crypto_box_SEEDBYTES)
 		End Function
 	#tag EndMethod
