@@ -103,7 +103,7 @@ Protected Module Testing
 		Private Sub TestPKIEncrypt(SenderKey As libsodium.PKI.EncryptionKey = Nil, Nonce As MemoryBlock = Nil)
 		  If SenderKey = Nil Then SenderKey = libsodium.PKI.EncryptionKey.Generate()
 		  Dim recipkey As libsodium.PKI.EncryptionKey
-		  recipkey = recipkey.Derive(recipkey.RandomPrivateKey)
+		  recipkey = recipkey.Generate(recipkey.RandomSeed)
 		  If nonce = Nil Then nonce = recipkey.RandomNonce
 		  
 		  Dim msg1 As String = "This is a test message."
