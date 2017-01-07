@@ -18,10 +18,18 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock)
+		  ' Computes the public key from the private key
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(PrivateKeyData, crypto_sign_SECRETKEYBYTES)
+		  
 		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
-		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Raise New SodiumException(ERR_COMPUTATION_FAILED)
-		  Me.Constructor(PrivateKeyData, pub)
+		  If crypto_sign_ed25519_sk_to_pk(pub, PrivateKeyData) = 0 Then
+		    Me.Constructor(PrivateKeyData, pub)
+		  Else
+		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		  End If
+		  
+		  
 		End Sub
 	#tag EndMethod
 
