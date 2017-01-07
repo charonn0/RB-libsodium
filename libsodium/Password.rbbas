@@ -126,7 +126,7 @@ Implements libsodium.Secureable
 		 Shared Function RandomSalt() As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a salt for use with an DeriveKey
 		  
-		  Return libsodium.SKI.SecretKey.RandomSalt()
+		  Return RandomBytes(crypto_pwhash_SALTBYTES)
 		End Function
 	#tag EndMethod
 
