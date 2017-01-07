@@ -226,21 +226,27 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function PackKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password) As MemoryBlock
+		Private Function PackKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password, Salt As MemoryBlock = Nil, Nonce As MemoryBlock = Nil, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As MemoryBlock
 		  Dim data As New MemoryBlock(0)
 		  Dim output As New BinaryStream(data)
 		  output.Write(Prefix + EndOfLine.Windows)
 		  
 		  If Passwd <> Nil Then
-		    Dim PasswdSalt, Nonce As MemoryBlock
-		    PasswdSalt = Passwd.RandomSalt
+		    If Salt = Nil Then Salt = Passwd.RandomSalt
 		    Dim key As libsodium.SKI.SecretKey
-		    Nonce = key.RandomNonce
-		    key = New libsodium.SKI.SecretKey(Passwd, PasswdSalt, ResourceLimits.Interactive)
+		    If Nonce = Nil Then Nonce = key.RandomNonce
+		    key = New libsodium.SKI.SecretKey(Passwd, Salt, Limits)
 		    ExportedKey = libsodium.SKI.EncryptData(ExportedKey, key, Nonce)
-		    output.Write("#Salt=" + EncodeBase64(PasswdSalt) + EndOfLine.Windows)
+		    output.Write("#Salt=" + EncodeBase64(Salt) + EndOfLine.Windows)
 		    output.Write("#Nonce=" + EncodeBase64(Nonce) + EndOfLine.Windows)
-		    output.Write("#Limits=Interactive" + EndOfLine.Windows)
+		    Select Case Limits
+		    Case ResourceLimits.Interactive
+		      output.Write("#Limits=Interactive" + EndOfLine.Windows)
+		    Case ResourceLimits.Moderate
+		      output.Write("#Limits=Moderate" + EndOfLine.Windows)
+		    Case ResourceLimits.Sensitive
+		      output.Write("#Limits=Sensitive" + EndOfLine.Windows)
+		    End Select
 		  End If
 		  output.Write(EndOfLine.Windows)
 		  output.Write(EncodeBase64(ExportedKey) + EndOfLine.Windows)
