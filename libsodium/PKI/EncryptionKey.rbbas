@@ -10,8 +10,7 @@ Inherits libsodium.PKI.KeyPair
 		  
 		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = PasswordData.RandomSalt
 		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, libsodium.Password.ALG_ARGON2)
-		  Dim pubkey As MemoryBlock = DerivePublicKey(seckey)
-		  Me.Constructor(seckey, pubkey)
+		  Me.Constructor(seckey)
 		End Sub
 	#tag EndMethod
 
