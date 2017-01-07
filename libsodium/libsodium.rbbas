@@ -148,7 +148,7 @@ Protected Module libsodium
 		  If i = UBound(lines) Then Return Nil
 		  
 		  Dim key As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(key)
+		  Dim output As New BinaryStream(key)
 		  Dim PasswdSalt, Nonce As MemoryBlock
 		  Dim Limits As libsodium.ResourceLimits
 		  For i = i + 1 To UBound(lines)
@@ -169,21 +169,22 @@ Protected Module libsodium
 		      Else
 		        Raise New UnsupportedFormatException
 		      End Select
-		    Case Left(s, 1) = "#" ' comment
+		    Case Left(s, 1) = "#", s.Trim = "" ' comment/blank line
 		      Continue
 		    Case s = Suffix
 		      Exit For
 		    Else
-		      bs.Write(s + EndOfLine.Windows)
+		      output.Write(s + EndOfLine.Windows)
 		    End Select
 		  Next
-		  bs.Close
+		  output.Close
+		  key = DecodeBase64(key)
 		  If Passwd <> Nil Then
 		    Dim sk As New libsodium.SKI.SecretKey(Passwd, PasswdSalt, Limits)
 		    key = libsodium.SKI.DecryptData(key, sk, Nonce)
 		  End If
 		  
-		  Return DecodeBase64(Trim(key))
+		  Return Trim(key)
 		End Function
 	#tag EndMethod
 
@@ -218,16 +219,27 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function PackKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String) As MemoryBlock
+		Private Function PackKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password) As MemoryBlock
 		  Dim data As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(data)
+		  Dim output As New BinaryStream(data)
+		  output.Write(Prefix + EndOfLine.Windows)
 		  
-		  bs.Write(Prefix + EndOfLine.Windows)
-		  bs.Write(EndOfLine.Windows)
-		  bs.Write(EncodeBase64(ExportedKey) + EndOfLine.Windows)
-		  bs.Write(Suffix + EndOfLine.Windows)
+		  If Passwd <> Nil Then
+		    Dim PasswdSalt, Nonce As MemoryBlock
+		    PasswdSalt = Passwd.RandomSalt
+		    Dim key As libsodium.SKI.SecretKey
+		    Nonce = key.RandomNonce
+		    key = New libsodium.SKI.SecretKey(Passwd, PasswdSalt, ResourceLimits.Interactive)
+		    ExportedKey = libsodium.SKI.EncryptData(ExportedKey, key, Nonce)
+		    output.Write("#Salt=" + EncodeBase64(PasswdSalt) + EndOfLine.Windows)
+		    output.Write("#Nonce=" + EncodeBase64(Nonce) + EndOfLine.Windows)
+		    output.Write("#Limits=Interactive" + EndOfLine.Windows)
+		  End If
+		  output.Write(EndOfLine.Windows)
+		  output.Write(EncodeBase64(ExportedKey) + EndOfLine.Windows)
+		  output.Write(Suffix + EndOfLine.Windows)
 		  
-		  bs.Close
+		  output.Close
 		  Return data
 		End Function
 	#tag EndMethod
