@@ -139,7 +139,7 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function ExtractKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String) As MemoryBlock
+		Private Function ExtractKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password) As MemoryBlock
 		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
 		  Dim i As Integer
 		  Do Until Ubound(lines) <= i Or lines(i) = Prefix
@@ -149,15 +149,40 @@ Protected Module libsodium
 		  
 		  Dim key As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(key)
-		  
+		  Dim PasswdSalt, Nonce As MemoryBlock
+		  Dim Limits As libsodium.ResourceLimits
 		  For i = i + 1 To UBound(lines)
-		    If lines(i) <> Suffix Then
-		      bs.Write(lines(i) + EndOfLine.Windows)
-		    Else
+		    Dim s As String = lines(i)
+		    Select Case True
+		    Case Left(s, 6) = "#Salt="
+		      PasswdSalt = DecodeBase64(Right(s, s.Len - 6))
+		    Case Left(s, 7) = "#Nonce="
+		      Nonce = DecodeBase64(Right(s, s.Len - 7))
+		    Case Left(s, 8) = "#Limits="
+		      Select Case Right(s, s.Len - 8)
+		      Case "Interactive"
+		        Limits = ResourceLimits.Interactive
+		      Case "Moderate"
+		        Limits = ResourceLimits.Moderate
+		      Case "Sensitive"
+		        Limits = ResourceLimits.Sensitive
+		      Else
+		        Raise New UnsupportedFormatException
+		      End Select
+		    Case Left(s, 1) = "#" ' comment
+		      Continue
+		    Case s = Suffix
 		      Exit For
-		    End If
+		    Else
+		      bs.Write(s + EndOfLine.Windows)
+		    End Select
 		  Next
 		  bs.Close
+		  If Passwd <> Nil Then
+		    Dim sk As New libsodium.SKI.SecretKey(Passwd, PasswdSalt, Limits)
+		    key = libsodium.SKI.DecryptData(key, sk, Nonce)
+		  End If
+		  
 		  Return DecodeBase64(Trim(key))
 		End Function
 	#tag EndMethod

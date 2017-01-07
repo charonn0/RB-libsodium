@@ -59,7 +59,7 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Export() As MemoryBlock
+		Function Export(Optional Password As libsodium.Password) As MemoryBlock
 		  ' Exports the SigningKey in a format that is understood by SigningKey.Import
 		  '
 		  ' See:
@@ -98,14 +98,14 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Import(ExportedKey As MemoryBlock) As libsodium.PKI.SigningKey
+		 Shared Function Import(ExportedKey As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.PKI.SigningKey
 		  ' Import a SigningKey that was exported using SigningKey.Export
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Import
 		  
 		  'Dim pk As MemoryBlock = ExtractKey(ExportedKey, PublicPrefix, PublicSuffix)
-		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, PrivatePrefix, PrivateSuffix)
+		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, PrivatePrefix, PrivateSuffix, Passwd)
 		  If sk <> Nil Then Return Derive(sk)
 		End Function
 	#tag EndMethod

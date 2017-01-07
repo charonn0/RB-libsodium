@@ -124,14 +124,14 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Import(ExportedKey As MemoryBlock) As libsodium.PKI.EncryptionKey
+		 Shared Function Import(ExportedKey As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.PKI.EncryptionKey
 		  ' Import an EncryptionKey that was exported using EncryptionKey.Export
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Import
 		  
 		  'Dim pk As MemoryBlock = ExtractKey(ExportedKey, PublicPrefix, PublicSuffix)
-		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, PrivatePrefix, PrivateSuffix)
+		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, PrivatePrefix, PrivateSuffix, Passwd)
 		  If sk <> Nil Then Return Derive(sk)
 		End Function
 	#tag EndMethod
