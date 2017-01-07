@@ -108,7 +108,9 @@ Protected Module libsodium
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
 		  ' decodes ASCII hexadecimal to Binary. On error, returns Nil. IgnoredChars
 		  ' is an optional string of characters to skip when interpreting the HexData
-		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.DecodeHex
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(HexData.Size * 2 + 1)
@@ -124,7 +126,9 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function EncodeHex(BinaryData As MemoryBlock, ToUppercase As Boolean = True) As MemoryBlock
 		  ' Encodes the BinaryData as ASCII hexadecimal
-		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.EncodeHex
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
@@ -207,6 +211,9 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function IsAvailable() As Boolean
 		  ' Returns True if libsodium is available.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.IsAvailable
 		  
 		  Static available As Boolean
 		  
@@ -325,7 +332,9 @@ Protected Module libsodium
 		  ' Generates a 64-bit hawsh of the InputData using the specified key. This method
 		  ' outputs short but unpredictable (without knowing the secret key) values suitable 
 		  ' for picking a list in a hash table for a given key.
-		  ' https://download.libsodium.org/doc/hashing/short-input_hashing.html
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.ShortHash
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(Key, crypto_shorthash_KEYBYTES)
