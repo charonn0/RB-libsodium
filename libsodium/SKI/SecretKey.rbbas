@@ -24,7 +24,7 @@ Implements libsodium.Secureable
 		  ' Exports the SecretKey in a format that is understood by SecretKey.Import
 		  '
 		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Export
 		  
 		  Return PackKey(Me.Value, ExportPrefix, ExportSuffix)
 		End Function
