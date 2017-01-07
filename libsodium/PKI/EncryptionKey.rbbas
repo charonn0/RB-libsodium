@@ -45,6 +45,23 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h1001
+		Protected Sub Constructor(PrivateKeyData As MemoryBlock)
+		  ' Given a user's private key, this method computes their public key
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
+		  CheckSize(PrivateKeyData, crypto_scalarmult_BYTES)
+		  
+		  Dim pub As New MemoryBlock(crypto_scalarmult_BYTES)
+		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then
+		    Me.Constructor(PrivateKeyData, pub)
+		  Else
+		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		  End If
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
 		  CheckSize(PrivateKeyData, crypto_box_SECRETKEYBYTES)
 		  CheckSize(PublicKeyData, crypto_box_PUBLICKEYBYTES)
@@ -63,22 +80,8 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Derive
 		  
-		  Return New EncryptionKey(PrivateKeyData, DerivePublicKey(PrivateKeyData))
+		  Return New EncryptionKey(PrivateKeyData)
 		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Shared Function DerivePublicKey(PrivateKeyData As MemoryBlock) As MemoryBlock
-		  ' Given a user's private key, this method computes their public key
-		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
-		  CheckSize(PrivateKeyData, crypto_scalarmult_BYTES)
-		  
-		  Dim pub As New MemoryBlock(crypto_scalarmult_BYTES)
-		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Return pub
-		  Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		End Function
 	#tag EndMethod
 
@@ -131,7 +134,6 @@ Inherits libsodium.PKI.KeyPair
 		  'Dim pk As MemoryBlock = ExtractKey(ExportedKey, PublicPrefix, PublicSuffix)
 		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, PrivatePrefix, PrivateSuffix)
 		  If sk <> Nil Then Return Derive(sk)
-		  Return Derive(sk)
 		End Function
 	#tag EndMethod
 
@@ -160,20 +162,6 @@ Inherits libsodium.PKI.KeyPair
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
 		  Return RandomBytes(crypto_box_NONCEBYTES)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		 Shared Function RandomPrivateKey() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a private key for encryption. To generate the
-		  ' corresponding public key use the EncryptionKey.Derive method.
-		  '
-		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomPrivateKey
-		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
-		  Return RandomBytes(crypto_box_SECRETKEYBYTES)
 		End Function
 	#tag EndMethod
 
