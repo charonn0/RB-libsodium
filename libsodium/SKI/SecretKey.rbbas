@@ -5,7 +5,7 @@ Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(FromPassword As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
 		  ' Compute a SecretKey from a hash of the password
-		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = RandomSalt
+		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = FromPassword.RandomSalt
 		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, Salt, Limits, HashAlgorithm)
 		  Super.Constructor(key)
 		  
@@ -63,14 +63,6 @@ Implements libsodium.Secureable
 		  ' Returns random bytes that are suitable to be used as a Nonce.
 		  
 		  Return RandomBytes(crypto_secretbox_NONCEBYTES)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		 Shared Function RandomSalt() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a salt.
-		  
-		  Return RandomBytes(crypto_pwhash_SALTBYTES)
 		End Function
 	#tag EndMethod
 
