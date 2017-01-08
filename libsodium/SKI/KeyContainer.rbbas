@@ -25,6 +25,14 @@ Implements libsodium.Secureable
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function Operator_Compare(OtherKey As String) As Int32
+		  ' Performs a constant-time binary comparison to the OtherKey
+		  If libsodium.StrComp(Me.Value, OtherKey) Then Return 0
+		  Return -1
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Sub Unlock()
 		  // Part of the libsodium.Secureable interface.

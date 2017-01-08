@@ -120,6 +120,13 @@ Inherits libsodium.SKI.KeyContainer
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function Operator_Compare(OtherSecret As libsodium.PKI.SharedSecret) As Int32
+		  If OtherSecret Is Nil Then Return 1
+		  Return Super.Operator_Compare(OtherSecret.Value)
+		End Function
+	#tag EndMethod
+
 
 	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 SHARED KEY BLOCK-----", Scope = Protected
 	#tag EndConstant
