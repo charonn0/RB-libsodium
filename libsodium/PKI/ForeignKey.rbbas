@@ -17,12 +17,12 @@ Protected Class ForeignKey
 	#tag Method, Flags = &h0
 		Sub Constructor(KeyData As MemoryBlock, Optional Passwd As libsodium.Password)
 		  Select Case True
-		  Case InStrB(KeyData, libsodium.PKI.SigningKey.PublicPrefix) > 0
-		    mKeyData = ExtractKey(KeyData, libsodium.PKI.SigningKey.PublicPrefix, libsodium.PKI.SigningKey.PublicSuffix, Passwd)
+		  Case InStrB(KeyData, ExportSigningPublicPrefix) > 0
+		    mKeyData = ExtractKey(KeyData, ExportSigningPublicPrefix, ExportSigningPublicSuffix, Passwd)
 		    mType = KeyType.Signature
 		    CheckSize(mKeyData, crypto_sign_PUBLICKEYBYTES)
-		  Case InStrB(KeyData, libsodium.PKI.EncryptionKey.PublicPrefix) > 0
-		    mKeyData = ExtractKey(KeyData, libsodium.PKI.EncryptionKey.PublicPrefix, libsodium.PKI.EncryptionKey.PublicSuffix, Passwd)
+		  Case InStrB(KeyData, ExportEncryptionPublicPrefix) > 0
+		    mKeyData = ExtractKey(KeyData, ExportEncryptionPublicPrefix, ExportEncryptionPublicSuffix, Passwd)
 		    mType = KeyType.Encryption
 		    CheckSize(mKeyData, crypto_box_PUBLICKEYBYTES)
 		  Case InStrB(KeyData, ExportPrefix) > 0
@@ -54,11 +54,11 @@ Protected Class ForeignKey
 		  Dim prefix, suffix As String
 		  Select Case mType
 		  Case KeyType.Signature
-		    prefix = libsodium.PKI.SigningKey.PublicPrefix
-		    suffix = libsodium.PKI.SigningKey.PublicSuffix
+		    prefix = ExportSigningPublicPrefix
+		    suffix = ExportSigningPublicSuffix
 		  Case KeyType.Encryption
-		    prefix = libsodium.PKI.EncryptionKey.PublicPrefix
-		    suffix = libsodium.PKI.EncryptionKey.PublicSuffix
+		    prefix = ExportEncryptionPublicPrefix
+		    suffix = ExportEncryptionPublicSuffix
 		  Else
 		    prefix = ExportPrefix
 		    suffix = ExportSuffix
