@@ -12,45 +12,39 @@ Protected Module Testing
 		    TestPKIEncrypt()
 		  Catch
 		    Failures.Append(1)
-		    Return False
 		  End Try
 		  
 		  Try
 		    TestPKISign()
 		  Catch
 		    Failures.Append(2)
-		    Return False
 		  End Try
 		  
 		  Try
 		    TestUtils()
 		  Catch
 		    Failures.Append(3)
-		    Return False
 		  End Try
 		  
 		  Try
 		    TestPassword()
 		  Catch
 		    Failures.Append(4)
-		    Return False
 		  End Try
 		  
 		  Try
 		    TestSecureMemory()
 		  Catch
 		    Failures.Append(5)
-		    Return False
 		  End Try
 		  
 		  Try
 		    TestHash()
 		  Catch
 		    Failures.Append(6)
-		    Return False
 		  End Try
 		  
-		  Return True
+		  Return UBound(Failures) = -1
 		End Function
 	#tag EndMethod
 
@@ -125,7 +119,7 @@ Protected Module Testing
 	#tag Method, Flags = &h21
 		Private Sub TestPKISign()
 		  Dim senderkey As libsodium.PKI.SigningKey
-		  senderkey = senderkey.Import(TestSigningKey, TestPasswordValue)
+		  senderkey = senderkey.Import(GetOpenFolderItem(""), TestPasswordValue)
 		  Dim msg As MemoryBlock = "This is a test message."
 		  Dim sig As MemoryBlock = libsodium.PKI.SignData(msg, senderkey)
 		  Assert(libsodium.PKI.VerifyData(sig, senderkey.PublicKey) <> Nil)
