@@ -4,7 +4,7 @@ Implements libsodium.Secureable
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
 		  mPrivate = New libsodium.SKI.KeyContainter(PrivateKeyData)
-		  mPublic = New libsodium.SKI.KeyContainter(PublicKeyData)
+		  mPublic = PublicKeyData
 		End Sub
 	#tag EndMethod
 
@@ -25,7 +25,7 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h0
 		Function PublicKey() As MemoryBlock
-		  Return mPublic.Value()
+		  Return mPublic
 		End Function
 	#tag EndMethod
 
@@ -44,7 +44,7 @@ Implements libsodium.Secureable
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
-		Protected mPublic As libsodium.SKI.KeyContainter
+		Protected mPublic As MemoryBlock
 	#tag EndProperty
 
 
