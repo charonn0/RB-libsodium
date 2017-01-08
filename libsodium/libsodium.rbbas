@@ -1,20 +1,5 @@
 #tag Module
 Protected Module libsodium
-	#tag Method, Flags = &h0
-		Sub AllowSwap(Extends m As MemoryBlock, Size As Int32 = -1, Assigns Allow As Boolean)
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
-		  If Size = -1 Then Size = m.Size
-		  If Size = -1 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
-		  If Allow Then
-		    If sodium_munlock(m, Size) <> 0 Then Raise New SodiumException(ERR_LOCK_DENIED)
-		  Else
-		    If sodium_mlock(m, Size) <> 0 Then Raise New SodiumException(ERR_LOCK_DENIED)
-		  End If
-		  
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h1
 		Protected Function Argon2(InputData As MemoryBlock) As String
 		  ' Generates an Argon2 digest of the InputData
@@ -31,10 +16,10 @@ Protected Module libsodium
 		  Select Case True
 		  Case Data = Nil
 		    Return
-		  Case Upperbound > 0
+		  Case Upperbound > 0 And (Data.Size > Upperbound Or Data.Size < Expected)
 		    err = New SodiumException(ERR_OUT_OF_RANGE)
 		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
-		  Case Data.Size <> Expected
+		  Case Data.Size <> Expected And Upperbound = 0
 		    err = New SodiumException(ERR_SIZE_MISMATCH)
 		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
 		  End Select
@@ -127,7 +112,9 @@ Protected Module libsodium
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
 		  ' decodes ASCII hexadecimal to Binary. On error, returns Nil. IgnoredChars
 		  ' is an optional string of characters to skip when interpreting the HexData
-		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.DecodeHex
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(HexData.Size * 2 + 1)
@@ -159,7 +146,9 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function EncodeHex(BinaryData As MemoryBlock, ToUppercase As Boolean = True) As MemoryBlock
 		  ' Encodes the BinaryData as ASCII hexadecimal
-		  ' https://download.libsodium.org/doc/helpers/#hexadecimal-encodingdecoding
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.EncodeHex
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(BinaryData.Size * 2 + 1)
@@ -173,13 +162,64 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Function ExtractKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password) As MemoryBlock
+		  ExportedKey = ReplaceLineEndings(ExportedKey, EndOfLine.Windows)
+		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
+		  Dim i As Integer
+		  Do Until Ubound(lines) <= i Or lines(i) = Prefix
+		    i = i + 1
+		  Loop
+		  If i = UBound(lines) Then Return Nil
+		  
+		  Dim key As New MemoryBlock(0)
+		  Dim output As New BinaryStream(key)
+		  Dim PasswdSalt, Nonce As MemoryBlock
+		  Dim Limits As libsodium.ResourceLimits = ResourceLimits.Interactive
+		  For i = i + 1 To UBound(lines)
+		    Dim s As String = lines(i)
+		    Select Case True
+		    Case Left(s, 6) = "#Salt="
+		      PasswdSalt = DecodeBase64(Right(s, s.Len - 6))
+		    Case Left(s, 7) = "#Nonce="
+		      Nonce = DecodeBase64(Right(s, s.Len - 7))
+		    Case Left(s, 8) = "#Limits="
+		      Select Case Right(s, s.Len - 8)
+		      Case "Interactive"
+		        Limits = ResourceLimits.Interactive
+		      Case "Moderate"
+		        Limits = ResourceLimits.Moderate
+		      Case "Sensitive"
+		        Limits = ResourceLimits.Sensitive
+		      Else
+		        Raise New UnsupportedFormatException
+		      End Select
+		    Case Left(s, 1) = "#", s.Trim = "" ' comment/blank line
+		      Continue
+		    Case s = Suffix
+		      Exit For
+		    Else
+		      output.Write(s + EndOfLine.Windows)
+		    End Select
+		  Next
+		  output.Close
+		  key = DecodeBase64(key.Trim)
+		  If Passwd <> Nil Then
+		    Dim sk As New libsodium.SKI.SecretKey(Passwd, PasswdSalt, Limits)
+		    key = libsodium.SKI.DecryptData(key, sk, Nonce)
+		  End If
+		  
+		  Return Trim(key)
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil, HashSize As UInt32 = libsodium.crypto_generichash_BYTES_MAX) As String
 		  ' Generates a 512-bit BLAKE2b digest of the InputData, optionally using the specified key.
 		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
 		  Dim h As GenericHashDigest
-		  If Key = Nil Then
+		  If Key <> Nil Then
 		    h = New GenericHashDigest(Key, HashSize)
 		  Else
 		    h = New GenericHashDigest(HashType.Generic)
@@ -192,21 +232,63 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function IsAvailable() As Boolean
 		  ' Returns True if libsodium is available.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.IsAvailable
 		  
 		  Static available As Boolean
 		  
 		  If Not available Then available = System.IsFunctionAvailable("sodium_init", "libsodium")
-		  If available Then 
-		    If sodium_init() = -1 Then available = False
+		  If available Then
+		    If sodium_init() = -1 Then available = False Else available = True
 		  End If
 		  Return available
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Function PackKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password, Salt As MemoryBlock = Nil, Nonce As MemoryBlock = Nil, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As MemoryBlock
+		  Dim data As New MemoryBlock(0)
+		  Dim output As New BinaryStream(data)
+		  output.Write(Prefix + EndOfLine.Windows)
+		  
+		  If Passwd <> Nil Then
+		    If Salt = Nil Then Salt = Passwd.RandomSalt
+		    Dim key As libsodium.SKI.SecretKey
+		    If Nonce = Nil Then Nonce = key.RandomNonce
+		    key = New libsodium.SKI.SecretKey(Passwd, Salt, Limits)
+		    ExportedKey = libsodium.SKI.EncryptData(ExportedKey, key, Nonce)
+		    output.Write("#Salt=" + EncodeBase64(Salt) + EndOfLine.Windows)
+		    output.Write("#Nonce=" + EncodeBase64(Nonce) + EndOfLine.Windows)
+		    Select Case Limits
+		    Case ResourceLimits.Interactive
+		      output.Write("#Limits=Interactive" + EndOfLine.Windows)
+		    Case ResourceLimits.Moderate
+		      output.Write("#Limits=Moderate" + EndOfLine.Windows)
+		    Case ResourceLimits.Sensitive
+		      output.Write("#Limits=Sensitive" + EndOfLine.Windows)
+		    End Select
+		  End If
+		  output.Write(EndOfLine.Windows)
+		  output.Write(EncodeBase64(ExportedKey) + EndOfLine.Windows)
+		  output.Write(Suffix + EndOfLine.Windows)
+		  
+		  output.Close
+		  Return data
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
-		  ' Returns a MemoryBlock filled with Count bytes of cryptographically random data.
-		  ' https://download.libsodium.org/doc/generating_random_data/
+		  ' Returns a MemoryBlock filled with the requested number of bytes of
+		  ' cryptographically random data.
+		  '   On Win32, the RtlGenRandom() function is used
+		  '   On BSD, the arc4random() function is used
+		  '   On recent Linux kernels, the getrandom system call is used (since Sodium 1.0.3)
+		  '   On other Unices, the /dev/urandom device is used
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.RandomBytes
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim mb As New MemoryBlock(Count)
@@ -229,8 +311,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function RandomUInt32(Optional UpperBound As UInt32) As UInt32
-		  ' Returns a random UInt32. If UpperBound is specified then the value will be 
-		  ' less-than or equal-to UpperBound
+		  ' Returns a random UInt32 between 0 and &hffffffff. If UpperBound is specified
+		  ' then the value will be less-than or equal-to UpperBound
 		  ' https://download.libsodium.org/doc/generating_random_data/
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
@@ -277,9 +359,11 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function ShortHash(InputData As MemoryBlock, Key As MemoryBlock) As UInt64
 		  ' Generates a 64-bit hawsh of the InputData using the specified key. This method
-		  ' outputs short but unpredictable (without knowing the secret key) values suitable 
+		  ' outputs short but unpredictable (without knowing the secret key) values suitable
 		  ' for picking a list in a hash table for a given key.
-		  ' https://download.libsodium.org/doc/hashing/short-input_hashing.html
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.ShortHash
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(Key, crypto_shorthash_KEYBYTES)
@@ -321,6 +405,10 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function sodium_init Lib "libsodium" () As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_is_zero Lib "libsodium" (DataPtr As Ptr, Length As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -368,49 +456,6 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub ZeroFill(Extends m As MemoryBlock, Size As Int32 = -1)
-		  ' Zero-fill the MemoryBlock
-		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
-		  If m <> Nil Then
-		    If Size = -1 Then Size = m.Size
-		    sodium_memzero(m, Size)
-		  End If
-		End Sub
-	#tag EndMethod
-
-
-	#tag Constant, Name = crypto_auth_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_auth_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_BEFORENMBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_BOXZEROBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_MACBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_PUBLICKEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_SECRETKEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_ZEROBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
 
 	#tag Constant, Name = crypto_generichash_blake2b_PERSONALBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
 	#tag EndConstant
@@ -452,18 +497,6 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_shorthash_KEYBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_BYTES, Type = Double, Dynamic = False, Default = \"64", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_PUBLICKEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_SECRETKEYBYTES, Type = Double, Dynamic = False, Default = \"64", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_CANT_ALLOC, Type = Double, Dynamic = False, Default = \"-5", Scope = Protected

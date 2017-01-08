@@ -2,8 +2,9 @@
 Protected Class SodiumException
 Inherits RuntimeException
 	#tag Method, Flags = &h0
-		Sub Constructor(ErrorNumber As Int32)
-		  Select Case ErrorNumber
+		Sub Constructor(ErrorCode As Int32)
+		  Me.ErrorNumber = ErrorCode
+		  Select Case ErrorCode
 		  Case ERR_INIT_FAILED
 		    Me.Message = "libsodium could not be initialized."
 		    
@@ -17,7 +18,7 @@ Inherits RuntimeException
 		    Me.Message = "Unable to create a buffer of the requested size."
 		    
 		  Case ERR_TOO_LARGE
-		    Me.Message = "The data is too large for the buffer."
+		    Me.Message = "The data are too large for the buffer."
 		    
 		  Case ERR_READ_DENIED
 		    Me.Message = "The requested memory is secured and cannot be accessed."
@@ -26,7 +27,7 @@ Inherits RuntimeException
 		    Me.Message = "The requested memory is secured and cannot be modified."
 		    
 		  Case ERR_LOCK_DENIED
-		    Me.Message = "The requested memory lock could not be modified."
+		    Me.Message = "The specified memory lock could not be modified."
 		    
 		  Case ERR_INVALID_STATE
 		    Me.Message = "The requested operation is illegal in the current state."

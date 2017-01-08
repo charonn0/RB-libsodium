@@ -3,10 +3,62 @@ Protected Class EncryptionKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive)
+		  ' Generates a key pair by deriving it from a password. The operation is deterministic,
+		  ' such that calling this method twice with the same Password, Salt, and Limits parameters
+		  ' will produce the same output both times. 
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
+		  
 		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = PasswordData.RandomSalt
 		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, libsodium.Password.ALG_ARGON2)
-		  Dim pubkey As MemoryBlock = libsodium.PKI.EncryptionKey.DerivePublicKey(seckey)
-		  Me.Constructor(seckey, pubkey)
+		  Me.Constructor(seckey)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1000
+		Sub Constructor(FromSigningKey As libsodium.PKI.SigningKey)
+		  ' Converts the FromSigningKey(Ed25519) into an EncryptionKey(Curve25519), so that the same 
+		  ' key pair can be used both for authenticated encryption and for signatures.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
+		  
+		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
+		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
+		  
+		  ' first convert the public key
+		  If crypto_sign_ed25519_pk_to_curve25519(pub, FromSigningKey.PublicKey) <> 0 Then
+		    Dim err As New SodiumException(ERR_CONVERSION_FAILED)
+		    err.Message = "This public key cannot be converted."
+		    Raise err
+		  End If
+		  
+		  ' then the private key
+		  If crypto_sign_ed25519_sk_to_curve25519(priv, FromSigningKey.PrivateKey) <> 0 Then
+		    Dim err As New SodiumException(ERR_CONVERSION_FAILED)
+		    err.Message = "This private key cannot be converted."
+		    Raise err
+		  End If
+		  
+		  Me.Constructor(priv, pub)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1001
+		Protected Sub Constructor(PrivateKeyData As MemoryBlock)
+		  ' Given a user's private key, this method computes their public key
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
+		  CheckSize(PrivateKeyData, crypto_scalarmult_BYTES)
+		  
+		  Dim pub As New MemoryBlock(crypto_scalarmult_BYTES)
+		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then
+		    Me.Constructor(PrivateKeyData, pub)
+		  Else
+		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
+		  End If
 		End Sub
 	#tag EndMethod
 
@@ -23,101 +75,59 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function ConvertSigningKey(FromSigningKey As libsodium.PKI.SigningKey) As libsodium.PKI.EncryptionKey
-		  ' Converts the FromSigningKey into a new EncryptionKey
-		  
-		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
-		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
-		  
-		  ' first convert the public key
-		  If crypto_sign_ed25519_pk_to_curve25519(pub, FromSigningKey.PublicKey) <> 0 Then
-		    Raise New SodiumException(ERR_CONVERSION_FAILED)
-		  End If
-		  
-		  ' then the private key
-		  If crypto_sign_ed25519_sk_to_curve25519(priv, FromSigningKey.PrivateKey) <> 0 Then
-		    Raise New SodiumException(ERR_CONVERSION_FAILED)
-		  End If
-		  
-		  Return New EncryptionKey(priv, pub)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  ' Given a user's private key, this method generates an EncryptionKey pair
-		  
-		  Return New EncryptionKey(PrivateKeyData, DerivePublicKey(PrivateKeyData))
-		  
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		 Shared Function DerivePublicKey(PrivateKeyData As MemoryBlock) As MemoryBlock
-		  ' Given a user's private key, this method computes their public key
-		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
-		  CheckSize(PrivateKeyData, crypto_scalarmult_BYTES)
-		  
-		  Dim pub As New MemoryBlock(crypto_scalarmult_BYTES)
-		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then Return pub
-		  Raise New SodiumException(ERR_COMPUTATION_FAILED)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function DeriveSharedKey(RecipientPublicKey As MemoryBlock) As MemoryBlock
-		  ' Calculates the shared key from the RecipientPublicKey and SenderPrivateKey, for
-		  ' use with the EncryptData and DecryptData methods. This allows the key derivation
-		  ' calculation to be performed once rather than on each invocation of EncryptData
-		  ' and DecryptData.
-		  
-		  Return DeriveSharedKey(Me.PrivateKey, RecipientPublicKey)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		 Shared Function DeriveSharedKey(RecipientPublicKey As MemoryBlock, SenderPrivateKey As MemoryBlock) As MemoryBlock
-		  ' Calculates the shared key from the RecipientPublicKey and SenderPrivateKey, for
-		  ' use with the EncryptData and DecryptData methods. This allows the key derivation
-		  ' calculation to be performed once rather than on each invocation of EncryptData
-		  ' and DecryptData.
-		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
-		  CheckSize(RecipientPublicKey, crypto_box_PUBLICKEYBYTES)
-		  CheckSize(SenderPrivateKey, crypto_box_SECRETKEYBYTES)
-		  
-		  Dim buffer As New MemoryBlock(crypto_box_BEFORENMBYTES)
-		  If crypto_box_beforenm(buffer, RecipientPublicKey, SenderPrivateKey) = 0 Then
-		    Return buffer
-		  End If
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function DeriveSharedSecret(RecipientPublicKey As MemoryBlock) As MemoryBlock
-		  ' Computes a shared secret given a SenderPrivateKey and RecipientPublicKey.
-		  ' The return value represents the X coordinate of a point on the curve. As
-		  ' a result, the number of possible keys is limited to the group size (≈2^252),
-		  ' and the key distribution is not uniform. For this reason, instead of directly
-		  ' using the return value as a shared key, it is recommended to use:
 		  '
-		  '  GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Derive
 		  
-		  CheckSize(RecipientPublicKey, crypto_scalarmult_BYTES)
+		  Return New EncryptionKey(PrivateKeyData)
 		  
-		  Dim buffer As New MemoryBlock(crypto_scalarmult_BYTES)
-		  If crypto_scalarmult(buffer, Me.PrivateKey, RecipientPublicKey) = 0 Then
-		    Return buffer
-		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
+		  ' Exports the EncryptionKey in a format that is understood by EncryptionKey.Import
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Export
+		  
+		  Try
+		    Dim bs As BinaryStream = BinaryStream.Create(SaveTo, OverWrite)
+		    bs.Write(Me.Export(Passwd))
+		    bs.Close
+		  Catch Err As IOException
+		    Return False
+		  End Try
+		  Return True
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
+		  ' Exports the EncryptionKey in a format that is understood by EncryptionKey.Import
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Export
+		  
+		  Dim data As New MemoryBlock(0)
+		  Dim bs As New BinaryStream(data)
+		  
+		  bs.Write(PackKey(Me.PublicKey, ExportEncryptionPublicPrefix, ExportEncryptionPublicSuffix, Nil))
+		  bs.Write(PackKey(Me.PrivateKey, ExportEncryptionPrivatePrefix, ExportEncryptionPrivateSuffix, Passwd))
+		  
+		  bs.Close
+		  Return data
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1000
 		 Shared Function Generate(Optional SeedData As MemoryBlock) As libsodium.PKI.EncryptionKey
 		  ' This method randomly generates an EncryptionKey pair, optionally using the specified seed.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Generate
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
@@ -134,16 +144,53 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As FolderItem, Optional Passwd As libsodium.Password) As libsodium.PKI.EncryptionKey
+		  ' Import an EncryptionKey that was exported using EncryptionKey.Export(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Import
+		  
+		  
+		  Dim bs As BinaryStream = BinaryStream.Open(ExportedKey)
+		  Dim keydata As MemoryBlock = bs.Read(bs.Length)
+		  bs.Close
+		  Return Import(keydata, Passwd)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.PKI.EncryptionKey
+		  ' Import an EncryptionKey that was exported using EncryptionKey.Export
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Import
+		  
+		  'Dim pk As MemoryBlock = ExtractKey(ExportedKey, PublicPrefix, PublicSuffix)
+		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportEncryptionPrivatePrefix, ExportEncryptionPrivateSuffix, Passwd)
+		  If sk <> Nil Then Return Derive(sk)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherKey As libsodium.PKI.EncryptionKey) As Integer
+		  ' This method overloads the comparison operator (=) allowing direct comparisons between 
+		  ' instances of EncryptionKey. The comparison operation itself is a constant-time binary 
+		  ' comparison of the private key halves of both key pairs; the public halves are not compared.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Operator_Compare
+		  
 		  If OtherKey Is Nil Then Return 1
-		  If libsodium.StrComp(Me.PrivateKey, OtherKey.PrivateKey) Then Return 0
-		  Return -1
+		  Return Super.Operator_Compare(OtherKey.PrivateKey)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomNonce() As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a Nonce for use with an EncryptionKey
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomNonce
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
@@ -152,21 +199,11 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function RandomPrivateKey() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a private key for encryption. To generate the
-		  ' corresponding public key use the EncryptionKey.Derive method.
-		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
-		  Return RandomBytes(crypto_box_SECRETKEYBYTES)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		 Shared Function RandomSeed() As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a seed for EncryptionKey.Generate
-		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomSeed
 		  
 		  Return RandomBytes(crypto_box_SEEDBYTES)
 		End Function

@@ -1,22 +1,18 @@
 #tag Class
 Protected Class Password
-Implements libsodium.Secureable
+Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h0
 		Sub Constructor(Passwd As String)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  mSessionKey = libsodium.SKI.SecretKey.Generate()
-		  
-		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.SecretKey.RandomNonce()
-		  Passwd = libsodium.SKI.EncryptData(Passwd, mSessionKey, SessionNonce)
-		  mPassword = New SecureMemoryBlock(Passwd.LenB)
-		  mPassword.StringValue(0, mPassword.Size) = Passwd
-		  mPassword.AllowSwap = False
-		  Me.Lock()
+		  // Calling the overridden superclass constructor.
+		  Super.Constructor(Passwd)
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function DeriveKey(KeyLength As Int32, Salt As MemoryBlock, Limits As libsodium.ResourceLimits, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As MemoryBlock
+		  ' Computes a key of the specified KeySize using the password, Salt, and other parameters.
+		  
 		  Dim out As New MemoryBlock(KeyLength)
 		  Dim clearpw As MemoryBlock = Me.Value
 		  Dim memlimit, opslimit As UInt32
@@ -39,12 +35,6 @@ Implements libsodium.Secureable
 		  
 		  Return out
 		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
-		Private Sub Destructor()
-		  mPassword = Nil
-		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -97,26 +87,10 @@ Implements libsodium.Secureable
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Sub Lock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  mPassword.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherPassword As libsodium.Password) As Int32
 		  If OtherPassword Is Nil Then Return 1
-		  If libsodium.StrComp(Me.Value, OtherPassword.Value) Then Return 0
-		  Return -1
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherPassword As String) As Int32
-		  If libsodium.StrComp(Me.Value, OtherPassword) Then Return 0
-		  Return -1
+		  Return Super.Operator_Compare(OtherPassword.Value)
 		End Function
 	#tag EndMethod
 
@@ -130,34 +104,13 @@ Implements libsodium.Secureable
 		 Shared Function RandomSalt() As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a salt for use with an DeriveKey
 		  
-		  Return libsodium.SKI.SecretKey.RandomSalt()
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Sub Unlock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  mPassword.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function Value() As MemoryBlock
-		  Dim ret As New MemoryBlock(mPassword.Size)
-		  Me.Unlock()
-		  Try
-		    ret = libsodium.SKI.DecryptData(mPassword.StringValue(0, mPassword.Size), mSessionKey, SessionNonce)
-		  Finally
-		    Me.Lock()
-		  End Try
-		  Return ret
+		  Return RandomBytes(crypto_pwhash_SALTBYTES)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function VerifyHash(HashValue As MemoryBlock, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As Boolean
-		  ' This method verifies that the HashValue is a valid hash for the password (as generated 
+		  ' This method verifies that the HashValue is a valid hash for the password (as generated
 		  ' by Password.GenerateHash)
 		  
 		  Dim clearpw As SecureMemoryBlock = Me.Value
@@ -167,25 +120,13 @@ Implements libsodium.Secureable
 		    Return crypto_pwhash_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
 		    
 		  Case ALG_SCRYPT
+		    HashValue = HashValue + Chr(0)
 		    CheckSize(HashValue, crypto_pwhash_scryptsalsa208sha256_STRBYTES)
 		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
 		  End Select
 		  
 		End Function
 	#tag EndMethod
-
-
-	#tag Property, Flags = &h21
-		Private mPassword As libsodium.SecureMemoryBlock
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private mSessionKey As libsodium.SKI.SecretKey
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private Shared SessionNonce As MemoryBlock
-	#tag EndProperty
 
 
 	#tag Constant, Name = ALG_ARGON2, Type = Double, Dynamic = False, Default = \"0", Scope = Public

@@ -55,6 +55,16 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub Constructor(RealMB As Ptr, RealSize As UInt64)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If RealMB = Nil Then Raise New NilObjectException
+		  mPtr = RealMB
+		  mFreeable = False
+		  mSize = RealSize
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Constructor(Size As UInt64)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mPtr = sodium_malloc(Size)
@@ -100,7 +110,13 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h21
 		Private Sub Destructor()
-		  If mPtr <> Nil And mFreeable Then sodium_free(mPtr)
+		  If mPtr <> Nil Then
+		    If mFreeable Then
+		      sodium_free(mPtr)
+		    Else
+		      Me.ZeroFill()
+		    End If
+		  End If
 		  mPtr = Nil
 		  mSize = 0
 		End Sub
@@ -116,12 +132,12 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function DoubleValue(Offset As UInt64, Assigns NewDouble As Double) As Double
+		Sub DoubleValue(Offset As UInt64, Assigns NewDouble As Double)
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
 		  mb.DoubleValue(Offset) = NewDouble
-		End Function
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -176,6 +192,12 @@ Implements libsodium.Secureable
 		  Dim mb As MemoryBlock = mPtr
 		  mb.Int64Value(Offset) = NewInt
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function IsZero() As Boolean
+		  Return sodium_is_zero(mPtr, Me.Size) = 1
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
