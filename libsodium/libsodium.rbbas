@@ -128,22 +128,6 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DeriveSubkey(MasterKey As MemoryBlock, SubkeySize As UInt32, Salt As MemoryBlock, Optional AppID As MemoryBlock) As MemoryBlock
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  CheckSize(Salt, crypto_generichash_blake2b_SALTBYTES)
-		  Dim subkey As New MemoryBlock(SubkeySize)
-		  CheckSize(subkey, 128, 512)
-		  If AppID <> Nil Then
-		    CheckSize(AppID, crypto_generichash_blake2b_PERSONALBYTES)
-		    If crypto_generichash_blake2b_salt_personal(Subkey, Subkey.Size, Nil, 0, MasterKey, MasterKey.Size, Salt, AppID) = 0 Then Return Nil
-		  Else
-		    If crypto_generichash_blake2b_salt_personal(Subkey, Subkey.Size, Nil, 0, MasterKey, MasterKey.Size, Salt, Nil) <> 0 Then Return Nil
-		  End If
-		  Return subkey
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
 		Protected Function EncodeHex(BinaryData As MemoryBlock, ToUppercase As Boolean = True) As MemoryBlock
 		  ' Encodes the BinaryData as ASCII hexadecimal
 		  '

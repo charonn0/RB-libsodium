@@ -87,6 +87,19 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function DeriveSubkey(Salt As MemoryBlock, AppID As MemoryBlock = Nil) As libsodium.PKI.EncryptionKey
+		  Dim pk As MemoryBlock = Me.DeriveSubkey(crypto_box_SECRETKEYBYTES, Salt, AppID)
+		  If pk <> Nil Then Return New EncryptionKey(pk)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function DeriveSubkey(SubkeySize As UInt32, Salt As MemoryBlock, AppID As MemoryBlock) As MemoryBlock
+		  Return Super.DeriveSubkey(SubkeySize, Salt, AppID)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
 		  ' Exports the EncryptionKey in a format that is understood by EncryptionKey.Import
 		  '
