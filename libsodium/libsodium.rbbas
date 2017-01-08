@@ -108,7 +108,7 @@ Protected Module libsodium
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
 		  ' decodes ASCII hexadecimal to Binary. On error, returns Nil. IgnoredChars
 		  ' is an optional string of characters to skip when interpreting the HexData
-		  ' 
+		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.DecodeHex
 		  
@@ -155,7 +155,7 @@ Protected Module libsodium
 		  Dim key As New MemoryBlock(0)
 		  Dim output As New BinaryStream(key)
 		  Dim PasswdSalt, Nonce As MemoryBlock
-		  Dim Limits As libsodium.ResourceLimits
+		  Dim Limits As libsodium.ResourceLimits = ResourceLimits.Interactive
 		  For i = i + 1 To UBound(lines)
 		    Dim s As String = lines(i)
 		    Select Case True
@@ -339,7 +339,7 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function ShortHash(InputData As MemoryBlock, Key As MemoryBlock) As UInt64
 		  ' Generates a 64-bit hawsh of the InputData using the specified key. This method
-		  ' outputs short but unpredictable (without knowing the secret key) values suitable 
+		  ' outputs short but unpredictable (without knowing the secret key) values suitable
 		  ' for picking a list in a hash table for a given key.
 		  '
 		  ' See:
