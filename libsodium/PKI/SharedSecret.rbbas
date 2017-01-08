@@ -1,12 +1,11 @@
 #tag Class
 Protected Class SharedSecret
-Implements libsodium.Secureable
+Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(SharedKey As MemoryBlock)
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(SharedKey, crypto_box_BEFORENMBYTES)
-		  
-		  mKeyData = New libsodium.SKI.KeyContainter(SharedKey)
+		  // Calling the overridden superclass constructor.
+		  Super.Constructor(SharedKey)
 		End Sub
 	#tag EndMethod
 
@@ -26,7 +25,8 @@ Implements libsodium.Secureable
 		  If crypto_box_beforenm(buffer, RecipientPublicKey, SenderPrivateKey.PrivateKey) <> 0 Then 
 		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		  End If
-		  mKeyData = New libsodium.SKI.KeyContainter(buffer)
+		  // Calling the overridden superclass constructor.
+		  Super.Constructor(buffer)
 		End Sub
 	#tag EndMethod
 
@@ -55,6 +55,24 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
+		  ' Exports the EncryptionKey in a format that is understood by EncryptionKey.Import(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Export
+		  
+		  Try
+		    Dim bs As BinaryStream = BinaryStream.Create(SaveTo, OverWrite)
+		    bs.Write(Me.Export(Passwd))
+		    bs.Close
+		  Catch Err As IOException
+		    Return False
+		  End Try
+		  Return True
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
 		  ' Exports the EncryptionKey in a format that is understood by EncryptionKey.Import
 		  '
@@ -72,6 +90,20 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As FolderItem, Optional Passwd As libsodium.Password) As libsodium.PKI.SharedSecret
+		  ' Import a SharedSecret that was exported using SharedSecret.Export(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Import
+		  
+		  Dim bs As BinaryStream = BinaryStream.Open(ExportedKey)
+		  Dim keydata As MemoryBlock = bs.Read(bs.Length)
+		  bs.Close
+		  Return Import(keydata, Passwd)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		 Shared Function Import(ExportedKey As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.PKI.SharedSecret
 		  ' Import a SharedSecret that was exported using SharedSecret.Export
 		  '
@@ -82,38 +114,6 @@ Implements libsodium.Secureable
 		  If secret <> Nil Then Return New SharedSecret(secret)
 		End Function
 	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Sub Lock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  If mKeyData <> Nil Then Secureable(mKeyData).Lock
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Sub Unlock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  If mKeyData <> Nil Then Secureable(mKeyData).Unlock
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function Value() As MemoryBlock
-		  ' Returns an unprotected copy of the shared key.
-		  ' 
-		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Value
-		  
-		  Return mKeyData.Value
-		End Function
-	#tag EndMethod
-
-
-	#tag Property, Flags = &h1
-		Protected mKeyData As libsodium.SKI.KeyContainter
-	#tag EndProperty
 
 
 	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 SHARED KEY BLOCK-----", Scope = Protected

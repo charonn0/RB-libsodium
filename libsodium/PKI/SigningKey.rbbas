@@ -59,6 +59,24 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
+		  ' Exports the SigningKey in a format that is understood by SigningKey.Import(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Export
+		  
+		  Try
+		    Dim bs As BinaryStream = BinaryStream.Create(SaveTo, OverWrite)
+		    bs.Write(Me.Export(Passwd))
+		    bs.Close
+		  Catch Err As IOException
+		    Return False
+		  End Try
+		  Return True
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
 		  ' Exports the SigningKey in a format that is understood by SigningKey.Import
 		  '
@@ -68,8 +86,8 @@ Inherits libsodium.PKI.KeyPair
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
 		  
-		  bs.Write(PackKey(Me.PublicKey, PublicPrefix, PublicSuffix, Nil))
-		  bs.Write(PackKey(Me.PrivateKey, PrivatePrefix, PrivateSuffix, Passwd))
+		  bs.Write(PackKey(Me.PublicKey, ExportSigningPublicPrefix, ExportSigningPublicSuffix, Nil))
+		  bs.Write(PackKey(Me.PrivateKey, ExportSigningPrivatePrefix, ExportSigningPrivateSuffix, Passwd))
 		  
 		  bs.Close
 		  Return data
@@ -98,6 +116,20 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As FolderItem, Optional Passwd As libsodium.Password) As libsodium.PKI.SigningKey
+		  ' Import a SigningKey that was exported using SigningKey.Export(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Import
+		  
+		  Dim bs As BinaryStream = BinaryStream.Open(ExportedKey)
+		  Dim keydata As MemoryBlock = bs.Read(bs.Length)
+		  bs.Close
+		  Return Import(keydata, Passwd)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		 Shared Function Import(ExportedKey As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.PKI.SigningKey
 		  ' Import a SigningKey that was exported using SigningKey.Export
 		  '
@@ -105,7 +137,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Import
 		  
 		  'Dim pk As MemoryBlock = ExtractKey(ExportedKey, PublicPrefix, PublicSuffix)
-		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, PrivatePrefix, PrivateSuffix, Passwd)
+		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportSigningPrivatePrefix, ExportSigningPrivateSuffix, Passwd)
 		  If sk <> Nil Then Return Derive(sk)
 		End Function
 	#tag EndMethod
@@ -173,19 +205,6 @@ Inherits libsodium.PKI.KeyPair
 		     Dim salt As MemoryBlock = libsodium.SKI.SecretKey.RandomSalt()
 		     Dim sigk As New libsodium.PKI.SigningKey(pw, salt)
 	#tag EndNote
-
-
-	#tag Constant, Name = PrivatePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PRIVATE KEY BLOCK-----", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = PrivateSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PRIVATE KEY BLOCK-----", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = PublicPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PUBLIC KEY BLOCK-----", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = PublicSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PUBLIC KEY BLOCK-----", Scope = Public
-	#tag EndConstant
 
 
 End Class

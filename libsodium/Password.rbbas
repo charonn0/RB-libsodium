@@ -4,7 +4,7 @@ Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(Passwd As String)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  mPassword = New libsodium.SKI.KeyContainter(Passwd)
+		  mPassword = New libsodium.SKI.KeyContainer(Passwd)
 		End Sub
 	#tag EndMethod
 
@@ -146,7 +146,7 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h0
 		Function VerifyHash(HashValue As MemoryBlock, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As Boolean
-		  ' This method verifies that the HashValue is a valid hash for the password (as generated 
+		  ' This method verifies that the HashValue is a valid hash for the password (as generated
 		  ' by Password.GenerateHash)
 		  
 		  Dim clearpw As SecureMemoryBlock = Me.Value
@@ -166,7 +166,7 @@ Implements libsodium.Secureable
 
 
 	#tag Property, Flags = &h21
-		Private mPassword As libsodium.SKI.KeyContainter
+		Private mPassword As libsodium.SKI.KeyContainer
 	#tag EndProperty
 
 

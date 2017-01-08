@@ -1,50 +1,35 @@
 #tag Class
 Protected Class KeyPair
-Implements libsodium.Secureable
+Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
-		  mPrivate = New libsodium.SKI.KeyContainter(PrivateKeyData)
-		  mPublic = New libsodium.SKI.KeyContainter(PublicKeyData)
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Sub Lock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  Secureable(mPublic).Lock()
-		  Secureable(mPrivate).Lock()
+		  // Calling the overridden superclass constructor.
+		  Super.Constructor(PrivateKeyData)
+		  mPublic = PublicKeyData
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function PrivateKey() As MemoryBlock
-		  Return mPrivate.Value()
+		  Return Me.Value()
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function PublicKey() As MemoryBlock
-		  Return mPublic.Value()
+		  Return mPublic
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Sub Unlock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  Secureable(mPublic).Unlock()
-		  Secureable(mPrivate).Unlock()
-		End Sub
+		Protected Function Value() As MemoryBlock
+		  Return Super.Value
+		End Function
 	#tag EndMethod
 
 
 	#tag Property, Flags = &h1
-		Protected mPrivate As libsodium.SKI.KeyContainter
-	#tag EndProperty
-
-	#tag Property, Flags = &h1
-		Protected mPublic As libsodium.SKI.KeyContainter
+		Protected mPublic As MemoryBlock
 	#tag EndProperty
 
 

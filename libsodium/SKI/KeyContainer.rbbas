@@ -1,8 +1,9 @@
 #tag Class
-Protected Class KeyContainter
+Protected Class KeyContainer
 Implements libsodium.Secureable
 	#tag Method, Flags = &h1000
 		Sub Constructor(KeyData As MemoryBlock)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If mSessionKey = Nil Then mSessionKey = RandomBytes(crypto_secretbox_KEYBYTES)
 		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.SecretKey.RandomNonce
 		  mKeyData = libsodium.SKI.EncryptData(KeyData, mSessionKey, SessionNonce)
@@ -29,6 +30,11 @@ Implements libsodium.Secureable
 
 	#tag Method, Flags = &h0
 		Function Value() As MemoryBlock
+		  ' Returns an unprotected copy of the key.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.KeyContainer.Value
+		  
 		  Dim ret As MemoryBlock
 		  Try
 		    mKeyData.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
