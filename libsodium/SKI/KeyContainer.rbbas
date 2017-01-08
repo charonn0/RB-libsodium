@@ -3,6 +3,11 @@ Protected Class KeyContainer
 Implements libsodium.Secureable
 	#tag Method, Flags = &h1000
 		Sub Constructor(KeyData As MemoryBlock)
+		  ' Creates a new container to hold a copy of the KeyData
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.KeyContainer.Constructor
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If mSessionKey = Nil Then mSessionKey = RandomBytes(crypto_secretbox_KEYBYTES)
 		  If SessionNonce = Nil Then SessionNonce = libsodium.SKI.SecretKey.RandomNonce
@@ -46,6 +51,15 @@ Implements libsodium.Secureable
 		  Return ret
 		End Function
 	#tag EndMethod
+
+
+	#tag Note, Name = Usage
+		This class contains a secret or private key. The key data is encrypted using 
+		a SecretKey that is generated at runtime, and stored in a SecureMemoryBlock
+		that has been marked as non-swappable. Except when accessed by the Value method
+		the encrypted KeyData is also marked as non-readable.
+		
+	#tag EndNote
 
 
 	#tag Property, Flags = &h1
