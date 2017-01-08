@@ -3,8 +3,10 @@ Protected Class EncryptionKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive)
-		  ' Generates a key pair by deriving it from a password.
-		  ' 
+		  ' Generates a key pair by deriving it from a password. The operation is deterministic,
+		  ' such that calling this method twice with the same Password, Salt, and Limits parameters
+		  ' will produce the same output both times. 
+		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
 		  
@@ -179,8 +181,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Operator_Compare
 		  
 		  If OtherKey Is Nil Then Return 1
-		  If libsodium.StrComp(Me.PrivateKey, OtherKey.PrivateKey) Then Return 0
-		  Return -1
+		  Return Super.Operator_Compare(OtherKey.PrivateKey)
 		End Function
 	#tag EndMethod
 

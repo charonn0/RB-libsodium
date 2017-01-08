@@ -15,6 +15,7 @@ Implements libsodium.Secureable
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(KeyData As MemoryBlock)
 		  // Calling the overridden superclass constructor.
+		  CheckSize(KeyData, crypto_secretbox_KEYBYTES)
 		  Super.Constructor(KeyData)
 		End Sub
 	#tag EndMethod
@@ -85,8 +86,7 @@ Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherKey As libsodium.SKI.SecretKey) As Integer
 		  If OtherKey Is Nil Then Return 1
-		  If libsodium.StrComp(Me.Value, OtherKey.Value) Then Return 0
-		  Return -1
+		  Return Super.Operator_Compare(OtherKey.Value)
 		End Function
 	#tag EndMethod
 

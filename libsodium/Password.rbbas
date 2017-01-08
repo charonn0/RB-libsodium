@@ -1,10 +1,11 @@
 #tag Class
 Protected Class Password
-Implements libsodium.Secureable
+Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h0
 		Sub Constructor(Passwd As String)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  mPassword = New libsodium.SKI.KeyContainer(Passwd)
+		  // Calling the overridden superclass constructor.
+		  Super.Constructor(Passwd)
 		End Sub
 	#tag EndMethod
 
@@ -34,12 +35,6 @@ Implements libsodium.Secureable
 		  
 		  Return out
 		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
-		Private Sub Destructor()
-		  mPassword = Nil
-		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -92,27 +87,10 @@ Implements libsodium.Secureable
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Sub Lock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  Secureable(mPassword).Lock
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherPassword As libsodium.Password) As Int32
 		  If OtherPassword Is Nil Then Return 1
-		  If libsodium.StrComp(Me.Value, OtherPassword.Value) Then Return 0
-		  Return -1
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherPassword As String) As Int32
-		  ' Performs a constant-time binary comparison to the OtherPassword
-		  If libsodium.StrComp(Me.Value, OtherPassword) Then Return 0
-		  Return -1
+		  Return Super.Operator_Compare(OtherPassword.Value)
 		End Function
 	#tag EndMethod
 
@@ -127,20 +105,6 @@ Implements libsodium.Secureable
 		  ' Returns random bytes that are suitable to be used as a salt for use with an DeriveKey
 		  
 		  Return RandomBytes(crypto_pwhash_SALTBYTES)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Sub Unlock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  Secureable(mPassword).Unlock
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function Value() As MemoryBlock
-		  Return mPassword.Value
 		End Function
 	#tag EndMethod
 
@@ -163,11 +127,6 @@ Implements libsodium.Secureable
 		  
 		End Function
 	#tag EndMethod
-
-
-	#tag Property, Flags = &h21
-		Private mPassword As libsodium.SKI.KeyContainer
-	#tag EndProperty
 
 
 	#tag Constant, Name = ALG_ARGON2, Type = Double, Dynamic = False, Default = \"0", Scope = Public

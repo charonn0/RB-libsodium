@@ -11,9 +11,9 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h1000
 		Sub Constructor(RecipientPublicKey As MemoryBlock, SenderPrivateKey As libsodium.PKI.EncryptionKey)
-		  ' Derives the shared secret key from the public half of the recipient's key pair 
-		  ' and the private half of the sender's key pair. This allows the key derivation 
-		  ' calculation to be performed once rather than on each Encrypt/Decrypt operation.
+		  ' Derives the shared key from the public half of the recipient's key pair and the 
+		  ' private half of the sender's key pair. This allows the key derivation calculation 
+		  ' to be performed once rather than on each Encrypt/Decrypt operation.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Constructor
@@ -32,15 +32,20 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		 Shared Function DeriveSharedSecret(RecipientPublicKey As MemoryBlock, SenderPrivateKey As libsodium.PKI.EncryptionKey) As MemoryBlock
-		  ' Computes a shared secret given a SenderPrivateKey and RecipientPublicKey.
-		  ' The return value represents the X coordinate of a point on the curve. As
-		  ' a result, the number of possible keys is limited to the group size (≈2^252),
-		  ' and the key distribution is not uniform. For this reason, instead of directly
-		  ' using the return value as a shared key, it is recommended to use:
+		  ' WARNING: THIS IS (PROBABLY) NOT THE METHOD YOU'RE LOOKING FOR. You probably
+		  ' want Constructor(TheirPublicKey, YourPrivateKey)
+		  '
+		  ' This method computes a shared secret (NOT a key) given a SenderPrivateKey and 
+		  ' RecipientPublicKey. The return value represents the X coordinate of a point on 
+		  ' the curve. As a result, the number of possible keys is limited to the group 
+		  ' size (≈2^252), and the key distribution is not uniform. 
+		  '
+		  ' For this reason, instead of directly using the return value as a shared key, 
+		  ' it is recommended to use:
 		  '
 		  '  GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
 		  '
-		  ' Or just call the Constructor
+		  '  Or just call the Constructor, which does it for you.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.DeriveSharedSecret
@@ -112,6 +117,13 @@ Inherits libsodium.SKI.KeyContainer
 		  
 		  Dim secret As MemoryBlock = ExtractKey(ExportedKey, ExportPrefix, ExportSuffix, Passwd)
 		  If secret <> Nil Then Return New SharedSecret(secret)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Operator_Compare(OtherSecret As libsodium.PKI.SharedSecret) As Int32
+		  If OtherSecret Is Nil Then Return 1
+		  Return Super.Operator_Compare(OtherSecret.Value)
 		End Function
 	#tag EndMethod
 

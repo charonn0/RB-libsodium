@@ -152,8 +152,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Operator_Compare
 		  
 		  If OtherKey Is Nil Then Return 1
-		  If libsodium.StrComp(Me.PrivateKey, OtherKey.PrivateKey) Then Return 0
-		  Return -1
+		  Return Super.Operator_Compare(OtherKey.PrivateKey)
 		End Function
 	#tag EndMethod
 
