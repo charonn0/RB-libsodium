@@ -144,6 +144,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h21
 		Private Function ExtractKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password) As MemoryBlock
+		  ExportedKey = ReplaceLineEndings(ExportedKey, EndOfLine.Windows)
 		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
 		  Dim i As Integer
 		  Do Until Ubound(lines) <= i Or lines(i) = Prefix
@@ -182,7 +183,7 @@ Protected Module libsodium
 		    End Select
 		  Next
 		  output.Close
-		  key = DecodeBase64(key)
+		  key = DecodeBase64(key.Trim)
 		  If Passwd <> Nil Then
 		    Dim sk As New libsodium.SKI.SecretKey(Passwd, PasswdSalt, Limits)
 		    key = libsodium.SKI.DecryptData(key, sk, Nonce)
