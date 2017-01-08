@@ -44,6 +44,12 @@ Protected Module Testing
 		    Failures.Append(6)
 		  End Try
 		  
+		  Try
+		    TestPKIForeignKey()
+		  Catch
+		    Failures.Append(7)
+		  End Try
+		  
 		  Return UBound(Failures) = -1
 		End Function
 	#tag EndMethod
@@ -113,6 +119,32 @@ Protected Module Testing
 		  msg2 = libsodium.PKI.DecryptData(crypted, sharedkey, nonce)
 		  
 		  Assert(msg1 = msg2)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub TestPKIForeignKey()
+		  Dim SenderKey As libsodium.PKI.EncryptionKey
+		  SenderKey = SenderKey.Import(TestEncryptionKey, TestPasswordValue)
+		  Dim recipkey As New libsodium.PKI.ForeignKey(SenderKey.Generate(SenderKey.RandomSeed))
+		  Dim nonce As MemoryBlock = SenderKey.RandomNonce
+		  
+		  Dim msg1 As String = "This is a test message."
+		  Dim crypted As String = libsodium.PKI.EncryptData(msg1, recipkey, senderkey, nonce)
+		  Dim msg2 As String = libsodium.PKI.DecryptData(crypted, recipkey, senderkey, nonce)
+		  
+		  Assert(msg1 = msg2)
+		  
+		  
+		  Dim SignKey As libsodium.PKI.SigningKey
+		  SignKey = SignKey.Import(TestSigningKey, TestPasswordValue)
+		  Dim verkey As New libsodium.PKI.ForeignKey(SignKey.Generate(SenderKey.RandomSeed))
+		  
+		  crypted = libsodium.PKI.SignData(msg1, SignKey)
+		  msg2 = libsodium.PKI.VerifyData(crypted, verkey)
+		  
+		  Assert(msg1 = msg2)
+		  
 		End Sub
 	#tag EndMethod
 
