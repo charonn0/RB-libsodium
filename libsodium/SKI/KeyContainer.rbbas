@@ -1,5 +1,5 @@
 #tag Class
-Protected Class KeyContainter
+Protected Class KeyContainer
 Implements libsodium.Secureable
 	#tag Method, Flags = &h1000
 		Sub Constructor(KeyData As MemoryBlock)

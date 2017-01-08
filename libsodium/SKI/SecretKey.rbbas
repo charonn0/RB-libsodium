@@ -1,6 +1,6 @@
 #tag Class
 Protected Class SecretKey
-Inherits libsodium.SKI.KeyContainter
+Inherits libsodium.SKI.KeyContainer
 Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(FromPassword As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)

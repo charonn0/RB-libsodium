@@ -6,7 +6,7 @@ Implements libsodium.Secureable
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(SharedKey, crypto_box_BEFORENMBYTES)
 		  
-		  mKeyData = New libsodium.SKI.KeyContainter(SharedKey)
+		  mKeyData = New libsodium.SKI.KeyContainer(SharedKey)
 		End Sub
 	#tag EndMethod
 
@@ -26,7 +26,7 @@ Implements libsodium.Secureable
 		  If crypto_box_beforenm(buffer, RecipientPublicKey, SenderPrivateKey.PrivateKey) <> 0 Then 
 		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		  End If
-		  mKeyData = New libsodium.SKI.KeyContainter(buffer)
+		  mKeyData = New libsodium.SKI.KeyContainer(buffer)
 		End Sub
 	#tag EndMethod
 
@@ -144,7 +144,7 @@ Implements libsodium.Secureable
 
 
 	#tag Property, Flags = &h1
-		Protected mKeyData As libsodium.SKI.KeyContainter
+		Protected mKeyData As libsodium.SKI.KeyContainer
 	#tag EndProperty
 
 
