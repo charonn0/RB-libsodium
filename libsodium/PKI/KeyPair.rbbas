@@ -12,7 +12,6 @@ Implements libsodium.Secureable
 		Protected Sub Lock()
 		  // Part of the libsodium.Secureable interface.
 		  
-		  Secureable(mPublic).Lock()
 		  Secureable(mPrivate).Lock()
 		End Sub
 	#tag EndMethod
@@ -33,7 +32,6 @@ Implements libsodium.Secureable
 		Protected Sub Unlock()
 		  // Part of the libsodium.Secureable interface.
 		  
-		  Secureable(mPublic).Unlock()
 		  Secureable(mPrivate).Unlock()
 		End Sub
 	#tag EndMethod
