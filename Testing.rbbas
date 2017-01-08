@@ -8,46 +8,45 @@ Protected Module Testing
 
 	#tag Method, Flags = &h1
 		Protected Function RunTests() As Boolean
-		  TestResult = 0
 		  Try
 		    TestPKIEncrypt()
 		  Catch
-		    TestResult = 1
+		    Failures.Append(1)
 		    Return False
 		  End Try
 		  
 		  Try
 		    TestPKISign()
 		  Catch
-		    TestResult = 2
+		    Failures.Append(2)
 		    Return False
 		  End Try
 		  
 		  Try
 		    TestUtils()
 		  Catch
-		    TestResult = 3
+		    Failures.Append(3)
 		    Return False
 		  End Try
 		  
 		  Try
 		    TestPassword()
 		  Catch
-		    TestResult = 4
+		    Failures.Append(4)
 		    Return False
 		  End Try
 		  
 		  Try
 		    TestSecureMemory()
 		  Catch
-		    TestResult = 5
+		    Failures.Append(5)
 		    Return False
 		  End Try
 		  
 		  Try
 		    TestHash()
 		  Catch
-		    TestResult = 6
+		    Failures.Append(6)
 		    Return False
 		  End Try
 		  
@@ -254,7 +253,7 @@ Protected Module Testing
 
 
 	#tag Property, Flags = &h1
-		Protected TestResult As Integer
+		Protected Failures() As Integer
 	#tag EndProperty
 
 

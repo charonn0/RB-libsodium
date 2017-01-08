@@ -6,7 +6,12 @@ Inherits Application
 		  If Testing.RunTests() Then
 		    MsgBox("All Tests passed!")
 		  Else
-		    MsgBox("Test " + Str(Testing.TestResult) + " failed!")
+		    Dim s As String
+		    For i As Integer = 0 To UBound(Testing.Failures)
+		      s = s + Str(Testing.Failures(i))
+		      If i < UBound(Testing.Failures) Then s = s  + ", "
+		    Next
+		    MsgBox("Test(s) " + s + " failed!")
 		  End If
 		End Sub
 	#tag EndEvent
