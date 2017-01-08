@@ -112,8 +112,8 @@ Inherits libsodium.PKI.KeyPair
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
 		  
-		  bs.Write(PackKey(Me.PublicKey, PublicPrefix, PublicSuffix, Nil))
-		  bs.Write(PackKey(Me.PrivateKey, PrivatePrefix, PrivateSuffix, Passwd))
+		  bs.Write(PackKey(Me.PublicKey, ExportEncryptionPublicPrefix, ExportEncryptionPublicSuffix, Nil))
+		  bs.Write(PackKey(Me.PrivateKey, ExportEncryptionPrivatePrefix, ExportEncryptionPrivateSuffix, Passwd))
 		  
 		  bs.Close
 		  Return data
@@ -164,7 +164,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Import
 		  
 		  'Dim pk As MemoryBlock = ExtractKey(ExportedKey, PublicPrefix, PublicSuffix)
-		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, PrivatePrefix, PrivateSuffix, Passwd)
+		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportEncryptionPrivatePrefix, ExportEncryptionPrivateSuffix, Passwd)
 		  If sk <> Nil Then Return Derive(sk)
 		End Function
 	#tag EndMethod
@@ -207,19 +207,6 @@ Inherits libsodium.PKI.KeyPair
 		  Return RandomBytes(crypto_box_SEEDBYTES)
 		End Function
 	#tag EndMethod
-
-
-	#tag Constant, Name = PrivatePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 PRIVATE KEY BLOCK-----", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = PrivateSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 PRIVATE KEY BLOCK-----", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = PublicPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 PUBLIC KEY BLOCK-----", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = PublicSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 PUBLIC KEY BLOCK-----", Scope = Public
-	#tag EndConstant
 
 
 	#tag ViewBehavior
