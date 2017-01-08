@@ -15,18 +15,18 @@ Protected Class ForeignKey
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(KeyData As MemoryBlock)
+		Sub Constructor(KeyData As MemoryBlock, Optional Passwd As libsodium.Password)
 		  Select Case True
 		  Case InStrB(KeyData, libsodium.PKI.SigningKey.PublicPrefix) > 0
-		    mKeyData = ExtractKey(KeyData, libsodium.PKI.SigningKey.PublicPrefix, libsodium.PKI.SigningKey.PublicSuffix)
+		    mKeyData = ExtractKey(KeyData, libsodium.PKI.SigningKey.PublicPrefix, libsodium.PKI.SigningKey.PublicSuffix, Passwd)
 		    mType = KeyType.Signature
 		    CheckSize(mKeyData, crypto_sign_PUBLICKEYBYTES)
 		  Case InStrB(KeyData, libsodium.PKI.EncryptionKey.PublicPrefix) > 0
-		    mKeyData = ExtractKey(KeyData, libsodium.PKI.EncryptionKey.PublicPrefix, libsodium.PKI.EncryptionKey.PublicSuffix)
+		    mKeyData = ExtractKey(KeyData, libsodium.PKI.EncryptionKey.PublicPrefix, libsodium.PKI.EncryptionKey.PublicSuffix, Passwd)
 		    mType = KeyType.Encryption
 		    CheckSize(mKeyData, crypto_box_PUBLICKEYBYTES)
 		  Case InStrB(KeyData, ExportPrefix) > 0
-		    mKeyData = ExtractKey(KeyData, ExportPrefix, ExportSuffix)
+		    mKeyData = ExtractKey(KeyData, ExportPrefix, ExportSuffix, Passwd)
 		    mType = KeyType.Generic
 		  Else
 		    mKeyData = KeyData
@@ -48,7 +48,7 @@ Protected Class ForeignKey
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Export() As MemoryBlock
+		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
 		  Dim prefix, suffix As String
@@ -63,7 +63,7 @@ Protected Class ForeignKey
 		    prefix = ExportPrefix
 		    suffix = ExportSuffix
 		  End Select
-		  bs.Write(PackKey(Me.Value, prefix, suffix))
+		  bs.Write(PackKey(Me.Value, prefix, suffix, Passwd))
 		  bs.Close
 		  Return data
 		  
