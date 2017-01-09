@@ -129,16 +129,16 @@ Protected Module Testing
 		  Dim recipkey As New libsodium.PKI.ForeignKey(SenderKey.Generate(SenderKey.RandomSeed))
 		  Dim nonce As MemoryBlock = SenderKey.RandomNonce
 		  
-		  Dim msg1 As String = "This is a test message."
-		  Dim crypted As String = libsodium.PKI.EncryptData(msg1, recipkey, senderkey, nonce)
-		  Dim msg2 As String = libsodium.PKI.DecryptData(crypted, recipkey, senderkey, nonce)
+		  Dim msg1 As MemoryBlock = "This is a test message."
+		  Dim crypted As MemoryBlock = libsodium.PKI.EncryptData(msg1, recipkey, senderkey, nonce)
+		  Dim msg2 As MemoryBlock = libsodium.PKI.DecryptData(crypted, recipkey, senderkey, nonce)
 		  
 		  Assert(msg1 = msg2)
 		  
 		  
 		  Dim SignKey As libsodium.PKI.SigningKey
-		  SignKey = SignKey.Import(TestSigningKey, TestPasswordValue)
-		  Dim verkey As New libsodium.PKI.ForeignKey(SignKey.Generate(SenderKey.RandomSeed))
+		  SignKey = SignKey.Generate'Import(TestSigningKey, TestPasswordValue)
+		  Dim verkey As New libsodium.PKI.ForeignKey(SignKey)
 		  
 		  crypted = libsodium.PKI.SignData(msg1, SignKey)
 		  msg2 = libsodium.PKI.VerifyData(crypted, verkey)
@@ -151,7 +151,7 @@ Protected Module Testing
 	#tag Method, Flags = &h21
 		Private Sub TestPKISign()
 		  Dim senderkey As libsodium.PKI.SigningKey
-		  senderkey = senderkey.Import(GetOpenFolderItem(""), TestPasswordValue)
+		  senderkey = senderkey.Generate'Import(GetOpenFolderItem(""), TestPasswordValue)
 		  Dim msg As MemoryBlock = "This is a test message."
 		  Dim sig As MemoryBlock = libsodium.PKI.SignData(msg, senderkey)
 		  Assert(libsodium.PKI.VerifyData(sig, senderkey.PublicKey) <> Nil)
@@ -274,6 +274,14 @@ Protected Module Testing
 		  Assert(libsodium.StrComp(msg, msg))
 		  Assert(Not libsodium.StrComp(msg, ConvertEncoding(msg, Encodings.UTF16)))
 		  Assert(Not libsodium.StrComp(msg, "adfsdfsdfsdf"))
+		  
+		  Dim m As MemoryBlock = DecodeHex("315f5bdb76d078c43b8ac0064e4a0164612b1fce77c869345bfc94c75894edd3")
+		  Dim h As MemoryBlock = libsodium.SHA256("Hello, world!")
+		  Assert(h = m)
+		  
+		  m = DecodeHex("c1527cd893c124773d811911970c8fe6e857d6df5dc9226bd8a160614c0cd963a4ddea2b94bb7d36021ef9d865d5cea294a82dd49a0bb269f51f6e7a57f79421")
+		  h = libsodium.SHA512("Hello, world!")
+		  Assert(h = m)
 		End Sub
 	#tag EndMethod
 
