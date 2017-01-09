@@ -143,19 +143,6 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function EncodeSignature(SigData As MemoryBlock) As MemoryBlock
-		  Dim out As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(out)
-		  bs.Write("-----BEGIN ED25519 SIGNATURE-----" + EndOfLine.Windows)
-		  bs.Write(EndOfLine.Windows)
-		  bs.Write(EncodeBase64(SigData) + EndOfLine.Windows)
-		  bs.Write("-----END ED25519 SIGNATURE-----" + EndOfLine.Windows)
-		  bs.Close
-		  Return out
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.ForeignKey, SenderPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a shared key, which is derived
 		  ' from the RecipientPublicKey and SenderPrivateKey, and a Nonce. A Poly1305 message authentication
