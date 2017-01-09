@@ -151,7 +151,7 @@ Protected Module Testing
 	#tag Method, Flags = &h21
 		Private Sub TestPKISign()
 		  Dim senderkey As libsodium.PKI.SigningKey
-		  senderkey = senderkey.Generate'Import(GetOpenFolderItem(""), TestPasswordValue)
+		  senderkey = senderkey.Import(TestSigningKey, TestPasswordValue)
 		  Dim msg As MemoryBlock = "This is a test message."
 		  Dim sig As MemoryBlock = libsodium.PKI.SignData(msg, senderkey)
 		  Assert(libsodium.PKI.VerifyData(sig, senderkey.PublicKey) <> Nil)
@@ -300,7 +300,7 @@ Protected Module Testing
 	#tag Constant, Name = TestSecretKey, Type = String, Dynamic = False, Default = \"-----BEGIN XSALSA20 KEY BLOCK-----\r#Salt\x3DjTBDkxcDwy/IwGNlvXl0Tw\x3D\x3D\r#Nonce\x3DiUGg2lC9OksFLwDZwZ7jPIIyTNhEcszo\r#Limits\x3DInteractive\r\rAETMF1emsH4TUf1Wm4C3XeenJFhwZ56nHj6M4ve43DFmE9aJREh1cX4ZJV1y+Ui5\r-----END XSALSA20 KEY BLOCK-----", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = TestSigningKey, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PUBLIC KEY BLOCK-----\r\rwqwM1IsH9vghjk+jNeMoAVLp4NwCqiWvJ3d5o6tVTCg\x3D\r-----END ED25519 PUBLIC KEY BLOCK-----\r-----BEGIN ED25519 PRIVATE KEY BLOCK-----\r#Salt\x3Df+C0Jejbwhwfyhh4txF9Ww\x3D\x3D\r#Nonce\x3DHEKurwUaMM0tPyP3AeXpXiXI+LDewWwl\r#Limits\x3DInteractive\r\rX5OoL1S1anFshbOHNK4dhj4McnP6WiRL3lU5DMXbd2ScFOB+OFZ+EZV30fcN5fDKZpNgGKnfxmdh\r9RHdAozkwW3SFqti1FC6wUyA0TLzQm4\x3D\r-----END ED25519 PRIVATE KEY BLOCK-----", Scope = Private
+	#tag Constant, Name = TestSigningKey, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PUBLIC KEY BLOCK-----\r\r2wnixPmaTtrQAvVfsnVuRgx722t8+/ucVnb0mGv8MRc\x3D\r-----END ED25519 PUBLIC KEY BLOCK-----\r-----BEGIN ED25519 PRIVATE KEY BLOCK-----\r#Salt\x3DfFRRYkW+0FUHgZ4M4rW/nw\x3D\x3D\r#Nonce\x3DXtNtXV/RKZOwaSwCeeQlBNM3P7GJP/Hq\r#Limits\x3DInteractive\r\rHa2tM9Kaby/GVIEvRXSJvfTCLfEjq3mQzlYBnhvyayXWLtbW7D4FnDKtXdiukd0hGLTmXPeR+5AE\rXh9jPNCC/dEsM/zrd+llwXq0TBXQAwg\x3D\r-----END ED25519 PRIVATE KEY BLOCK-----", Scope = Private
 	#tag EndConstant
 
 
