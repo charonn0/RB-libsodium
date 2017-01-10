@@ -19,7 +19,7 @@ Protected Module SKI
 	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Decrypts the CipherText using the XSalsa20 stream cipher with the specified Key and Nonce. A
-		  ' Poly1305 message authentication code is prepended by the EncryptData method and will be 
+		  ' Poly1305 message authentication code is prepended by the EncryptData method and will be
 		  ' validated by this method. The decrypted data is returned on success. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
 		  
@@ -99,7 +99,7 @@ Protected Module SKI
 	#tag Constant, Name = crypto_secretbox_MACBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_secretbox_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Protected
+	#tag Constant, Name = crypto_secretbox_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
 	#tag EndConstant
 
 
