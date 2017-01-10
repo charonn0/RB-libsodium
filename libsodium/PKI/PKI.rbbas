@@ -143,19 +143,6 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function EncodeSignature(SigData As MemoryBlock) As MemoryBlock
-		  Dim out As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(out)
-		  bs.Write("-----BEGIN ED25519 SIGNATURE-----" + EndOfLine.Windows)
-		  bs.Write(EndOfLine.Windows)
-		  bs.Write(EncodeBase64(SigData) + EndOfLine.Windows)
-		  bs.Write("-----END ED25519 SIGNATURE-----" + EndOfLine.Windows)
-		  bs.Close
-		  Return out
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.ForeignKey, SenderPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a shared key, which is derived
 		  ' from the RecipientPublicKey and SenderPrivateKey, and a Nonce. A Poly1305 message authentication
@@ -277,6 +264,30 @@ Protected Module PKI
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_sign_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportEncryptionPrivatePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 PRIVATE KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportEncryptionPrivateSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 PRIVATE KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportEncryptionPublicPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 PUBLIC KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportEncryptionPublicSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 PUBLIC KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportSigningPrivatePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PRIVATE KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportSigningPrivateSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PRIVATE KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportSigningPublicPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PUBLIC KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportSigningPublicSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PUBLIC KEY BLOCK-----", Scope = Private
 	#tag EndConstant
 
 

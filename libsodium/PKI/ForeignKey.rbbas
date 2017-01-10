@@ -14,24 +14,10 @@ Protected Class ForeignKey
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub Constructor(KeyData As MemoryBlock)
-		  Select Case True
-		  Case InStrB(KeyData, libsodium.PKI.SigningKey.PublicPrefix) > 0
-		    mKeyData = ExtractKey(KeyData, libsodium.PKI.SigningKey.PublicPrefix, libsodium.PKI.SigningKey.PublicSuffix)
-		    mType = KeyType.Signature
-		    CheckSize(mKeyData, crypto_sign_PUBLICKEYBYTES)
-		  Case InStrB(KeyData, libsodium.PKI.EncryptionKey.PublicPrefix) > 0
-		    mKeyData = ExtractKey(KeyData, libsodium.PKI.EncryptionKey.PublicPrefix, libsodium.PKI.EncryptionKey.PublicSuffix)
-		    mType = KeyType.Encryption
-		    CheckSize(mKeyData, crypto_box_PUBLICKEYBYTES)
-		  Case InStrB(KeyData, ExportPrefix) > 0
-		    mKeyData = ExtractKey(KeyData, ExportPrefix, ExportSuffix)
-		    mType = KeyType.Generic
-		  Else
-		    mKeyData = KeyData
-		    mType = KeyType.Unknown
-		  End Select
+	#tag Method, Flags = &h1
+		Protected Sub Constructor(KeyData As MemoryBlock)
+		  mKeyData = KeyData
+		  mType = KeyType.Unknown
 		End Sub
 	#tag EndMethod
 
@@ -48,25 +34,83 @@ Protected Class ForeignKey
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Export() As MemoryBlock
+		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
+		  ' Exports the ForeignKey in a format that is understood by ForeignKey.Import(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey.Export
+		  
+		  Try
+		    Dim bs As BinaryStream = BinaryStream.Create(SaveTo, OverWrite)
+		    bs.Write(Me.Export(Passwd))
+		    bs.Close
+		  Catch Err As IOException
+		    Return False
+		  End Try
+		  Return True
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
 		  Dim prefix, suffix As String
 		  Select Case mType
 		  Case KeyType.Signature
-		    prefix = libsodium.PKI.SigningKey.PublicPrefix
-		    suffix = libsodium.PKI.SigningKey.PublicSuffix
+		    prefix = ExportSigningPublicPrefix
+		    suffix = ExportSigningPublicSuffix
 		  Case KeyType.Encryption
-		    prefix = libsodium.PKI.EncryptionKey.PublicPrefix
-		    suffix = libsodium.PKI.EncryptionKey.PublicSuffix
+		    prefix = ExportEncryptionPublicPrefix
+		    suffix = ExportEncryptionPublicSuffix
 		  Else
 		    prefix = ExportPrefix
 		    suffix = ExportSuffix
 		  End Select
-		  bs.Write(PackKey(Me.Value, prefix, suffix))
+		  bs.Write(PackKey(Me.Value, prefix, suffix, Passwd))
 		  bs.Close
 		  Return data
 		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As FolderItem, Optional Passwd As libsodium.Password) As libsodium.PKI.ForeignKey
+		  ' Import a public key that was exported using ForeignKey.Export(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey.Import
+		  
+		  Dim bs As BinaryStream = BinaryStream.Open(ExportedKey)
+		  Dim keydata As MemoryBlock = bs.Read(bs.Length)
+		  bs.Close
+		  Return Import(keydata, Passwd)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function Import(KeyData As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.PKI.ForeignKey
+		  Dim typ As KeyType
+		  Dim key As MemoryBlock
+		  Select Case True
+		  Case InStrB(KeyData, ExportSigningPublicPrefix) > 0
+		    key = ExtractKey(KeyData, ExportSigningPublicPrefix, ExportSigningPublicSuffix, Passwd)
+		    typ = KeyType.Signature
+		    CheckSize(key, crypto_sign_PUBLICKEYBYTES)
+		  Case InStrB(KeyData, ExportEncryptionPublicPrefix) > 0
+		    key = ExtractKey(KeyData, ExportEncryptionPublicPrefix, ExportEncryptionPublicSuffix, Passwd)
+		    typ = KeyType.Encryption
+		    CheckSize(key, crypto_box_PUBLICKEYBYTES)
+		  Case InStrB(KeyData, ExportPrefix) > 0
+		    key = ExtractKey(KeyData, ExportPrefix, ExportSuffix, Passwd)
+		    typ = KeyType.Generic
+		  Else
+		    key = KeyData
+		    typ = KeyType.Unknown
+		  End Select
+		  Dim k As New ForeignKey(key)
+		  k.mType = typ
+		  Return k
 		End Function
 	#tag EndMethod
 

@@ -1,11 +1,11 @@
 #tag Class
 Protected Class SecretKey
-Inherits libsodium.SKI.KeyContainter
+Inherits libsodium.SKI.KeyContainer
 Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(FromPassword As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
 		  ' Compute a SecretKey from a hash of the password
-		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = RandomSalt
+		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = FromPassword.RandomSalt
 		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, Salt, Limits, HashAlgorithm)
 		  Super.Constructor(key)
 		  
@@ -15,18 +15,37 @@ Implements libsodium.Secureable
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(KeyData As MemoryBlock)
 		  // Calling the overridden superclass constructor.
+		  CheckSize(KeyData, crypto_secretbox_KEYBYTES)
 		  Super.Constructor(KeyData)
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Export() As MemoryBlock
+		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
+		  ' Exports the SecretKey in a format that is understood by SecretKey.Import(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Export
+		  
+		  Try
+		    Dim bs As BinaryStream = BinaryStream.Create(SaveTo, OverWrite)
+		    bs.Write(Me.Export(Passwd))
+		    bs.Close
+		  Catch Err As IOException
+		    Return False
+		  End Try
+		  Return True
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
 		  ' Exports the SecretKey in a format that is understood by SecretKey.Import
 		  '
 		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Export
 		  
-		  Return PackKey(Me.Value, ExportPrefix, ExportSuffix)
+		  Return PackKey(Me.Value, ExportPrefix, ExportSuffix, Passwd)
 		End Function
 	#tag EndMethod
 
@@ -39,13 +58,27 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Import(ExportedKey As MemoryBlock) As libsodium.SKI.SecretKey
+		 Shared Function Import(ExportedKey As FolderItem, Optional Passwd As libsodium.Password) As libsodium.SKI.SecretKey
+		  ' Import an SecretKey that was exported using SecretKey.Export(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
+		  
+		  Dim bs As BinaryStream = BinaryStream.Open(ExportedKey)
+		  Dim keydata As MemoryBlock = bs.Read(bs.Length)
+		  bs.Close
+		  Return Import(keydata, Passwd)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.SKI.SecretKey
 		  ' Import an SecretKey that was exported using SecretKey.Export
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
 		  
-		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportPrefix, ExportSuffix)
+		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportPrefix, ExportSuffix, Passwd)
 		  If sk <> Nil Then Return New SecretKey(sk)
 		End Function
 	#tag EndMethod
@@ -53,8 +86,7 @@ Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherKey As libsodium.SKI.SecretKey) As Integer
 		  If OtherKey Is Nil Then Return 1
-		  If libsodium.StrComp(Me.Value, OtherKey.Value) Then Return 0
-		  Return -1
+		  Return Super.Operator_Compare(OtherKey.Value)
 		End Function
 	#tag EndMethod
 
@@ -63,14 +95,6 @@ Implements libsodium.Secureable
 		  ' Returns random bytes that are suitable to be used as a Nonce.
 		  
 		  Return RandomBytes(crypto_secretbox_NONCEBYTES)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		 Shared Function RandomSalt() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a salt.
-		  
-		  Return RandomBytes(crypto_pwhash_SALTBYTES)
 		End Function
 	#tag EndMethod
 
@@ -107,10 +131,10 @@ Implements libsodium.Secureable
 	#tag EndNote
 
 
-	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN XSALSA20 KEY BLOCK-----", Scope = Public
+	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN XSALSA20 KEY BLOCK-----", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = ExportSuffix, Type = String, Dynamic = False, Default = \"-----END XSALSA20 KEY BLOCK-----", Scope = Public
+	#tag Constant, Name = ExportSuffix, Type = String, Dynamic = False, Default = \"-----END XSALSA20 KEY BLOCK-----", Scope = Private
 	#tag EndConstant
 
 
