@@ -22,7 +22,7 @@ Implements Readable,Writeable
 		  mNonce = Nonce
 		  mInput = Source
 		  mOutput = Destination
-		  mKey = New libsodium.SKI.KeyContainter(KeyData)
+		  mKey = New libsodium.SKI.KeyContainer(KeyData)
 		End Sub
 	#tag EndMethod
 
@@ -118,7 +118,7 @@ Implements Readable,Writeable
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
-		Protected mKey As libsodium.SKI.KeyContainter
+		Protected mKey As libsodium.SKI.KeyContainer
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
