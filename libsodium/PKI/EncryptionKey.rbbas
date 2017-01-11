@@ -181,7 +181,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Operator_Compare
 		  
 		  If OtherKey Is Nil Then Return 1
-		  Return Super.Operator_Compare(OtherKey.PrivateKey)
+		  Return Super.Operator_Compare(OtherKey)
 		End Function
 	#tag EndMethod
 
