@@ -119,6 +119,23 @@ Protected Module Testing
 		  msg2 = libsodium.PKI.DecryptData(crypted, sharedkey, nonce)
 		  
 		  Assert(msg1 = msg2)
+		  
+		  Dim msgs() As MemoryBlock
+		  Dim n As MemoryBlock = nonce
+		  For i As Integer = 0 To 10
+		    n = libsodium.IncrementNonce(n)
+		    Assert(n <> nonce)
+		    Dim m As MemoryBlock = libsodium.PKI.EncryptData(msg1, recipkey.PublicKey, senderkey, n)
+		    Assert(m <> Nil)
+		    msgs.Append(m)
+		  Next
+		  
+		  n = nonce
+		  For i As Integer = 0 To UBound(msgs)
+		    n = libsodium.IncrementNonce(n)
+		    Assert(n <> nonce)
+		    Assert(libsodium.PKI.DecryptData(msgs(i), senderkey.PublicKey, recipkey, n) = msg1)
+		  Next
 		End Sub
 	#tag EndMethod
 
@@ -282,6 +299,9 @@ Protected Module Testing
 		  m = DecodeHex("c1527cd893c124773d811911970c8fe6e857d6df5dc9226bd8a160614c0cd963a4ddea2b94bb7d36021ef9d865d5cea294a82dd49a0bb269f51f6e7a57f79421")
 		  h = libsodium.SHA512("Hello, world!")
 		  Assert(h = m)
+		  
+		  Dim n As MemoryBlock = libsodium.PKI.EncryptionKey.RandomNonce
+		  Assert(n <> libsodium.IncrementNonce(n))
 		End Sub
 	#tag EndMethod
 
