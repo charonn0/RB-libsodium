@@ -2,14 +2,6 @@
 Protected Class Password
 Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h0
-		Sub Constructor(Passwd As String)
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  // Calling the overridden superclass constructor.
-		  Super.Constructor(Passwd)
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Function DeriveKey(KeyLength As Int32, Salt As MemoryBlock, Limits As libsodium.ResourceLimits, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As MemoryBlock
 		  ' Computes a key of the specified KeySize using the password, Salt, and other parameters.
 		  
