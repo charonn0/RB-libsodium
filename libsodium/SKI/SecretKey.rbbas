@@ -4,7 +4,10 @@ Inherits libsodium.SKI.KeyContainer
 Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Sub Constructor(FromPassword As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
-		  ' Compute a SecretKey from a hash of the password
+		  ' Generates a secret key by deriving it from a salted hash of the password. The operation is
+		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
+		  ' parameters will produce the same output both times.
+		  
 		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = FromPassword.RandomSalt
 		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, Salt, Limits, HashAlgorithm)
 		  Super.Constructor(key)

@@ -37,6 +37,14 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_seal Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_seal_open Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr, PrivateKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_box_seed_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr, SeedData As Ptr) As Int32
 	#tag EndExternalMethod
 
@@ -177,6 +185,20 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function SealData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.ForeignKey) As MemoryBlock
+		  ' Seals the ClearText using the XSalsa20 stream cipher with the recipient's public key and an
+		  ' ephemeral private key. On error returns Nil.
+		  '
+		  ' See: https://download.libsodium.org/doc/public-key_cryptography/sealed_boxes.html
+		  
+		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_PUBLICKEYBYTES + crypto_box_MACBYTES)
+		  If crypto_box_seal(buffer, ClearText, ClearText.Size, RecipientPublicKey.Value) = 0 Then
+		    Return buffer
+		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function SignData(Message As MemoryBlock, SenderKey As libsodium.PKI.SigningKey, Detached As Boolean = False) As MemoryBlock
 		  ' Generate a Ed25519 signature for the Message using the SenderKey. If Detached=True then
 		  ' only the signature is returned; otherwise the signature is prepended to the message and
@@ -197,6 +219,20 @@ Protected Module PKI
 		  End If
 		  
 		  If signature <> Nil Then Return signature.StringValue(0, siglen)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function UnsealData(SealedBox As MemoryBlock, RecipientPrivateKey As libsodium.PKI.EncryptionKey) As MemoryBlock
+		  ' Decrypts the SealedBox using the XSalsa20 stream cipher with the recipient's private key. The decrypted
+		  ' data is returned  on success. On error returns Nil.
+		  '
+		  ' See: https://download.libsodium.org/doc/public-key_cryptography/sealed_boxes.html
+		  
+		  Dim buffer As New MemoryBlock(SealedBox.Size - crypto_box_PUBLICKEYBYTES - crypto_box_MACBYTES)
+		  If crypto_box_seal_open(Buffer, SealedBox, SealedBox.Size, RecipientPrivateKey.Publickey, RecipientPrivateKey.PrivateKey) = 0 Then
+		    Return buffer
+		  End If
 		End Function
 	#tag EndMethod
 

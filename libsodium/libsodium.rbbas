@@ -28,6 +28,35 @@ Protected Module libsodium
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h1
+		Protected Function CombineNonce(Nonce1 As MemoryBlock, Nonce2 As MemoryBlock) As MemoryBlock
+		  ' Combines Nonce1 with Nonce2 in constant time.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CombineNonce
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  Dim output As New MemoryBlock(Nonce1.Size)
+		  output.StringValue(0, output.Size) = Nonce1.StringValue(0, Nonce1.Size)
+		  sodium_add(output, Nonce2, Max(output.Size, Nonce2.Size))
+		  Return output
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function CompareNonce(Nonce1 As MemoryBlock, Nonce2 As MemoryBlock) As Int32
+		  ' Compares Nonce1 to Nonce2 in constant time. Returns 0 if they are equal, +1 if Nonce1
+		  ' is greater, or -1 if Nonce2 is greater.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CompareNonce
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
+		  Return sodium_compare(Nonce1, Nonce2, Max(Nonce1.Size, Nonce2.Size))
+		End Function
+	#tag EndMethod
+
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_generichash_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
 	#tag EndExternalMethod
@@ -102,6 +131,14 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_shorthash Lib "libsodium" (Buffer As Ptr, InputData As Ptr, InputDataSize As UInt64, Key As Ptr) As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_xor Lib "libsodium" (OutBuffer As Ptr, Message As Ptr, MsgSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
@@ -206,6 +243,22 @@ Protected Module libsodium
 		  End If
 		  h.Process(InputData)
 		  Return h.Value
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function IncrementNonce(Nonce As MemoryBlock) As MemoryBlock
+		  ' Increments the Nonce in constant time.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CompareNonce
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  
+		  Dim output As New MemoryBlock(Nonce.Size)
+		  output.StringValue(0, output.Size) = Nonce.StringValue(0, Nonce.Size)
+		  sodium_increment(output, output.Size)
+		  Return output
 		End Function
 	#tag EndMethod
 
@@ -465,6 +518,12 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_shorthash_KEYBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_CANT_ALLOC, Type = Double, Dynamic = False, Default = \"-5", Scope = Protected
