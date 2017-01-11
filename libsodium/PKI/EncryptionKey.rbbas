@@ -27,21 +27,22 @@ Inherits libsodium.PKI.KeyPair
 		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
 		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
 		  
-		  ' first convert the public key
+		  ' try to convert the public key. This might fail, but it's not fatal since
+		  ' the public key can be derived from the private key
 		  If crypto_sign_ed25519_pk_to_curve25519(pub, FromSigningKey.PublicKey) <> 0 Then
-		    Dim err As New SodiumException(ERR_CONVERSION_FAILED)
-		    err.Message = "This public key cannot be converted."
-		    Raise err
+		    pub = Nil
 		  End If
 		  
-		  ' then the private key
+		  ' convert the private key. If this fails then the key can't be converted
 		  If crypto_sign_ed25519_sk_to_curve25519(priv, FromSigningKey.PrivateKey) <> 0 Then
-		    Dim err As New SodiumException(ERR_CONVERSION_FAILED)
-		    err.Message = "This private key cannot be converted."
-		    Raise err
+		    Raise New SodiumException(ERR_CONVERSION_FAILED)
 		  End If
 		  
-		  Me.Constructor(priv, pub)
+		  If pub <> Nil Then 
+		    Me.Constructor(priv, pub) ' store the converted keys
+		  Else
+		    Me.Constructor(priv) ' derive the public key
+		  End If
 		End Sub
 	#tag EndMethod
 
@@ -181,7 +182,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Operator_Compare
 		  
 		  If OtherKey Is Nil Then Return 1
-		  Return Super.Operator_Compare(OtherKey.PrivateKey)
+		  Return Super.Operator_Compare(OtherKey)
 		End Function
 	#tag EndMethod
 
