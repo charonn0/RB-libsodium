@@ -102,7 +102,7 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomSalt() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a salt for use with an DeriveKey
+		  ' Returns random bytes that are suitable to be used as a salt for Password.DeriveKey
 		  
 		  Return RandomBytes(crypto_pwhash_SALTBYTES)
 		End Function
