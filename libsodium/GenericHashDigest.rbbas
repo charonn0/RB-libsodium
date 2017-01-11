@@ -17,11 +17,11 @@ Protected Class GenericHashDigest
 		    mHashSize = crypto_generichash_BYTES_MAX
 		    
 		  Case HashType.SHA256
-		    If KeyData <> Nil Then CheckSize(KeyData, crypto_generichash_KEYBYTES)
+		    If KeyData <> Nil Then CheckSize(KeyData, crypto_auth_hmacsha256_KEYBYTES)
 		    mHashSize = crypto_hash_sha256_BYTES
 		    
 		  Case HashType.SHA512
-		    If KeyData <> Nil Then CheckSize(KeyData, crypto_generichash_KEYBYTES)
+		    If KeyData <> Nil Then CheckSize(KeyData, crypto_auth_hmacsha512_KEYBYTES)
 		    mHashSize = crypto_hash_sha512_BYTES
 		    
 		  End Select
@@ -31,7 +31,28 @@ Protected Class GenericHashDigest
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(HashSize As UInt32, KeyData As MemoryBlock = Nil)
+		Sub Constructor(KeyData As libsodium.Password, Type As libsodium.HashType = libsodium.HashType.Generic)
+		  ' Instantiates the processor for hashing. If KeyData is specified then the hash is keyed using a derived key
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Constructor
+		  
+		  Dim k As Integer
+		  Select Case Type
+		  Case HashType.Generic
+		    k = crypto_generichash_KEYBYTES
+		  Case HashType.SHA256
+		    k = crypto_auth_hmacsha256_KEYBYTES
+		  Case HashType.SHA512
+		    k = crypto_auth_hmacsha512_KEYBYTES
+		  End Select
+		  
+		  Me.Constructor(Type, KeyData.DeriveKey(k, KeyData.RandomSalt, ResourceLimits.Interactive))
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Constructor(HashSize As UInt32, KeyData As MemoryBlock)
 		  ' Instantiates the processor for generic hashing.
 		  '
 		  ' See:
@@ -179,6 +200,12 @@ Protected Class GenericHashDigest
 		Protected mType As libsodium.HashType
 	#tag EndProperty
 
+
+	#tag Constant, Name = crypto_auth_hmacsha256_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_auth_hmacsha512_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
+	#tag EndConstant
 
 	#tag Constant, Name = crypto_hash_sha256_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
 	#tag EndConstant
