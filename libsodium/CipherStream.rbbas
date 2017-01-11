@@ -1,6 +1,12 @@
 #tag Class
 Protected Class CipherStream
 	#tag Method, Flags = &h0
+		Sub Constructor()
+		  Me.Constructor(RandomBytes(crypto_stream_KEYBYTES))
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Constructor(KeyData As libsodium.PKI.ForeignKey)
 		  Me.Constructor(KeyData.Value)
 		End Sub
@@ -16,24 +22,21 @@ Protected Class CipherStream
 
 	#tag Method, Flags = &h0
 		Function DeriveKey(Size As Int32, Optional Nonce As MemoryBlock) As MemoryBlock
-		  If Nonce = Nil Then Nonce = Me.RandomNonce()
-		  Return GetStreamBytes(Size, mKey.Value, Nonce)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		 Shared Function GetStreamBytes(Count As Int32, Key As libsodium.PKI.ForeignKey, Nonce As MemoryBlock) As MemoryBlock
+		  ' Returns the requested number of bytes from the key stream. Suitable for generating
+		  ' keys or other pseudo-random data
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If Nonce = Nil Then Nonce = Me.RandomNonce()
 		  CheckSize(Nonce, crypto_stream_NONCEBYTES)
-		  Dim mb As New MemoryBlock(Count)
-		  If crypto_stream(mb, mb.Size, Nonce, Key.Value) <> 0 Then Return Nil
+		  Dim mb As New MemoryBlock(Size)
+		  If crypto_stream(mb, mb.Size, Nonce, mKey.Value) <> 0 Then Return Nil
 		  Return mb
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function Process(Data As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  ' Encrypts or decrypts the Data.
+		  ' Encrypts or decrypts the Data by XOR'ing it with the key stream.
 		  
 		  CheckSize(Nonce, crypto_stream_NONCEBYTES)
 		  Dim output As New MemoryBlock(Data.Size)
