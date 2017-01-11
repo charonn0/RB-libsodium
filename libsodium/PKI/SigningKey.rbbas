@@ -18,7 +18,8 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock)
-		  ' Computes the public key from the private key
+		  ' Given a user's private key, this method computes their public key
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(PrivateKeyData, crypto_sign_SECRETKEYBYTES)
 		  

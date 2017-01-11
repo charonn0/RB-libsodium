@@ -226,7 +226,7 @@ Protected Module libsodium
 		    key = libsodium.SKI.DecryptData(key, sk, Nonce)
 		  End If
 		  
-		  Return Trim(key)
+		  If key <> Nil Then Return Trim(key)
 		End Function
 	#tag EndMethod
 
