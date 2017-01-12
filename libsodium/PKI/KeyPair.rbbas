@@ -8,6 +8,25 @@ Implements libsodium.Secureable
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function DeriveSubkey(SubkeySize As UInt32, Salt As MemoryBlock, AppID As MemoryBlock) As MemoryBlock
+		  CheckSize(Salt, crypto_generichash_blake2b_SALTBYTES)
+		  Dim subkey As New MemoryBlock(SubkeySize)
+		  CheckSize(subkey, 16, 64) ' 128 to 512 bits
+		  Dim err As Int32
+		  If AppID <> Nil Then
+		    CheckSize(AppID, crypto_generichash_blake2b_PERSONALBYTES)
+		    Dim v As MemoryBlock = Me.PrivateKey
+		    err = crypto_generichash_blake2b_salt_personal(Subkey, Subkey.Size, Nil, 0, v, v.Size, Salt, AppID)
+		  Else
+		    Dim v As MemoryBlock = Me.PrivateKey
+		    err = crypto_generichash_blake2b_salt_personal(Subkey, Subkey.Size, Nil, 0, v, v.Size, Salt, Nil)
+		  End If
+		  If err <> 1 Then Return Nil
+		  Return subkey
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Sub Lock()
 		  // Part of the libsodium.Secureable interface.
@@ -27,25 +46,6 @@ Implements libsodium.Secureable
 		  
 		  If OtherKey Is Nil Then Return 1
 		  Return mPrivate.Operator_Compare(OtherKey.PrivateKey)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function DeriveSubkey(SubkeySize As UInt32, Salt As MemoryBlock, AppID As MemoryBlock) As MemoryBlock
-		  CheckSize(Salt, crypto_generichash_blake2b_SALTBYTES)
-		  Dim subkey As New MemoryBlock(SubkeySize)
-		  CheckSize(subkey, 128 / 8, 512 / 8)
-		  Dim err As Int32
-		  If AppID <> Nil Then
-		    CheckSize(AppID, crypto_generichash_blake2b_PERSONALBYTES)
-		    Dim v As MemoryBlock = Me.Value
-		    err = crypto_generichash_blake2b_salt_personal(Subkey, Subkey.Size, Nil, 0, v, v.Size, Salt, AppID)
-		  Else
-		    Dim v As MemoryBlock = Me.Value
-		    err = crypto_generichash_blake2b_salt_personal(Subkey, Subkey.Size, Nil, 0, v, v.Size, Salt, Nil)
-		  End If
-		  If err <> 1 Then Return Nil
-		  Return subkey
 		End Function
 	#tag EndMethod
 
