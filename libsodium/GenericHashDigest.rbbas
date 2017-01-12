@@ -31,7 +31,7 @@ Protected Class GenericHashDigest
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(KeyData As libsodium.Password, Type As libsodium.HashType = libsodium.HashType.Generic)
+		Sub Constructor(KeyData As libsodium.Password, Salt As MemoryBlock, Type As libsodium.HashType = libsodium.HashType.Generic)
 		  ' Instantiates the processor for hashing. If KeyData is specified then the hash is keyed using a derived key
 		  '
 		  ' See:
@@ -47,7 +47,7 @@ Protected Class GenericHashDigest
 		    k = crypto_auth_hmacsha512_KEYBYTES
 		  End Select
 		  
-		  Me.Constructor(Type, KeyData.DeriveKey(k, KeyData.RandomSalt, ResourceLimits.Interactive))
+		  Me.Constructor(Type, KeyData.DeriveKey(k, Salt, ResourceLimits.Interactive))
 		End Sub
 	#tag EndMethod
 
