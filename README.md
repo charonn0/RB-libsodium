@@ -4,46 +4,24 @@
 **RB-libsodium** is a libsodium [binding](http://en.wikipedia.org/wiki/Language_binding) for Realbasic and Xojo ("classic" framework) projects. It is designed and tested using REALstudio 2011r4.3 on Windows 7. Library binaries for [a number of platforms](https://download.libsodium.org/libsodium/releases/) are available, or can built from source. 
 
 ##Example
-This example generates a private key, derives the corresponding public key, for both a sender and recipient; and encrypts and decrypts a message:
-
+This example generates and validates a password hash that is suitable to be stored in a database:
 ```vbnet
-  ' generate a new private key for the sender
-  Dim senderprivkey As MemoryBlock = libsodium.PKI.RandomKey()
-  ' derive the sender's public key
-  Dim senderkeys As libsodium.PKI.EncryptionKey = libsodium.PKI.EncryptionKey.Derive(senderprivkey) 
-  
-  ' generate a new private key for the recipient
-  Dim recipientprivkey As MemoryBlock = libsodium.PKI.RandomKey()
-  ' derive the recipient's public key
-  Dim recipientkeys As libsodium.PKI.EncryptionKey = libsodium.PKI.EncryptionKey.Derive(recipientprivkey)
-  
-  ' the nonce is not secret but shouldn't be reused
-  Dim nonce As MemoryBlock = libsodium.PKI.RandomNonce()
-  
-  ' encrypt the message
-  Dim cleartext As String = "Attack at dawn."
-  Dim crypttext As String = libsodium.PKI.EncryptData(cleartext, recipientkeys.PublicKey, senderkeys, nonce)
-  
-  ' decrypt the message
-  Dim decrypted As String = libsodium.PKI.DecryptData(crypttext, senderkeys.PublicKey, recipientkeys, nonce)
+  Dim pw As libsodium.Password = "seekrit"
+  Dim hash As String = pw.GenerateHash()
+  If Not pw.VerifyHash(hash) Then MsgBox("Bad password!")
 ```
+
 ##Hilights
-* Guarded heap allocations
-* Mark memory as non-swapable
-* Securely hash passwords using hard hash functions
-* Secret-key and public-key cryptography
+* [Password hashing](https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.GenerateHash) and [Password-based key derivation (PBKDF2)](https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.DeriveKey) using either Argon2 or scrypt
+* [Secret-key](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI) and [public-key](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI) cryptography
 * Key exchange
-* Secret-key message authentication 
-* Public-key message signatures
+* Secret-key [message authentication](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.GenerateMAC)
+* Public-key [message signatures](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SignData)
+* Fast generic or keyed hashing using [BLAKE2b](https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHash), [SHA512](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SHA512), or [SHA256](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SHA256)
+* [Secured memory](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock) allocations
 
 ##Synopsis
-
-***
-It is strongly recommended that you familiarize yourself with [libsodium](http://doc.libsodium.org/), as this documentation is for the wrapper itself and not the underlying library. 
-***
-
-The wrapper is divided into three main parts: secret-key (SKI), public-key (PKI), and non-cryptographic (everything else).
-
+RB-libsodium is designed to make it as hard as possible to write bad crypto code. For example signing keys can't be used to perform encryption, so methods that need a signing key will require an instance of the SigningKey class as a parameter; attempting to pass an EncryptionKey will generate a compiler error.
 
 ##How to incorporate libsodium into your Realbasic/Xojo project
 ###Import the libsodium module
@@ -57,4 +35,18 @@ libsodium is not ordinarily installed by default on most operating systems, you 
 RB-libsodium will raise a PlatformNotSupportedException when used if all required DLLs/SOs/DyLibs are not available at runtime. 
 
 ##Examples
-* [Secure memory](https://github.com/charonn0/RB-libcURL/wiki/Secure-Memory-Example)
+* [Secure memory](https://github.com/charonn0/RB-libsodium/wiki/Secure-Memory-Example)
+* [Password hashing](https://github.com/charonn0/RB-libsodium/wiki/Password-Example#generate-a-hash)
+* [Generic hashing](https://github.com/charonn0/RB-libsodium/wiki/Generic-Hash-Example)
+* PKI
+  * [Generate an encryption key](https://github.com/charonn0/RB-libsodium/wiki/PKI-Encryption-Examples#KeyGeneration)
+  * [Encrypt data](https://github.com/charonn0/RB-libsodium/wiki/PKI-Encryption-Examples#Encrypt)
+  * [Decrypt data](https://github.com/charonn0/RB-libsodium/wiki/PKI-Encryption-Examples#Decrypt)
+  * [Sign data](https://github.com/charonn0/RB-libsodium/wiki/PKI-Encryption-Examples#Sign)
+  * [Verify data](https://github.com/charonn0/RB-libsodium/wiki/PKI-Encryption-Examples#Verify)
+* SKI
+  * [Generate a key](https://github.com/charonn0/RB-libsodium/wiki/SKI-Encryption-Examples#KeyGeneration)
+  * [Encrypt data](https://github.com/charonn0/RB-libsodium/wiki/SKI-Encryption-Examples#Encrypt)
+  * [Decrypt data](https://github.com/charonn0/RB-libsodium/wiki/SKI-Encryption-Examples#Decrypt)
+  * [Generate a MAC](https://github.com/charonn0/RB-libsodium/wiki/SKI-Encryption-Examples#MAC)
+  * [Verify a MAC](https://github.com/charonn0/RB-libsodium/wiki/SKI-Encryption-Examples#MACVerify)

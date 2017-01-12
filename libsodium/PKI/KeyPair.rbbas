@@ -1,12 +1,33 @@
 #tag Class
 Protected Class KeyPair
-Inherits libsodium.SKI.KeyContainer
+Implements libsodium.Secureable
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
-		  // Calling the overridden superclass constructor.
-		  Super.Constructor(PrivateKeyData)
+		  mPrivate = New libsodium.SKI.KeyContainer(PrivateKeyData)
 		  mPublic = PublicKeyData
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub Lock()
+		  // Part of the libsodium.Secureable interface.
+		  
+		  Secureable(mPrivate).Lock
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Operator_Compare(OtherKey As libsodium.PKI.KeyPair) As Integer
+		  ' This method overloads the comparison operator (=) allowing direct comparisons between
+		  ' instances of KeyPair. The comparison operation itself is a constant-time binary
+		  ' comparison of the private key halves of both key pairs; the public halves are not compared.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.KeyPair.Operator_Compare
+		  
+		  If OtherKey Is Nil Then Return 1
+		  Return mPrivate.Operator_Compare(OtherKey.PrivateKey)
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -30,7 +51,7 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		Function PrivateKey() As MemoryBlock
-		  Return Me.Value()
+		  Return mPrivate.Value()
 		End Function
 	#tag EndMethod
 
@@ -49,11 +70,17 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Value() As MemoryBlock
-		  Return Super.Value
-		End Function
+		Protected Sub Unlock()
+		  // Part of the libsodium.Secureable interface.
+		  
+		  Secureable(mPrivate).Unlock
+		End Sub
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h1
+		Protected mPrivate As libsodium.SKI.KeyContainer
+	#tag EndProperty
 
 	#tag Property, Flags = &h1
 		Protected mPublic As MemoryBlock

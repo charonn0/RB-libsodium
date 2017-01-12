@@ -3,7 +3,9 @@ Protected Class SigningKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
-		  ' Generates a key pair by deriving it from a password.
+		  ' Generates a key pair by deriving it from a salted hash of the password. The operation is 
+		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits 
+		  ' parameters will produce the same output both times.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Constructor
@@ -16,7 +18,8 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock)
-		  ' Computes the public key from the private key
+		  ' Given a user's private key, this method computes their public key
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(PrivateKeyData, crypto_sign_SECRETKEYBYTES)
 		  
@@ -152,7 +155,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Operator_Compare
 		  
 		  If OtherKey Is Nil Then Return 1
-		  Return Super.Operator_Compare(OtherKey.PrivateKey)
+		  Return Super.Operator_Compare(OtherKey)
 		End Function
 	#tag EndMethod
 

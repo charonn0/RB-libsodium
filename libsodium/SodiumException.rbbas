@@ -6,13 +6,13 @@ Inherits RuntimeException
 		  Me.ErrorNumber = ErrorCode
 		  Select Case ErrorCode
 		  Case ERR_INIT_FAILED
-		    Me.Message = "libsodium could not be initialized."
+		    Me.Message = "libsodium can not be initialized."
 		    
 		  Case ERR_UNAVAILABLE
-		    Me.Message = "libsodium is not installed or failed to initialize."
+		    Me.Message = "libsodium is not installed."
 		    
 		  Case ERR_PROTECT_FAILED
-		    Me.Message = "Unable to set the memory protection level."
+		    Me.Message = "Unable to set the protection level for the specified memory range."
 		    
 		  Case ERR_CANT_ALLOC
 		    Me.Message = "Unable to create a buffer of the requested size."
@@ -21,16 +21,16 @@ Inherits RuntimeException
 		    Me.Message = "The data are too large for the buffer."
 		    
 		  Case ERR_READ_DENIED
-		    Me.Message = "The requested memory is secured and cannot be accessed."
+		    Me.Message = "The specified memory range is secured and can not be accessed."
 		    
 		  Case ERR_WRITE_DENIED
-		    Me.Message = "The requested memory is secured and cannot be modified."
+		    Me.Message = "The specified memory range is secured and can not be modified."
 		    
 		  Case ERR_LOCK_DENIED
-		    Me.Message = "The specified memory lock could not be modified."
+		    Me.Message = "The specified memory lock can not be modified."
 		    
 		  Case ERR_INVALID_STATE
-		    Me.Message = "The requested operation is illegal in the current state."
+		    Me.Message = "The requested operation is illegal in the current context."
 		    
 		  Case ERR_COMPUTATION_FAILED
 		    Me.Message = "The requested operation failed, possibly due to resource constraints."

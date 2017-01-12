@@ -1,32 +1,32 @@
 #tag Class
 Protected Class SharedSecret
 Inherits libsodium.SKI.KeyContainer
-	#tag Method, Flags = &h1001
-		Protected Sub Constructor(SharedKey As MemoryBlock)
-		  CheckSize(SharedKey, crypto_box_BEFORENMBYTES)
-		  // Calling the overridden superclass constructor.
-		  Super.Constructor(SharedKey)
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h1000
-		Sub Constructor(RecipientPublicKey As MemoryBlock, SenderPrivateKey As libsodium.PKI.EncryptionKey)
-		  ' Derives the shared key from the public half of the recipient's key pair and the 
-		  ' private half of the sender's key pair. This allows the key derivation calculation 
+		Sub Constructor(RecipientPublicKey As libsodium.PKI.ForeignKey, SenderPrivateKey As libsodium.PKI.EncryptionKey)
+		  ' Derives the shared key from the public half of the recipient's key pair and the
+		  ' private half of the sender's key pair. This allows the key derivation calculation
 		  ' to be performed once rather than on each Encrypt/Decrypt operation.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Constructor
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  CheckSize(RecipientPublicKey, crypto_box_PUBLICKEYBYTES)
+		  CheckSize(RecipientPublicKey.Value, crypto_box_PUBLICKEYBYTES)
 		  
 		  Dim buffer As New MemoryBlock(crypto_box_BEFORENMBYTES)
-		  If crypto_box_beforenm(buffer, RecipientPublicKey, SenderPrivateKey.PrivateKey) <> 0 Then 
+		  If crypto_box_beforenm(buffer, RecipientPublicKey.Value, SenderPrivateKey.PrivateKey) <> 0 Then
 		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		  End If
 		  // Calling the overridden superclass constructor.
 		  Super.Constructor(buffer)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1001
+		Protected Sub Constructor(SharedKey As MemoryBlock)
+		  CheckSize(SharedKey, crypto_box_BEFORENMBYTES)
+		  // Calling the overridden superclass constructor.
+		  Super.Constructor(SharedKey)
 		End Sub
 	#tag EndMethod
 
