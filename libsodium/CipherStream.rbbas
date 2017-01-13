@@ -36,7 +36,6 @@ Protected Class CipherStream
 		  ' Returns the requested number of bytes from the key stream. Suitable for generating
 		  ' keys or other pseudo-random data
 		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If Nonce = Nil Then Nonce = Me.RandomNonce()
 		  CheckSize(Nonce, crypto_stream_NONCEBYTES)
 		  Dim mb As New MemoryBlock(Size)
