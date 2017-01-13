@@ -1,5 +1,5 @@
 #tag Class
-Protected Class CipherStream
+Protected Class KeyStream
 	#tag Method, Flags = &h0
 		Sub Constructor()
 		  Me.Constructor(RandomBytes(crypto_stream_KEYBYTES))
@@ -58,11 +58,11 @@ Protected Class CipherStream
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomNonce() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a Nonce for use with CipherStream.Process
-		  ' and CipherStream.DeriveKey
+		  ' Returns random bytes that are suitable to be used as a Nonce for use with KeyStream.Process
+		  ' and KeyStream.DeriveKey
 		  '
 		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CipherStream.RandomNonce
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.RandomNonce
 		  
 		  Return RandomBytes(crypto_stream_NONCEBYTES)
 		End Function
