@@ -82,6 +82,10 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_hash_sha256_init Lib "libsodium" (State As Ptr, Key As Ptr, KeySize As Int32) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_hash_sha256_statebytes Lib "libsodium" () As UInt64
 	#tag EndExternalMethod
 
@@ -95,6 +99,10 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_hash_sha512_init Lib "libsodium" (State As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_hash_sha512_init Lib "libsodium" (State As Ptr, Key As Ptr, KeySize As Int32) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -226,7 +234,7 @@ Protected Module libsodium
 		    key = libsodium.SKI.DecryptData(key, sk, Nonce)
 		  End If
 		  
-		  Return Trim(key)
+		  If key <> Nil Then Return Trim(key)
 		End Function
 	#tag EndMethod
 
@@ -235,12 +243,7 @@ Protected Module libsodium
 		  ' Generates a 512-bit BLAKE2b digest of the InputData, optionally using the specified key.
 		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
-		  Dim h As GenericHashDigest
-		  If Key <> Nil Then
-		    h = New GenericHashDigest(Key, HashSize)
-		  Else
-		    h = New GenericHashDigest(HashType.Generic)
-		  End If
+		  Dim h As New GenericHashDigest(HashSize, Key)
 		  h.Process(InputData)
 		  Return h.Value
 		End Function
@@ -368,22 +371,22 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function SHA256(InputData As MemoryBlock) As String
+		Protected Function SHA256(InputData As MemoryBlock, HMACKey As MemoryBlock = Nil) As String
 		  ' Generates a SHA256 digest of the InputData
 		  ' https://download.libsodium.org/doc/advanced/sha-2_hash_function.html
 		  
-		  Dim h As New GenericHashDigest(HashType.SHA256)
+		  Dim h As New GenericHashDigest(HashType.SHA256, HMACKey)
 		  h.Process(InputData)
 		  Return h.Value
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function SHA512(InputData As MemoryBlock) As String
+		Protected Function SHA512(InputData As MemoryBlock, HMACKey As MemoryBlock = Nil) As String
 		  ' Generates a SHA256 digest of the InputData
 		  ' https://download.libsodium.org/doc/advanced/sha-2_hash_function.html
 		  
-		  Dim h As New GenericHashDigest(HashType.SHA512)
+		  Dim h As New GenericHashDigest(HashType.SHA512, HMACKey)
 		  h.Process(InputData)
 		  Return h.Value
 		End Function

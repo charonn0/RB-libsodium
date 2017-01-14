@@ -1,8 +1,19 @@
 #tag Class
-Protected Class CipherStream
+Protected Class KeyStream
 	#tag Method, Flags = &h0
 		Sub Constructor()
 		  Me.Constructor(RandomBytes(crypto_stream_KEYBYTES))
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Constructor(FromPassword As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
+		  ' Generates a key by deriving it from a salted hash of the password. The operation is
+		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
+		  ' parameters will produce the same output both times.
+		  
+		  If Salt = Nil Then Salt = FromPassword.RandomSalt
+		  Me.Constructor(FromPassword.DeriveKey(crypto_stream_KEYBYTES, Salt, Limits, HashAlgorithm))
 		End Sub
 	#tag EndMethod
 
@@ -12,8 +23,8 @@ Protected Class CipherStream
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub Constructor(KeyData As MemoryBlock)
+	#tag Method, Flags = &h1
+		Protected Sub Constructor(KeyData As MemoryBlock)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  CheckSize(KeyData, crypto_stream_KEYBYTES)
 		  mKey = New libsodium.SKI.KeyContainer(KeyData)
@@ -25,7 +36,6 @@ Protected Class CipherStream
 		  ' Returns the requested number of bytes from the key stream. Suitable for generating
 		  ' keys or other pseudo-random data
 		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If Nonce = Nil Then Nonce = Me.RandomNonce()
 		  CheckSize(Nonce, crypto_stream_NONCEBYTES)
 		  Dim mb As New MemoryBlock(Size)
@@ -48,6 +58,12 @@ Protected Class CipherStream
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomNonce() As MemoryBlock
+		  ' Returns random bytes that are suitable to be used as a Nonce for use with KeyStream.Process
+		  ' and KeyStream.DeriveKey
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.RandomNonce
+		  
 		  Return RandomBytes(crypto_stream_NONCEBYTES)
 		End Function
 	#tag EndMethod
