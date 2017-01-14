@@ -338,7 +338,19 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function randombytes_close Lib "libsodium" () As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function randombytes_random Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function randombytes_set_implementation Lib "libsodium" (Implementation As randombytes_implementation) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Sub randombytes_stir Lib "libsodium" ()
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -529,6 +541,9 @@ Protected Module libsodium
 	#tag Constant, Name = crypto_stream_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_BAD_RANDOM, Type = Double, Dynamic = False, Default = \"-19", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_CANT_ALLOC, Type = Double, Dynamic = False, Default = \"-5", Scope = Protected
 	#tag EndConstant
 
@@ -582,6 +597,16 @@ Protected Module libsodium
 
 	#tag Constant, Name = STRICT_CONVERT, Type = Boolean, Dynamic = False, Default = \"False", Scope = Private
 	#tag EndConstant
+
+
+	#tag Structure, Name = randombytes_implementation, Flags = &h21
+		Name As Ptr
+		  RandomInt As Ptr
+		  Stir As Ptr
+		  UnformInt As Ptr
+		  GenRandom As Ptr
+		CloseFunc As Ptr
+	#tag EndStructure
 
 
 	#tag Enum, Name = HashType, Type = Integer, Flags = &h1
