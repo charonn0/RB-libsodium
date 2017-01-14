@@ -1,12 +1,22 @@
 #tag Module
 Protected Module libsodium
 	#tag Method, Flags = &h1
-		Protected Function Argon2(InputData As MemoryBlock) As String
+		Protected Function Argon2(InputData As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As String
 		  ' Generates an Argon2 digest of the InputData
 		  ' https://download.libsodium.org/doc/password_hashing/the_argon2i_function.html
 		  
 		  Dim p As New libsodium.Password(InputData)
-		  Return p.GenerateHash(Password.ALG_ARGON2)
+		  Return p.GenerateHash(Password.ALG_ARGON2, Limits)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function Argon2Verify(InputData As MemoryBlock, HashValue As MemoryBlock) As Boolean
+		  ' Verifies an Argon2 digest of the InputData
+		  ' https://download.libsodium.org/doc/password_hashing/the_argon2i_function.html
+		  
+		  Dim p As New libsodium.Password(InputData)
+		  Return p.VerifyHash(HashValue, Password.ALG_ARGON2)
 		End Function
 	#tag EndMethod
 
@@ -158,7 +168,7 @@ Protected Module libsodium
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.DecodeHex
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  Dim output As New MemoryBlock(HexData.Size * 2 + 1)
+		  Dim output As New MemoryBlock(HexData.Size)
 		  Dim endhex As Ptr
 		  Dim ign As MemoryBlock = IgnoredChars + Chr(0)
 		  Dim sz As UInt32 = output.Size
@@ -361,12 +371,22 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function scrypt(InputData As MemoryBlock) As String
+		Protected Function scrypt(InputData As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As String
 		  ' Generates a scrypt digest of the InputData
 		  ' https://download.libsodium.org/doc/password_hashing/scrypt.html
 		  
 		  Dim p As New libsodium.Password(InputData)
-		  Return p.GenerateHash(Password.ALG_SCRYPT)
+		  Return p.GenerateHash(Password.ALG_SCRYPT, Limits)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function ScryptVerify(InputData As MemoryBlock, HashValue As MemoryBlock) As Boolean
+		  ' Verifies an scrypt digest of the InputData
+		  ' https://download.libsodium.org/doc/password_hashing/scrypt.html
+		  
+		  Dim p As New libsodium.Password(InputData)
+		  Return p.VerifyHash(HashValue, Password.ALG_SCRYPT)
 		End Function
 	#tag EndMethod
 
