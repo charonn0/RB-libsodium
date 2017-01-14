@@ -62,6 +62,7 @@ Protected Class GenericHashDigest
 		  
 		  mType = HashType.Generic
 		  If KeyData <> Nil Then CheckSize(KeyData, crypto_generichash_KEYBYTES)
+		  mKey = KeyData
 		  mHashSize = HashSize
 		  Me.Reset()
 		End Sub
