@@ -1,6 +1,14 @@
 #tag Module
 Protected Module SKI
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_aead_chacha20poly1305_ietf_decrypt Lib "libsodium" (Buffer As Ptr, ByRef BufferSize As UInt64, Reserved As Ptr, CipherText As Ptr, CipherTextSize As UInt64, AdditionalData As Ptr, AdditionalDataSize As UInt64, Nonce As Ptr, SecretKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_aead_chacha20poly1305_ietf_encrypt Lib "libsodium" (Buffer As Ptr, BufferSize As UInt64, Message As Ptr, MessageSize As UInt64, AdditionalData As Ptr, AdditionalDataSize As UInt64, Reserved As Ptr, Nonce As Ptr, SecretKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_auth Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
 	#tag EndExternalMethod
 
@@ -39,6 +47,29 @@ Protected Module SKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function DecryptDataAEAD(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, AdditionalData As MemoryBlock) As MemoryBlock
+		  ' Authenticated Encryption with Additional Data (AEAD) verifies that the CipherText includes a valid
+		  ' message authentication code using the SecretKey, a public nonce, and optional additional data. If 
+		  ' the verification succeeds, the function returns the decrypted message. On error returns Nil.
+		  
+		  CheckSize(Key.Value, crypto_aead_chacha20poly1305_IETF_KEYBYTES)
+		  CheckSize(Nonce, crypto_aead_chacha20poly1305_IETF_NPUBBYTES)
+		  
+		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_aead_chacha20poly1305_IETF_ABYTES)
+		  Dim buffersz As UInt64 = buffer.Size
+		  
+		  If AdditionalData <> Nil Then
+		    If crypto_aead_chacha20poly1305_ietf_decrypt(Buffer, buffersz, Nil, CipherText, CipherText.Size, _
+		      AdditionalData, AdditionalData.Size, Nonce, Key.Value) <> 0 Then Return Nil
+		    Else
+		      If crypto_aead_chacha20poly1305_ietf_decrypt(Buffer, buffersz, Nil, CipherText, CipherText.Size, _
+		        Nil, 0, Nonce, Key.Value) <> 0 Then Return Nil
+		      End If
+		      Return buffer.StringValue(0, buffersz)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function EncryptData(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the specified Key and Nonce. A
 		  ' Poly1305 message authentication code is also generated and prepended to the returned encrypted
@@ -58,6 +89,31 @@ Protected Module SKI
 		  If crypto_secretbox_easy(buffer, ClearText, ClearText.Size, Nonce, Key) = 0 Then
 		    Return buffer
 		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function EncryptDataAEAD(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, AdditionalData As MemoryBlock) As MemoryBlock
+		  ' Authenticated Encryption with Additional Data (AEAD) encrypts the ClearText using a secret key 
+		  ' and public nonce. A message authentication code for both the encrypted message and the optional
+		  ' AdditionalData is computed and prepended to the encrypted message. AdditionalData may be Nil 
+		  ' if no additional data are required. 
+		  '
+		  ' The public nonce should never ever be reused with the same key. The recommended way to generate
+		  ' it is to use libsodium.RandomBytes for the first message, and increment it for each subsequent
+		  ' message using the same key.
+		  
+		  CheckSize(Key.Value, crypto_aead_chacha20poly1305_IETF_KEYBYTES)
+		  CheckSize(Nonce, crypto_aead_chacha20poly1305_IETF_NPUBBYTES)
+		  
+		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_aead_chacha20poly1305_IETF_ABYTES)
+		  If AdditionalData <> Nil Then
+		    If crypto_aead_chacha20poly1305_ietf_encrypt(buffer, buffer.Size, ClearText, ClearText.Size, _
+		      AdditionalData, AdditionalData.Size, Nil, Nonce, Key.Value) = 0 Then Return buffer
+		    Else
+		      If crypto_aead_chacha20poly1305_ietf_encrypt(buffer, buffer.Size, ClearText, ClearText.Size, _
+		        Nil, 0, Nil, Nonce, Key.Value) = 0 Then Return buffer
+		      End If
 		End Function
 	#tag EndMethod
 
@@ -86,6 +142,15 @@ Protected Module SKI
 		End Function
 	#tag EndMethod
 
+
+	#tag Constant, Name = crypto_aead_chacha20poly1305_IETF_ABYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_aead_chacha20poly1305_IETF_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_aead_chacha20poly1305_IETF_NPUBBYTES, Type = Double, Dynamic = False, Default = \"12", Scope = Private
+	#tag EndConstant
 
 	#tag Constant, Name = crypto_auth_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
