@@ -1,30 +1,44 @@
 #tag Module
 Protected Module libsodium
 	#tag Method, Flags = &h1
-		Protected Function Argon2(InputData As MemoryBlock) As String
+		Protected Function Argon2(InputData As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As String
 		  ' Generates an Argon2 digest of the InputData
 		  ' https://download.libsodium.org/doc/password_hashing/the_argon2i_function.html
 		  
 		  Dim p As New libsodium.Password(InputData)
-		  Return p.GenerateHash(Password.ALG_ARGON2)
+		  Return p.GenerateHash(Password.ALG_ARGON2, Limits)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function Argon2Verify(InputData As MemoryBlock, HashValue As MemoryBlock) As Boolean
+		  ' Verifies an Argon2 digest of the InputData
+		  ' https://download.libsodium.org/doc/password_hashing/the_argon2i_function.html
+		  
+		  Dim p As New libsodium.Password(InputData)
+		  Return p.VerifyHash(HashValue, Password.ALG_ARGON2)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub CheckSize(Data As MemoryBlock, Expected As Int64, Upperbound As Int64 = 0)
+		Private Sub CheckSize(Size As Int64, Expected As Int64, Upperbound As Int64 = 0)
 		  Dim err As SodiumException
 		  Select Case True
-		  Case Data = Nil
-		    Return
-		  Case Upperbound > 0 And (Data.Size > Upperbound Or Data.Size < Expected)
+		  Case Upperbound > 0 And (Size > Upperbound Or Size < Expected)
 		    err = New SodiumException(ERR_OUT_OF_RANGE)
-		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
-		  Case Data.Size <> Expected And Upperbound = 0
+		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Size, "############0") + ")"
+		  Case Size <> Expected And Upperbound = 0
 		    err = New SodiumException(ERR_SIZE_MISMATCH)
-		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
+		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "; Got: " + Format(Size, "############0") + ")"
 		  End Select
 		  
 		  If err <> Nil Then Raise err
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub CheckSize(Data As MemoryBlock, Expected As Int64, Upperbound As Int64 = 0)
+		  If Data <> Nil Then CheckSize(Data, Expected, Upperbound)
 		End Sub
 	#tag EndMethod
 
@@ -158,7 +172,7 @@ Protected Module libsodium
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.DecodeHex
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  Dim output As New MemoryBlock(HexData.Size * 2 + 1)
+		  Dim output As New MemoryBlock(HexData.Size)
 		  Dim endhex As Ptr
 		  Dim ign As MemoryBlock = IgnoredChars + Chr(0)
 		  Dim sz As UInt32 = output.Size
@@ -361,12 +375,22 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function scrypt(InputData As MemoryBlock) As String
+		Protected Function Scrypt(InputData As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As String
 		  ' Generates a scrypt digest of the InputData
 		  ' https://download.libsodium.org/doc/password_hashing/scrypt.html
 		  
 		  Dim p As New libsodium.Password(InputData)
-		  Return p.GenerateHash(Password.ALG_SCRYPT)
+		  Return p.GenerateHash(Password.ALG_SCRYPT, Limits)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function ScryptVerify(InputData As MemoryBlock, HashValue As MemoryBlock) As Boolean
+		  ' Verifies an scrypt digest of the InputData
+		  ' https://download.libsodium.org/doc/password_hashing/scrypt.html
+		  
+		  Dim p As New libsodium.Password(InputData)
+		  Return p.VerifyHash(HashValue, Password.ALG_SCRYPT)
 		End Function
 	#tag EndMethod
 
