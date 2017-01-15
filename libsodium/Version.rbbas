@@ -1,5 +1,17 @@
 #tag Module
 Protected Module Version
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_aead_aes256gcm_is_available Lib "libsodium" () As Int32
+	#tag EndExternalMethod
+
+	#tag Method, Flags = &h1
+		Protected Function HasAES256GCM() As Boolean
+		  If libsodium.IsAvailable Then
+		    Return crypto_aead_aes256gcm_is_available = 1
+		  End If
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Function HasAESNI() As Boolean
 		  If System.IsFunctionAvailable("sodium_runtime_has_aesni", "libsodium") Then 
