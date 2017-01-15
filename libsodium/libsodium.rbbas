@@ -21,20 +21,24 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub CheckSize(Data As MemoryBlock, Expected As Int64, Upperbound As Int64 = 0)
+		Private Sub CheckSize(Size As Int64, Expected As Int64, Upperbound As Int64 = 0)
 		  Dim err As SodiumException
 		  Select Case True
-		  Case Data = Nil
-		    Return
-		  Case Upperbound > 0 And (Data.Size > Upperbound Or Data.Size < Expected)
+		  Case Upperbound > 0 And (Size > Upperbound Or Size < Expected)
 		    err = New SodiumException(ERR_OUT_OF_RANGE)
-		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
-		  Case Data.Size <> Expected And Upperbound = 0
+		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Size, "############0") + ")"
+		  Case Size <> Expected And Upperbound = 0
 		    err = New SodiumException(ERR_SIZE_MISMATCH)
-		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "; Got: " + Format(Data.Size, "############0") + ")"
+		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "; Got: " + Format(Size, "############0") + ")"
 		  End Select
 		  
 		  If err <> Nil Then Raise err
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub CheckSize(Data As MemoryBlock, Expected As Int64, Upperbound As Int64 = 0)
+		  If Data <> Nil Then CheckSize(Data, Expected, Upperbound)
 		End Sub
 	#tag EndMethod
 
@@ -371,7 +375,7 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function scrypt(InputData As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As String
+		Protected Function Scrypt(InputData As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As String
 		  ' Generates a scrypt digest of the InputData
 		  ' https://download.libsodium.org/doc/password_hashing/scrypt.html
 		  
