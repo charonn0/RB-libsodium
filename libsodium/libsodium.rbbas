@@ -38,7 +38,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h21
 		Private Sub CheckSize(Data As MemoryBlock, Expected As Int64, Upperbound As Int64 = 0)
-		  If Data <> Nil Then CheckSize(Data, Expected, Upperbound)
+		  If Data <> Nil Then CheckSize(Data.Size, Expected, Upperbound)
 		End Sub
 	#tag EndMethod
 
