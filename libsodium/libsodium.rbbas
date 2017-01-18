@@ -80,7 +80,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_generichash_statebytes Lib "libsodium" () As UInt64
+		Private Soft Declare Function crypto_generichash_statebytes Lib "libsodium" () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
