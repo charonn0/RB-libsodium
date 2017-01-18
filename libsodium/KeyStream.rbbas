@@ -1,5 +1,5 @@
 #tag Class
-Protected Class CipherStream
+Protected Class KeyStream
 	#tag Method, Flags = &h0
 		Sub Constructor()
 		  Me.Constructor(RandomBytes(crypto_stream_KEYBYTES))
@@ -36,7 +36,6 @@ Protected Class CipherStream
 		  ' Returns the requested number of bytes from the key stream. Suitable for generating
 		  ' keys or other pseudo-random data
 		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If Nonce = Nil Then Nonce = Me.RandomNonce()
 		  CheckSize(Nonce, crypto_stream_NONCEBYTES)
 		  Dim mb As New MemoryBlock(Size)
@@ -59,11 +58,11 @@ Protected Class CipherStream
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomNonce() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a Nonce for use with CipherStream.Process
-		  ' and CipherStream.DeriveKey
+		  ' Returns random bytes that are suitable to be used as a Nonce for use with KeyStream.Process
+		  ' and KeyStream.DeriveKey
 		  '
 		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CipherStream.RandomNonce
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.RandomNonce
 		  
 		  Return RandomBytes(crypto_stream_NONCEBYTES)
 		End Function
