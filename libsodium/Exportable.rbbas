@@ -1,7 +1,38 @@
 #tag Class
-Private Class Exportable
+Protected Class Exportable
+	#tag Method, Flags = &h21
+		Private Sub Constructor(Optional Passwd As libsodium.Password)
+		  mPasswd = Passwd
+		  If mPasswd <> Nil Then
+		    mPasswdSalt = mPasswd.RandomSalt
+		    mNonce = libsodium.SKI.SecretKey.RandomNonce
+		  End If
+		  mMetaData = New Dictionary
+		  mPasswdLimits = ResourceLimits.Interactive
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
-		Sub Constructor(ExportedKey As MemoryBlock, Type As DataType, Prefix As String, Suffix As String, Optional Passwd As libsodium.Password)
+		Sub Constructor(ExportedKey As libsodium.PKI.EncryptionKey, Optional Passwd As libsodium.Password)
+		  mData = ExportedKey.PrivateKey
+		  mNonce = ExportedKey.RandomNonce
+		  mPrefix = ExportEncryptionPrivatePrefix
+		  mSuffix = ExportEncryptionPrivateSuffix
+		  Me.Constructor(Passwd)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Constructor(ExportedKey As libsodium.PKI.SigningKey, Optional Passwd As libsodium.Password)
+		  mData = ExportedKey.PrivateKey
+		  mPrefix = ExportSigningPrivatePrefix
+		  mSuffix = ExportSigningPrivateSuffix
+		  Me.Constructor(Passwd)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Constructor1(ExportedKey As MemoryBlock, Type As ExportableType, Prefix As String, Suffix As String, Optional Passwd As libsodium.Password)
 		  ExportedKey = ReplaceLineEndings(ExportedKey, EndOfLine.Windows)
 		  mType = Type
 		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
@@ -96,6 +127,66 @@ Private Class Exportable
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		 Shared Function ParseKey(ExportedKey As MemoryBlock, Type As ExportableType, Prefix As String, Suffix As String, Optional Passwd As libsodium.Password) As libsodium.Exportable
+		  Dim ret As New Exportable
+		  ExportedKey = ReplaceLineEndings(ExportedKey, EndOfLine.Windows)
+		  ret.mType = Type
+		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
+		  Dim i As Integer
+		  Do Until Ubound(lines) <= i Or lines(i) = Prefix
+		    i = i + 1
+		  Loop
+		  If i = UBound(lines) Then Raise New UnsupportedFormatException
+		  
+		  ret.mData = New MemoryBlock(0)
+		  ret.mMetaData = New Dictionary
+		  Dim output As New BinaryStream(ret.mData)
+		  
+		  For i = i + 1 To UBound(lines)
+		    Dim s As String = lines(i)
+		    Select Case True
+		    Case Left(s, 6) = "#Salt="
+		      ret.mPasswdSalt = DecodeBase64(Right(s, s.Len - 6))
+		    Case Left(s, 7) = "#Nonce="
+		      ret.mNonce = DecodeBase64(Right(s, s.Len - 7))
+		    Case Left(s, 8) = "#Limits="
+		      Select Case Right(s, s.Len - 8)
+		      Case "Interactive"
+		        ret.mPasswdLimits = ResourceLimits.Interactive
+		      Case "Moderate"
+		        ret.mPasswdLimits = ResourceLimits.Moderate
+		      Case "Sensitive"
+		        ret.mPasswdLimits = ResourceLimits.Sensitive
+		      Else
+		        Raise New UnsupportedFormatException
+		      End Select
+		    Case Left(s, 1) = "#", s.Trim = "" ' comment/blank line
+		      If Left(s, 1) = "#" And s.Len > 1 Then
+		        Dim n As String = NthField(s, "=", 1)
+		        Dim v As String = Right(s, s.Len - n.Len)
+		        n = Right(n, n.Len - 1)
+		        ret.mMetaData.Value(n) = v
+		      End If
+		      Continue
+		    Case s = Suffix
+		      Exit For
+		    Else
+		      output.Write(s + EndOfLine.Windows)
+		    End Select
+		  Next
+		  output.Close
+		  ret.mData = DecodeBase64(ret.mData.Trim)
+		  If Passwd <> Nil Then
+		    Dim sk As New libsodium.SKI.SecretKey(Passwd, ret.mPasswdSalt, ret.mPasswdLimits)
+		    ret.mData = libsodium.SKI.DecryptData(ret.mData, sk, ret.mNonce)
+		  End If
+		  
+		  If ret.mData <> Nil Then ret.mData = Trim(ret.mData) Else Raise New UnsupportedFormatException
+		  Return ret
+		End Function
+	#tag EndMethod
+
 
 	#tag Property, Flags = &h21
 		Private mData As MemoryBlock
@@ -130,25 +221,87 @@ Private Class Exportable
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mType As DataType
+		Private mType As ExportableType
 	#tag EndProperty
 
 
-	#tag Enum, Name = DataType, Type = Integer, Flags = &h0
-		EncryptionSecretKey
-		  EncryptionPublicKey
-		  SigningSecretKey
-		  SigningPublicKey
-		  SecretKey
-		  PKINonce
-		  SKINonce
-		  ArgonSalt
-		  ScryptSalt
-		  PKIMessage
-		  SKIMessage
-		MAC
-	#tag EndEnum
+	#tag Constant, Name = ExportEncryptionPrivatePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 PRIVATE KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportEncryptionPrivateSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 PRIVATE KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportEncryptionPublicPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 PUBLIC KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportEncryptionPublicSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 PUBLIC KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportMessagePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 MESSAGE-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportMessageSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 MESSAGE-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportNoncePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 NONCE-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportNonceSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 NONCE-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN XSALSA20 KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportSigningPrivatePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PRIVATE KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportSigningPrivateSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PRIVATE KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportSigningPublicPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PUBLIC KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportSigningPublicSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PUBLIC KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = ExportSuffix, Type = String, Dynamic = False, Default = \"-----END XSALSA20 KEY BLOCK-----", Scope = Private
+	#tag EndConstant
 
 
+	#tag ViewBehavior
+		#tag ViewProperty
+			Name="Index"
+			Visible=true
+			Group="ID"
+			InitialValue="-2147483648"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Left"
+			Visible=true
+			Group="Position"
+			InitialValue="0"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Name"
+			Visible=true
+			Group="ID"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Super"
+			Visible=true
+			Group="ID"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+		#tag ViewProperty
+			Name="Top"
+			Visible=true
+			Group="Position"
+			InitialValue="0"
+			InheritedFrom="Object"
+		#tag EndViewProperty
+	#tag EndViewBehavior
 End Class
 #tag EndClass
