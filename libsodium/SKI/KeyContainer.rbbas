@@ -10,6 +10,7 @@ Implements libsodium.Secureable
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.KeyContainer.Constructor
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If KeyData.Size < 0 Then Raise New OutOfBoundsException ' can't pass a MemoryBlock of unknown size
 		  If RuntimeKey = Nil Then RuntimeKey = RandomBytes(crypto_secretbox_KEYBYTES)
 		  mSessionNonce = libsodium.SKI.SecretKey.RandomNonce
 		  mKeyData = libsodium.SKI.EncryptData(KeyData, RuntimeKey, mSessionNonce)
