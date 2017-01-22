@@ -72,6 +72,42 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_auth_hmacsha256_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_auth_hmacsha256_init Lib "libsodium" (State As Ptr, Key As Ptr, KeySize As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_auth_hmacsha256_update Lib "libsodium" (State As Ptr, InputBuffer As Ptr, InputSize As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_auth_hmacsha512256_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_auth_hmacsha512256_init Lib "libsodium" (State As Ptr, Key As Ptr, KeySize As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_auth_hmacsha512256_update Lib "libsodium" (State As Ptr, InputBuffer As Ptr, InputSize As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_auth_hmacsha512_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_auth_hmacsha512_init Lib "libsodium" (State As Ptr, Key As Ptr, KeySize As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_auth_hmacsha512_update Lib "libsodium" (State As Ptr, InputBuffer As Ptr, InputSize As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_generichash_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
 	#tag EndExternalMethod
 
@@ -634,6 +670,12 @@ Protected Module libsodium
 		Sensitive
 		  Moderate
 		Interactive
+	#tag EndEnum
+
+	#tag Enum, Name = SHAType, Type = Integer, Flags = &h1
+		SHA512
+		  SHA256
+		SHA512_256
 	#tag EndEnum
 
 

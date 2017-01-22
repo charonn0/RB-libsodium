@@ -21,6 +21,7 @@ Class=SecureMemoryBlock;libsodium/SecureMemoryBlock.rbbas;&h71AA47FF;&h7228CFFF;
 Class=SigningKey;libsodium/PKI/SigningKey.rbbas;&h4BD427FF;&h1F9A4FFF;false
 Class=EncryptionKey;libsodium/PKI/EncryptionKey.rbbas;&h626097FF;&h1F9A4FFF;false
 FileTypeSet=SodiumFileTypes;SodiumFileTypes.rbbas;&hA6E5FFF;&h0;false
+Class=HMACDigest;libsodium/HMACDigest.rbbas;&h25D26FFF;&h7228CFFF;false
 MajorVersion=1
 MinorVersion=0
 SubVersion=0
