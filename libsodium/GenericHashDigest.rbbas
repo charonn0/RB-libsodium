@@ -37,7 +37,7 @@ Protected Class GenericHashDigest
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Constructor
 		  
-		  Dim k As Integer
+		  Dim k As Int32
 		  Select Case Type
 		  Case HashType.Generic
 		    k = crypto_generichash_KEYBYTES
@@ -117,7 +117,7 @@ Protected Class GenericHashDigest
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Reset
 		  
-		  Dim sz As UInt64
+		  Dim sz As UInt32
 		  Select Case mType
 		  Case HashType.Generic
 		    sz = crypto_generichash_statebytes()
