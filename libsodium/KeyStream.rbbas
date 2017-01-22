@@ -2,13 +2,15 @@
 Protected Class KeyStream
 	#tag Method, Flags = &h0
 		Sub Constructor()
+		  ' Generates a random key stream. 
+		  
 		  Me.Constructor(RandomBytes(crypto_stream_KEYBYTES))
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub Constructor(FromPassword As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
-		  ' Generates a key by deriving it from a salted hash of the password. The operation is
+		  ' Generates a key stream by deriving it from a salted hash of the password. The operation is
 		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
 		  ' parameters will produce the same output both times.
 		  
@@ -19,6 +21,8 @@ Protected Class KeyStream
 
 	#tag Method, Flags = &h0
 		Sub Constructor(KeyData As libsodium.PKI.ForeignKey)
+		  ' Uses the KeyData as the key for the key stream
+		  
 		  Me.Constructor(KeyData.Value)
 		End Sub
 	#tag EndMethod
