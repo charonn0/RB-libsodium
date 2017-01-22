@@ -73,6 +73,26 @@ Protected Class KeyStream
 	#tag EndMethod
 
 
+	#tag Note, Name = About key streams
+		The DeriveKey method, viewed as a function of the nonce for a uniform random key, is designed to meet the standard notion
+		of unpredictability ("PRF"). For a formal definition see, e.g., Section 2.3 of Bellare, Kilian, and Rogaway, "The security of the 
+		cipher block chaining message authentication code," Journal of Computer and System Sciences 61 (2000), 362–399; 
+		http://www-cse.ucsd.edu/~mihir/papers/cbc.html.
+		
+		This means that an attacker cannot distinguish this function from a uniform random function. Consequently, if a series of messages 
+		is encrypted by the Process method with a different nonce for each message, the ciphertexts are indistinguishable from uniform random 
+		strings of the same length.
+		
+		Note that the length is not hidden. Note also that it is the caller's responsibility to ensure the uniqueness of nonces—for example, 
+		by using nonce 1 for the first message, nonce 2 for the second message, etc. Nonces are long enough that randomly generated nonces 
+		have negligible risk of collision.
+		
+		libsodium does not make any promises regarding the resistance of the derived keys to "related-key attacks." It is the caller's 
+		responsibility to use proper key-derivation functions. All of the public Constructor methods derive proper keys.
+		
+	#tag EndNote
+
+
 	#tag Property, Flags = &h1
 		Protected mKey As libsodium.SKI.KeyContainer
 	#tag EndProperty
