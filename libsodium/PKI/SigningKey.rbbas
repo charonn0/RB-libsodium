@@ -195,16 +195,18 @@ Inherits libsodium.PKI.KeyPair
 		Signing is done using the Ed25519 digital signature algorithm.
 		
 		
-		To generate a brand new signing key use the libsodium.PKI.SigningKey.Generate() method, optionally
+		To generate a brand new signing key use the .Generate() method, optionally
 		passing in some seed data.
 		
-		     Dim sigk As libsodium.PKI.SigningKey = libsodium.PKI.SigningKey.Generate()
+		     Dim sigk As libsodium.PKI.SigningKey
+		     sigk = sigk.Generate()
 		
-		To derive SigningKey key from a password string use the Constructor method. Derivation requires a random salt, 
-		which you should get from the SecretKey.RandomSalt() shared method:
+		To derive SigningKey key from a password use the Constructor method. 
+		Derivation requires a random salt, which you should get from the 
+		Password.RandomSalt() shared method:
 		
 		     Dim pw As libsodium.Password = "seekrit"
-		     Dim salt As MemoryBlock = libsodium.SKI.SecretKey.RandomSalt()
+		     Dim salt As MemoryBlock = pw.RandomSalt()
 		     Dim sigk As New libsodium.PKI.SigningKey(pw, salt)
 	#tag EndNote
 

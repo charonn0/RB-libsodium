@@ -80,7 +80,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_generichash_statebytes Lib "libsodium" () As UInt64
+		Private Soft Declare Function crypto_generichash_statebytes Lib "libsodium" () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -514,6 +514,16 @@ Protected Module libsodium
 		  Dim mb2 As MemoryBlock = String2
 		  Return sodium_memcmp(mb1, mb2, Max(mb1.Size, mb2.Size)) = 0
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub ZeroFill(Extends mb As MemoryBlock)
+		  ' Overwrites the data in the MemoryBlock with zeroes.
+		  
+		  If mb = Nil Then Return
+		  If mb.Size < 0 Then Raise New OutOfBoundsException ' can't pass a MemoryBlock of unknown size
+		  sodium_memzero(mb, mb.Size)
+		End Sub
 	#tag EndMethod
 
 
