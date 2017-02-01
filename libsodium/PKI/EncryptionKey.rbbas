@@ -11,8 +11,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
 		  
 		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = PasswordData.RandomSalt
-		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, libsodium.Password.ALG_ARGON2)
-		  Me.Constructor(seckey)
+		  Me.Constructor(PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, libsodium.Password.ALG_ARGON2))
 		End Sub
 	#tag EndMethod
 
@@ -192,8 +191,6 @@ Inherits libsodium.PKI.KeyPair
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomNonce
-		  
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
 		  Return RandomBytes(crypto_box_NONCEBYTES)
 		End Function

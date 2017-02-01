@@ -88,8 +88,7 @@ Protected Class KeyStream
 		have negligible risk of collision.
 		
 		libsodium does not make any promises regarding the resistance of the derived keys to "related-key attacks." It is the caller's 
-		responsibility to use proper key-derivation functions. All of the public Constructor methods derive proper keys.
-		
+		responsibility to use proper key-derivation functions; all of this class's public Constructor methods derive proper keys.
 	#tag EndNote
 
 
