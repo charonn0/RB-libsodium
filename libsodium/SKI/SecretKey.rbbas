@@ -117,15 +117,16 @@ Implements libsodium.Secureable
 		Encryption is done using the XSalsa20 stream cipher. Message authentication uses Poly1305 authentication codes.
 		
 		
-		To generate a brand new secret key use the libsodium.SKI.SecretKey.Generate() method:
+		To generate a brand new secret key use the SecretKey.Generate() method:
 		
-		     Dim sk As libsodium.SKI.SecretKey = libsodium.SKI.SecretKey.Generate()
+		     Dim sk As libsodium.SKI.SecretKey
+		     sk = sk.Generate()
 		
-		To derive a secret key from a password string use the Constructor method. Derivation requires a random salt, 
-		which you should get from the SecretKey.RandomSalt() shared method:
+		To derive a secret key from a password use the Constructor method. Derivation requires a random salt, which you 
+		should get from the Password.RandomSalt() shared method:
 		
 		     Dim pw As libsodium.Password = "seekrit"
-		     Dim salt As MemoryBlock = libsodium.SKI.SecretKey.RandomSalt()
+		     Dim salt As MemoryBlock = pw.RandomSalt()
 		     Dim sk As New libsodium.SKI.SecretKey(pw, salt)
 		
 		

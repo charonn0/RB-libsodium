@@ -516,6 +516,16 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Sub ZeroFill(Extends mb As MemoryBlock)
+		  ' Overwrites the data in the MemoryBlock with zeroes.
+		  
+		  If mb = Nil Then Return
+		  If mb.Size < 0 Then Raise New OutOfBoundsException ' can't pass a MemoryBlock of unknown size
+		  sodium_memzero(mb, mb.Size)
+		End Sub
+	#tag EndMethod
+
 
 	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
 	#tag EndConstant
