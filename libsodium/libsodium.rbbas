@@ -618,6 +618,15 @@ Protected Module libsodium
 	#tag EndConstant
 
 
+	#tag Enum, Name = ExportableType, Type = Integer, Flags = &h1
+		CryptPrivate
+		  CryptPublic
+		  SignPrivate
+		  SignPublic
+		  Secret
+		Unknown
+	#tag EndEnum
+
 	#tag Enum, Name = HashType, Type = Integer, Flags = &h1
 		Generic
 		  SHA256

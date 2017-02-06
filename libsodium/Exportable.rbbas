@@ -1,91 +1,37 @@
 #tag Class
 Protected Class Exportable
-	#tag Method, Flags = &h21
-		Private Sub Constructor(Optional Passwd As libsodium.Password)
-		  mPasswd = Passwd
-		  If mPasswd <> Nil Then
-		    mPasswdSalt = mPasswd.RandomSalt
-		    mNonce = libsodium.SKI.SecretKey.RandomNonce
-		  End If
-		  mMetaData = New Dictionary
-		  mPasswdLimits = ResourceLimits.Interactive
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h0
 		Sub Constructor(ExportedKey As libsodium.PKI.EncryptionKey, Optional Passwd As libsodium.Password)
-		  mData = ExportedKey.PrivateKey
-		  mNonce = ExportedKey.RandomNonce
-		  mPrefix = ExportEncryptionPrivatePrefix
-		  mSuffix = ExportEncryptionPrivateSuffix
-		  Me.Constructor(Passwd)
+		  If Passwd <> Nil Then
+		    Me.Constructor(ExportedKey.PrivateKey, libsodium.SKI.SecretKey.RandomNonce, ResourceLimits.Interactive, Passwd.RandomSalt, ExportableType.CryptPrivate, Passwd)
+		  Else
+		    Me.Constructor(ExportedKey.PublicKey, Nil, ResourceLimits.Interactive, Nil, ExportableType.CryptPublic, Nil)
+		  End If
+		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub Constructor(ExportedKey As libsodium.PKI.SigningKey, Optional Passwd As libsodium.Password)
-		  mData = ExportedKey.PrivateKey
-		  mPrefix = ExportSigningPrivatePrefix
-		  mSuffix = ExportSigningPrivateSuffix
-		  Me.Constructor(Passwd)
+		  If Passwd <> Nil Then
+		    Me.Constructor(ExportedKey.PrivateKey, libsodium.SKI.SecretKey.RandomNonce, ResourceLimits.Interactive, Passwd.RandomSalt, ExportableType.SignPrivate, Passwd)
+		  Else
+		    Me.Constructor(ExportedKey.PublicKey, Nil, ResourceLimits.Interactive, Nil, ExportableType.SignPublic, Nil)
+		  End If
+		  
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub Constructor1(ExportedKey As MemoryBlock, Type As ExportableType, Prefix As String, Suffix As String, Optional Passwd As libsodium.Password)
-		  ExportedKey = ReplaceLineEndings(ExportedKey, EndOfLine.Windows)
+	#tag Method, Flags = &h21
+		Private Sub Constructor(RawKey As MemoryBlock, Nonce As MemoryBlock, Limits As libsodium.ResourceLimits, Salt As MemoryBlock, Type As libsodium.ExportableType, Passwd As libsodium.Password, Meta As Dictionary = Nil)
+		  If Meta = Nil Then mMetaData = New Dictionary Else mMetaData = Meta
+		  mData = RawKey
+		  mNonce = Nonce
+		  mPasswdLimits = Limits
+		  mPasswdSalt = Salt
 		  mType = Type
-		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
-		  Dim i As Integer
-		  Do Until Ubound(lines) <= i Or lines(i) = Prefix
-		    i = i + 1
-		  Loop
-		  If i = UBound(lines) Then Raise New UnsupportedFormatException
+		  mPasswd = Passwd
 		  
-		  mData = New MemoryBlock(0)
-		  mMetaData = New Dictionary
-		  Dim output As New BinaryStream(mData)
-		  
-		  For i = i + 1 To UBound(lines)
-		    Dim s As String = lines(i)
-		    Select Case True
-		    Case Left(s, 6) = "#Salt="
-		      mPasswdSalt = DecodeBase64(Right(s, s.Len - 6))
-		    Case Left(s, 7) = "#Nonce="
-		      mNonce = DecodeBase64(Right(s, s.Len - 7))
-		    Case Left(s, 8) = "#Limits="
-		      Select Case Right(s, s.Len - 8)
-		      Case "Interactive"
-		        mPasswdLimits = ResourceLimits.Interactive
-		      Case "Moderate"
-		        mPasswdLimits = ResourceLimits.Moderate
-		      Case "Sensitive"
-		        mPasswdLimits = ResourceLimits.Sensitive
-		      Else
-		        Raise New UnsupportedFormatException
-		      End Select
-		    Case Left(s, 1) = "#", s.Trim = "" ' comment/blank line
-		      If Left(s, 1) = "#" And s.Len > 1 Then
-		        Dim n As String = NthField(s, "=", 1)
-		        Dim v As String = Right(s, s.Len - n.Len)
-		        n = Right(n, n.Len - 1)
-		        mMetaData.Value(n) = v
-		      End If
-		      Continue
-		    Case s = Suffix
-		      Exit For
-		    Else
-		      output.Write(s + EndOfLine.Windows)
-		    End Select
-		  Next
-		  output.Close
-		  mData = DecodeBase64(mData.Trim)
-		  If Passwd <> Nil Then
-		    Dim sk As New libsodium.SKI.SecretKey(Passwd, mPasswdSalt, mPasswdLimits)
-		    mData = libsodium.SKI.DecryptData(mData, sk, mNonce)
-		  End If
-		  
-		  If mData <> Nil Then mData = Trim(mData) Else Raise New UnsupportedFormatException
 		End Sub
 	#tag EndMethod
 
@@ -94,7 +40,7 @@ Protected Class Exportable
 		  Dim data As New MemoryBlock(0)
 		  Dim output As New BinaryStream(data)
 		  Dim ExportedKey As MemoryBlock
-		  output.Write(mPrefix + EndOfLine.Windows)
+		  output.Write(GetPrefix(mType) + EndOfLine.Windows)
 		  
 		  If mPasswd <> Nil Then
 		    If mPasswdSalt = Nil Then mPasswdSalt = mPasswd.RandomSalt
@@ -120,7 +66,7 @@ Protected Class Exportable
 		  Next
 		  output.Write(EndOfLine.Windows)
 		  output.Write(EncodeBase64(ExportedKey) + EndOfLine.Windows)
-		  output.Write(mSuffix + EndOfLine.Windows)
+		  output.Write(GetSuffix(mType) + EndOfLine.Windows)
 		  
 		  output.Close
 		  Return data
@@ -128,45 +74,76 @@ Protected Class Exportable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function ParseKey(ExportedKey As MemoryBlock, Type As ExportableType, Prefix As String, Suffix As String, Optional Passwd As libsodium.Password) As libsodium.Exportable
-		  Dim ret As New Exportable
-		  ExportedKey = ReplaceLineEndings(ExportedKey, EndOfLine.Windows)
-		  ret.mType = Type
-		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
+		Function Export(SaveTo As FolderItem, OverWrite As Boolean = False) As Boolean
+		  ' Exports the key in a format that is understood by Exportable.Import
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Exportable.Export
+		  
+		  Try
+		    Dim bs As BinaryStream = BinaryStream.Create(SaveTo, OverWrite)
+		    bs.Write(Me.Export)
+		    bs.Close
+		  Catch Err As IOException
+		    Return False
+		  End Try
+		  Return True
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Shared Function GetPrefix(Type As libsodium.ExportableType) As String
+		  Select Case Type
+		  Case ExportableType.CryptPrivate
+		    Return ExportEncryptionPrivatePrefix
+		  Case ExportableType.CryptPublic
+		    Return ExportEncryptionPublicPrefix
+		  Case ExportableType.SignPrivate
+		    Return ExportSigningPrivatePrefix
+		  Case ExportableType.SignPublic
+		    Return ExportSigningPublicPrefix
+		  Else
+		    Return ExportPrefix
+		  End Select
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Shared Function GetRawKeyData(ByRef EncodedKey As MemoryBlock, Prefix As String, Suffix As String, ByRef Salt As MemoryBlock, ByRef Nonce As MemoryBlock, ByRef Limits As libsodium.ResourceLimits, ByRef MetaData As Dictionary) As Boolean
+		  EncodedKey = ReplaceLineEndings(EncodedKey, EndOfLine.Windows)
+		  Dim lines() As String = SplitB(EncodedKey, EndOfLine.Windows)
 		  Dim i As Integer
 		  Do Until Ubound(lines) <= i Or lines(i) = Prefix
 		    i = i + 1
 		  Loop
-		  If i = UBound(lines) Then Raise New UnsupportedFormatException
-		  
-		  ret.mData = New MemoryBlock(0)
-		  ret.mMetaData = New Dictionary
-		  Dim output As New BinaryStream(ret.mData)
-		  
+		  If i = UBound(lines) Then Return False
+		  Dim data As New MemoryBlock(0)
+		  Dim output As New BinaryStream(data)
+		  MetaData = New Dictionary
 		  For i = i + 1 To UBound(lines)
 		    Dim s As String = lines(i)
 		    Select Case True
 		    Case Left(s, 6) = "#Salt="
-		      ret.mPasswdSalt = DecodeBase64(Right(s, s.Len - 6))
+		      Salt = DecodeBase64(Right(s, s.Len - 6))
 		    Case Left(s, 7) = "#Nonce="
-		      ret.mNonce = DecodeBase64(Right(s, s.Len - 7))
+		      Nonce = DecodeBase64(Right(s, s.Len - 7))
 		    Case Left(s, 8) = "#Limits="
 		      Select Case Right(s, s.Len - 8)
 		      Case "Interactive"
-		        ret.mPasswdLimits = ResourceLimits.Interactive
+		        Limits = ResourceLimits.Interactive
 		      Case "Moderate"
-		        ret.mPasswdLimits = ResourceLimits.Moderate
+		        Limits = ResourceLimits.Moderate
 		      Case "Sensitive"
-		        ret.mPasswdLimits = ResourceLimits.Sensitive
+		        Limits = ResourceLimits.Sensitive
 		      Else
-		        Raise New UnsupportedFormatException
+		        Return False
 		      End Select
 		    Case Left(s, 1) = "#", s.Trim = "" ' comment/blank line
 		      If Left(s, 1) = "#" And s.Len > 1 Then
 		        Dim n As String = NthField(s, "=", 1)
 		        Dim v As String = Right(s, s.Len - n.Len)
 		        n = Right(n, n.Len - 1)
-		        ret.mMetaData.Value(n) = v
+		        MetaData.Value(n) = v
 		      End If
 		      Continue
 		    Case s = Suffix
@@ -176,14 +153,98 @@ Protected Class Exportable
 		    End Select
 		  Next
 		  output.Close
-		  ret.mData = DecodeBase64(ret.mData.Trim)
+		  EncodedKey = DecodeBase64(data.Trim)
+		  Return True
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Shared Function GetSuffix(Type As libsodium.ExportableType) As String
+		  Select Case Type
+		  Case ExportableType.CryptPrivate
+		    Return ExportEncryptionPrivateSuffix
+		  Case ExportableType.CryptPublic
+		    Return ExportEncryptionPublicSuffix
+		  Case ExportableType.SignPrivate
+		    Return ExportSigningPrivateSuffix
+		  Case ExportableType.SignPublic
+		    Return ExportSigningPublicSuffix
+		  Else
+		    Return ExportSuffix
+		  End Select
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function GetType(EncodedKey As MemoryBlock) As libsodium.ExportableType
+		  Static Prefixes() As String = Array(ExportEncryptionPrivatePrefix, ExportEncryptionPublicPrefix, ExportSigningPrivatePrefix, ExportSigningPublicPrefix, ExportSuffix)
+		  Dim ExportedKey As MemoryBlock = ReplaceLineEndings(EncodedKey, EndOfLine.Windows)
+		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
+		  For i As Integer = 0 To UBound(lines)
+		    Select Case Prefixes.IndexOf(lines(i))
+		    Case 0 'PKE private
+		      Return ExportableType.CryptPrivate
+		    Case 1 'PKE public
+		      Return ExportableType.CryptPublic
+		    Case 2 'PKS private
+		      Return ExportableType.SignPrivate
+		    Case 3 'PKS public
+		      Return ExportableType.SignPublic
+		    Case 4 'Secret key
+		      Return ExportableType.Secret
+		    End Select
+		  Next
+		  Return ExportableType.Unknown
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As FolderItem, Optional Passwd As libsodium.Password) As libsodium.Exportable
+		  ' Import an key that was exported using Exportable.Export(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Exportable.Import
+		  
+		  
+		  Dim bs As BinaryStream = BinaryStream.Open(ExportedKey)
+		  Dim keydata As MemoryBlock = bs.Read(bs.Length)
+		  bs.Close
+		  Return Import(keydata, Passwd)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.Exportable
+		  Dim Type As libsodium.ExportableType = GetType(ExportedKey)
+		  Dim Prefix, Suffix As String
+		  Prefix = GetPrefix(Type)
+		  Suffix = GetSuffix(Type)
+		  Dim salt, nonce As MemoryBlock
+		  Dim metadata As Dictionary
+		  Dim limits As libsodium.ResourceLimits
+		  
+		  If Not GetRawKeyData(ExportedKey, Prefix, Suffix, salt, nonce, limits, metadata) Then Raise New UnsupportedFormatException
+		  If ExportedKey = Nil Then Raise New UnsupportedFormatException
+		  
 		  If Passwd <> Nil Then
-		    Dim sk As New libsodium.SKI.SecretKey(Passwd, ret.mPasswdSalt, ret.mPasswdLimits)
-		    ret.mData = libsodium.SKI.DecryptData(ret.mData, sk, ret.mNonce)
+		    Dim sk As New libsodium.SKI.SecretKey(Passwd, salt, limits)
+		    ExportedKey = libsodium.SKI.DecryptData(ExportedKey, sk, nonce)
 		  End If
 		  
-		  If ret.mData <> Nil Then ret.mData = Trim(ret.mData) Else Raise New UnsupportedFormatException
-		  Return ret
+		  If ExportedKey <> Nil Then ExportedKey = Trim(ExportedKey) Else Raise New UnsupportedFormatException
+		  Return New Exportable(ExportedKey, nonce, limits, salt, Type, Passwd, metadata)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Type() As libsodium.ExportableType
+		  Return mType
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Value() As MemoryBlock
+		  Return mData
 		End Function
 	#tag EndMethod
 
@@ -210,14 +271,6 @@ Protected Class Exportable
 
 	#tag Property, Flags = &h21
 		Private mPasswdSalt As MemoryBlock
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private mPrefix As String
-	#tag EndProperty
-
-	#tag Property, Flags = &h21
-		Private mSuffix As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
