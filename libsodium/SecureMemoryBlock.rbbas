@@ -1,6 +1,5 @@
 #tag Class
 Class SecureMemoryBlock
-Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Function BooleanValue(Offset As UInt64) As Boolean
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
@@ -200,14 +199,6 @@ Implements libsodium.Secureable
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Sub Lock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  Me.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h0
 		Function Long(Offset As UInt64) As Int32
 		  Return Me.Int32Value(Offset)
@@ -311,6 +302,7 @@ Implements libsodium.Secureable
 		Sub StringValue(Offset As UInt64, Length As UInt64, Assigns NewData As MemoryBlock)
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + Length > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Me.ZeroFill
 		  Dim mb As MemoryBlock = mPtr
 		  mb.StringValue(Offset, Length) = NewData
 		End Sub
@@ -391,14 +383,6 @@ Implements libsodium.Secureable
 		  If Offset + 1 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
 		  mb.UInt8Value(Offset) = NewInt
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Sub Unlock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  Me.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
 		End Sub
 	#tag EndMethod
 

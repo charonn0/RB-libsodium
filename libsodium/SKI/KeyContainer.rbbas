@@ -1,6 +1,5 @@
 #tag Class
 Protected Class KeyContainer
-Implements libsodium.Secureable
 	#tag Method, Flags = &h1000
 		Sub Constructor(KeyData As MemoryBlock)
 		  ' Creates a new container to hold a copy of the KeyData. The KeyData is encrypted
@@ -15,14 +14,6 @@ Implements libsodium.Secureable
 		  mSessionNonce = libsodium.SKI.SecretKey.RandomNonce
 		  mKeyData = libsodium.SKI.EncryptData(KeyData, RuntimeKey, mSessionNonce)
 		  mKeyData.AllowSwap = False
-		  Me.Lock
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Sub Lock()
-		  // Part of the libsodium.Secureable interface.
-		  
 		  mKeyData.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
 		End Sub
 	#tag EndMethod
@@ -33,14 +24,6 @@ Implements libsodium.Secureable
 		  If libsodium.StrComp(Me.Value, OtherKey) Then Return 0
 		  Return -1
 		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Sub Unlock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  mKeyData.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
-		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -68,7 +51,6 @@ Implements libsodium.Secureable
 		a SecretKey that is generated at runtime, and stored in a SecureMemoryBlock
 		that has been marked as non-swappable. Except when accessed by the Value method
 		the encrypted KeyData is also marked as non-readable.
-		
 	#tag EndNote
 
 
