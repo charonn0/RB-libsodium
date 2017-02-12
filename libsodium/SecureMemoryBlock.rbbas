@@ -195,6 +195,9 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function IsZero() As Boolean
+		  ' This method returns True if the SecureMemoryBlock contains only zeros. It returns False 
+		  ' if non-zero bits are found. Execution time is constant for a given length.
+		  
 		  Return sodium_is_zero(mPtr, Me.Size) = 1
 		End Function
 	#tag EndMethod
@@ -417,6 +420,8 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub ZeroFill()
+		  ' This method fills the SecureMemoryBlock with zeroes, overwriting any previous data.
+		  
 		  If mPtr = Nil Then Return
 		  sodium_memzero(mPtr, mSize)
 		End Sub
