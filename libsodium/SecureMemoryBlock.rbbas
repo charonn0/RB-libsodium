@@ -312,12 +312,6 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function TruePtr() As Ptr
-		  Return mPtr
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Function UInt16Value(Offset As UInt64) As UInt16
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 2 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
