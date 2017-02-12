@@ -70,7 +70,6 @@ Inherits libsodium.PKI.KeyPair
 		  // Calling the overridden superclass constructor.
 		  // Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock) -- From KeyPair
 		  Super.Constructor(PrivateKeyData, PublicKeyData)
-		  Me.Lock()
 		End Sub
 	#tag EndMethod
 
