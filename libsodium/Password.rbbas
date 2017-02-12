@@ -105,16 +105,16 @@ Inherits libsodium.SKI.KeyContainer
 		  ' This method verifies that the HashValue is a valid hash for the password (as generated
 		  ' by Password.GenerateHash)
 		  
-		  Dim clearpw As SecureMemoryBlock = Me.Value
+		  Dim clearpw As MemoryBlock = Me.Value
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
 		    If HashValue.Size <= crypto_pwhash_STRBYTES Then HashValue.Size = crypto_pwhash_STRBYTES Else CheckSize(HashValue, crypto_pwhash_STRBYTES)
-		    Return crypto_pwhash_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
+		    Return crypto_pwhash_str_verify(HashValue, clearpw, clearpw.Size) = 0
 		    
 		  Case ALG_SCRYPT
 		    HashValue = HashValue + Chr(0)
 		    CheckSize(HashValue, crypto_pwhash_scryptsalsa208sha256_STRBYTES)
-		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
+		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw, clearpw.Size) = 0
 		  End Select
 		  
 		End Function
