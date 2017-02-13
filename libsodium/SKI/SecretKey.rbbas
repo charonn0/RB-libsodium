@@ -110,13 +110,13 @@ Inherits libsodium.SKI.KeyContainer
 		  * libsodium.SKI.EncryptData: Encrypt a message and generate its MAC; the MAC is prepended to the 
 		    encrypted message and returned.
 		  * libsodium.SKI.DecryptData: Authenticate the MAC and return the decrypted the message.
-		  * libsodium.SKI.GenerateMAC: Generate a Poly1305 message authentication code for an unencrypted message.
-		  * libsodium.SKI.VerifyMAC: Authenticate a Poly1305 message authentication code for an unencrypted message.
+		  * libsodium.SKI.GenerateMAC: Generate a MAC for an unencrypted message.
+		  * libsodium.SKI.VerifyMAC: Authenticate a MAC for an unencrypted message.
 		
 		Encryption is done using the XSalsa20 stream cipher. Message authentication uses Poly1305 authentication codes.
 		
 		
-		To generate a brand new secret key use the SecretKey.Generate() method:
+		To generate a brand new secret key use the SecretKey.Generate() shared method:
 		
 		     Dim sk As libsodium.SKI.SecretKey
 		     sk = sk.Generate()
@@ -130,7 +130,11 @@ Inherits libsodium.SKI.KeyContainer
 		
 		
 		Encryption/decryption needs a Nonce value to work. Use the SecretKey.RandomNonce shared method to generate
-		securely random nonces.
+		securely random nonces (continuing from the above code): 
+		
+		    Dim n As MemoryBlock = sk.RandomNonce()
+		    Dim msg As MemoryBlock = libsodium.SKI.EncryptData("Hello, world!", sk, n)
+		    MsgBox(libsodium.SKI.DecryptData(msg, sk, n))
 	#tag EndNote
 
 
