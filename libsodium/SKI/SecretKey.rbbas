@@ -9,7 +9,7 @@ Inherits libsodium.SKI.KeyContainer
 		  
 		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = FromPassword.RandomSalt
 		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, Salt, Limits, HashAlgorithm)
-		  Super.Constructor(key)
+		  Me.Constructor(key)
 		  
 		End Sub
 	#tag EndMethod
