@@ -19,6 +19,17 @@ Protected Class KeyContainer
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Operator_Compare(OtherKey As libsodium.SKI.KeyContainer) As Int32
+		  ' Performs a constant-time binary comparison to the OtherKey
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.KeyContainer.Operator_Compare
+		  
+		  Return Me.Operator_Compare(OtherKey.Value)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherKey As String) As Int32
 		  ' Performs a constant-time binary comparison to the OtherKey
 		  '
