@@ -6,6 +6,9 @@ Inherits libsodium.SKI.KeyContainer
 		  ' Generates a secret key by deriving it from a salted hash of the password. The operation is
 		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
 		  ' parameters will produce the same output both times.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Constructor
 		  
 		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = FromPassword.RandomSalt
 		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, Salt, Limits, HashAlgorithm)
@@ -16,8 +19,9 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(KeyData As MemoryBlock)
-		  // Calling the overridden superclass constructor.
 		  CheckSize(KeyData, crypto_secretbox_KEYBYTES)
+		  // Calling the overridden superclass constructor.
+		  // Constructor(KeyData As MemoryBlock) -- From KeyContainer
 		  Super.Constructor(KeyData)
 		End Sub
 	#tag EndMethod
@@ -54,6 +58,9 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h1000
 		 Shared Function Generate() As libsodium.SKI.SecretKey
 		  ' Returns random bytes that are suitable to be used as a secret key.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Generate
 		  
 		  Return New libsodium.SKI.SecretKey(RandomBytes(crypto_secretbox_KEYBYTES))
 		End Function
@@ -95,6 +102,9 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h0
 		 Shared Function RandomNonce() As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a Nonce.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.RandomNonce
 		  
 		  Return RandomBytes(crypto_secretbox_NONCEBYTES)
 		End Function
