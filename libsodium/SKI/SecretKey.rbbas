@@ -93,7 +93,7 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherKey As libsodium.SKI.SecretKey) As Integer
+		Function Operator_Compare(OtherKey As libsodium.SKI.SecretKey) As Int32
 		  If OtherKey Is Nil Then Return 1
 		  Return Super.Operator_Compare(OtherKey.Value)
 		End Function
