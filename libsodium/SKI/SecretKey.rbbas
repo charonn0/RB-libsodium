@@ -6,18 +6,22 @@ Inherits libsodium.SKI.KeyContainer
 		  ' Generates a secret key by deriving it from a salted hash of the password. The operation is
 		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
 		  ' parameters will produce the same output both times.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Constructor
 		  
 		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = FromPassword.RandomSalt
 		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, Salt, Limits, HashAlgorithm)
-		  Super.Constructor(key)
+		  Me.Constructor(key)
 		  
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(KeyData As MemoryBlock)
-		  // Calling the overridden superclass constructor.
 		  CheckSize(KeyData, crypto_secretbox_KEYBYTES)
+		  // Calling the overridden superclass constructor.
+		  // Constructor(KeyData As MemoryBlock) -- From KeyContainer
 		  Super.Constructor(KeyData)
 		End Sub
 	#tag EndMethod
@@ -54,6 +58,9 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h1000
 		 Shared Function Generate() As libsodium.SKI.SecretKey
 		  ' Returns random bytes that are suitable to be used as a secret key.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Generate
 		  
 		  Return New libsodium.SKI.SecretKey(RandomBytes(crypto_secretbox_KEYBYTES))
 		End Function
@@ -86,7 +93,7 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherKey As libsodium.SKI.SecretKey) As Integer
+		Function Operator_Compare(OtherKey As libsodium.SKI.SecretKey) As Int32
 		  If OtherKey Is Nil Then Return 1
 		  Return Super.Operator_Compare(OtherKey.Value)
 		End Function
@@ -95,6 +102,9 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h0
 		 Shared Function RandomNonce() As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a Nonce.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.RandomNonce
 		  
 		  Return RandomBytes(crypto_secretbox_NONCEBYTES)
 		End Function
@@ -110,13 +120,13 @@ Inherits libsodium.SKI.KeyContainer
 		  * libsodium.SKI.EncryptData: Encrypt a message and generate its MAC; the MAC is prepended to the 
 		    encrypted message and returned.
 		  * libsodium.SKI.DecryptData: Authenticate the MAC and return the decrypted the message.
-		  * libsodium.SKI.GenerateMAC: Generate a Poly1305 message authentication code for an unencrypted message.
-		  * libsodium.SKI.VerifyMAC: Authenticate a Poly1305 message authentication code for an unencrypted message.
+		  * libsodium.SKI.GenerateMAC: Generate a MAC for an unencrypted message.
+		  * libsodium.SKI.VerifyMAC: Authenticate a MAC for an unencrypted message.
 		
 		Encryption is done using the XSalsa20 stream cipher. Message authentication uses Poly1305 authentication codes.
 		
 		
-		To generate a brand new secret key use the SecretKey.Generate() method:
+		To generate a brand new secret key use the SecretKey.Generate() shared method:
 		
 		     Dim sk As libsodium.SKI.SecretKey
 		     sk = sk.Generate()
@@ -130,7 +140,11 @@ Inherits libsodium.SKI.KeyContainer
 		
 		
 		Encryption/decryption needs a Nonce value to work. Use the SecretKey.RandomNonce shared method to generate
-		securely random nonces.
+		securely random nonces (continuing from the above code): 
+		
+		    Dim n As MemoryBlock = sk.RandomNonce()
+		    Dim msg As MemoryBlock = libsodium.SKI.EncryptData("Hello, world!", sk, n)
+		    MsgBox(libsodium.SKI.DecryptData(msg, sk, n))
 	#tag EndNote
 
 

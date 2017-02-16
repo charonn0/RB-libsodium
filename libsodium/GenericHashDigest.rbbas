@@ -98,7 +98,7 @@ Protected Class GenericHashDigest
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function RandomKey() As MemoryBlock
+		 Shared Function RandomKey(Type As libsodium.HashType = libsodium.HashType.Generic) As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a key for GenericHashDigest.Constructor
 		  '
 		  ' See: 
@@ -106,7 +106,18 @@ Protected Class GenericHashDigest
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
-		  Return RandomBytes(crypto_generichash_KEYBYTES)
+		  Select Case Type
+		  Case HashType.Generic
+		    Return RandomBytes(crypto_generichash_KEYBYTES)
+		    
+		  Case HashType.SHA256
+		    Return RandomBytes(crypto_auth_hmacsha256_KEYBYTES)
+		    
+		  Case HashType.SHA512
+		    Return RandomBytes(crypto_auth_hmacsha512_KEYBYTES)
+		    
+		  End Select
+		  
 		End Function
 	#tag EndMethod
 

@@ -145,7 +145,7 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherKey As libsodium.PKI.SigningKey) As Integer
+		Function Operator_Compare(OtherKey As libsodium.PKI.SigningKey) As Int32
 		  ' This method overloads the comparison operator (=) allowing direct comparisons between
 		  ' instances of SigningKey. The comparison operation itself is a constant-time binary
 		  ' comparison of the private key halves of both key pairs; the public halves are not compared.

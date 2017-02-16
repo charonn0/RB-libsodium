@@ -22,18 +22,6 @@ Protected Class ForeignKey
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function ConvertSigningKey() As libsodium.PKI.ForeignKey
-		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
-		  If crypto_sign_ed25519_pk_to_curve25519(pub, Me.Value) <> 0 Then
-		    Dim err As New SodiumException(ERR_CONVERSION_FAILED)
-		    err.Message = "This public key cannot be converted."
-		    Raise err
-		  End If
-		  Return New ForeignKey(pub)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
 		  ' Exports the ForeignKey in a format that is understood by ForeignKey.Import(FolderItem)
 		  '
