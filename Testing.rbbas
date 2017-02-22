@@ -50,6 +50,12 @@ Protected Module Testing
 		    Failures.Append(7)
 		  End Try
 		  
+		  Try
+		    TestPKIExchange()
+		  Catch
+		    Failures.Append(8)
+		  End Try
+		  
 		  Return UBound(Failures) = -1
 		End Function
 	#tag EndMethod
@@ -136,6 +142,28 @@ Protected Module Testing
 		    Assert(n <> nonce)
 		    Assert(libsodium.PKI.DecryptData(msgs(i), senderkey.PublicKey, recipkey, n) = msg1)
 		  Next
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub TestPKIExchange()
+		  Const ALICE_SK = "77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a"
+		  Const ALICE_PK = "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a"
+		  Const BOB_SK = "5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb"
+		  Const BOB_PK = "de9edb7d7b7dc1b4d35b61c2ece435373f8343c85b78674dadfc7e146f882b4f"
+		  Const BOB_ALICE_SECRET = "4a5d9d5ba4ce2de1728e3bf480350f25e07e21c947d19e3376f09b3c1e161742"
+		  
+		  Dim alice As libsodium.PKI.EncryptionKey
+		  alice = alice.Derive(DecodeHex(ALICE_SK))
+		  Assert(alice.PublicKey = DecodeHex(ALICE_PK))
+		  
+		  Dim bob As libsodium.PKI.EncryptionKey
+		  bob = bob.Derive(DecodeHex(BOB_SK))
+		  Assert(bob.PublicKey = DecodeHex(BOB_PK))
+		  
+		  Dim shsk As New libsodium.PKI.SharedSecret(alice.PublicKey, bob)
+		  Dim k As MemoryBlock = shsk.DeriveSharedSecret(alice.PublicKey, bob)
+		  Assert(EncodeHex(k) = BOB_ALICE_SECRET)
 		End Sub
 	#tag EndMethod
 
