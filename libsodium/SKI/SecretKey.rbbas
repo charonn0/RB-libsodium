@@ -27,6 +27,18 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		 Shared Function Derive(SecretKeyData As MemoryBlock) As libsodium.SKI.SecretKey
+		  ' Uses the PrivateKeyData as the SecretKey
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Derive
+		  
+		  Return New SecretKey(SecretKeyData)
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
 		  ' Exports the SecretKey in a format that is understood by SecretKey.Import(FolderItem)
 		  '
