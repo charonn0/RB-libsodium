@@ -46,7 +46,7 @@ Inherits libsodium.SKI.KeyContainer
 		  '
 		  '    GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
 		  '
-		  '  Or just call the Constructor, which does it for you.
+		  ' Or just call the Constructor, which does it for you.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.DeriveSharedSecret
