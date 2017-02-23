@@ -56,6 +56,12 @@ Protected Module Testing
 		    Failures.Append(8)
 		  End Try
 		  
+		  Try
+		    TestPKISeal()
+		  Catch
+		    Failures.Append(9)
+		  End Try
+		  
 		  Return UBound(Failures) = -1
 		End Function
 	#tag EndMethod
@@ -69,6 +75,61 @@ Protected Module Testing
 		  
 		  Assert(libsodium.EncodeHex(libsodium.SHA256("Hello, world!")) = "315F5BDB76D078C43B8AC0064E4A0164612B1FCE77C869345BFC94C75894EDD3")
 		  Assert(libsodium.EncodeHex(libsodium.SHA512("Hello, world!")) = "C1527CD893C124773D811911970C8FE6E857D6DF5DC9226BD8A160614C0CD963A4DDEA2B94BB7D36021EF9D865D5CEA294A82DD49A0BB269F51F6E7A57F79421")
+		  
+		  
+		  // Taken from the NSRL test vectors = http://www.nsrl.nist.gov/testdata/
+		  Const sha256_message = "6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071"
+		  Const sha256_digest = "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
+		  Const sha256_empty = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+		  
+		  Dim h, m As MemoryBlock
+		  h = libsodium.SHA256(DecodeHex(sha256_message))
+		  m = DecodeHex(sha256_digest)
+		  Assert(h = m)
+		  
+		  h = libsodium.SHA256("")
+		  m = DecodeHex(sha256_empty)
+		  Assert(h = m)
+		  
+		  // self-created (FIXME: find standard test vectors)
+		  Const sha512_message = "54686520717569636b2062726f776e20666f78206a756d7073206f76657220746865206c617a7920646f672e"
+		  Const sha512_digest = "91ea1245f20d46ae9a037a989f54f1f790f0a47607eeb8a14d12890cea77a1bbc6c7ed9cf205e67b7f2b8fd4c7dfd3a7a8617e45f3c463d481c7e586c39ac1ed"
+		  Const sha512_empty = "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
+		  
+		  h = libsodium.SHA512(DecodeHex(sha512_message))
+		  m = DecodeHex(sha512_digest)
+		  Assert(h = m)
+		  
+		  h = libsodium.SHA512("")
+		  m = DecodeHex(sha512_empty)
+		  Assert(h = m)
+		  
+		  
+		  // self-created? (TODO: double check, fix)
+		  'Const blake2b_message = "54686520717569636b2062726f776e20666f78206a756d7073206f76657220746865206c617a7920646f67"
+		  'Const blake2b_digest = "a8add4bdddfd93e4877d2746e62817b116364a1fa7bc148d95090bc7333b3673f82401cf7aa2e4cb1ecd90296e3f14cb5413f8ed77be73045b13914cdcd6a918"
+		  'Const blake2b_empty = "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce"
+		  '
+		  'h = libsodium.GenericHash(DecodeHex(blake2b_message))
+		  'm = DecodeHex(blake2b_digest)
+		  ''Assert(h = m)
+		  '
+		  'Dim p As libsodium.Password = DecodeHex(blake2b_message)
+		  'Dim k As MemoryBlock = p.DeriveKey(crypto_generichash_BYTES_MAX)
+		  '
+		  'h = libsodium.GenericHash("")
+		  'm = DecodeHex(blake2b_empty)
+		  'Assert(h = m)
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
+		  
 		End Sub
 	#tag EndMethod
 
@@ -194,6 +255,20 @@ Protected Module Testing
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
+		Private Sub TestPKISeal()
+		  Dim recipkey As libsodium.PKI.EncryptionKey
+		  recipkey = recipkey.Generate(recipkey.RandomSeed)
+		  
+		  Dim msg1 As String = "This is a test message."
+		  Dim sealed As String = libsodium.PKI.SealData(msg1, recipkey.PublicKey)
+		  Dim msg2 As String = libsodium.PKI.UnsealData(sealed, recipkey)
+		  
+		  Assert(msg1 = msg2)
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
 		Private Sub TestPKISign()
 		  Dim senderkey As libsodium.PKI.SigningKey
 		  senderkey = senderkey.Import(TestSigningKey, TestPasswordValue)
@@ -201,6 +276,19 @@ Protected Module Testing
 		  Dim sig As MemoryBlock = libsodium.PKI.SignData(msg, senderkey)
 		  Assert(libsodium.PKI.VerifyData(sig, senderkey.PublicKey) <> Nil)
 		  
+		  '//These test vectors are from http://ed25519.cr.yp.to/python/sign.input
+		  'Const sign_private = "b18e1d0045995ec3d010c387ccfeb984d783af8fbb0f40fa7db126d889f6dadd"
+		  'Const sign_public = "77f48b59caeda77751ed138b0ec667ff50f8768c25d48309a8f386a2bad187fb"
+		  'Const sign_message = "916c7d1d268fc0e77c1bef238432573c39be577bbea0998936add2b50a653171ce18a542b0b7f96c1691a3be6031522894a8634183eda38798a0c5d5d79fbd01dd04a8646d71873b77b221998a81922d8105f892316369d5224c9983372d2313c6b1f4556ea26ba49d46e8b561e0fc76633ac9766e68e21fba7edca93c4c7460376d7f3ac22ff372c18f613f2ae2e856af40"
+		  'Const sign_signature = "6bd710a368c1249923fc7a1610747403040f0cc30815a00f9ff548a896bbda0b4eb2ca19ebcf917f0f34200a9edbad3901b64ab09cc5ef7b9bcc3c40c0ff7509"
+		  '
+		  'senderkey = senderkey.Derive(DecodeHex(sign_private))
+		  'Dim spk As MemoryBlock = senderkey.PublicKey
+		  'Dim kps As MemoryBlock = DecodeHex(sign_public)
+		  'Assert(spk = kps)
+		  'msg = DecodeHex(sign_message)
+		  'sig = libsodium.PKI.SignData(msg, senderkey, True)
+		  'Assert(sig = DecodeHex(sign_signature))
 		End Sub
 	#tag EndMethod
 
@@ -294,6 +382,21 @@ Protected Module Testing
 		  Dim msg2 As String = libsodium.SKI.DecryptData(crypted, SecretKey, nonce)
 		  
 		  Assert(msg1 = msg2)
+		  
+		  //these test vectors are from NaCl
+		  Const secret_key = "1b27556473e985d462cd51197a9a46c76009549eac6474f206c4ee0844f68389"
+		  Const box_nonce = "69696ee955b62b73cd62bda875fc73d68219e0036b7a0b37"
+		  Const box_message = "be075fc53c81f2d5cf141316ebeb0c7b5228c52a4c62cbd44b66849b64244ffce5ecbaaf33bd751a1ac728d45e6c61296cdc3c01233561f41db66cce314adb310e3be8250c46f06dceea3a7fa1348057e2f6556ad6b1318a024a838f21af1fde048977eb48f59ffd4924ca1c60902e52f0a089bc76897040e082f937763848645e0705"
+		  Const box_ciphertext = "f3ffc7703f9400e52a7dfb4b3d3305d98e993b9f48681273c29650ba32fc76ce48332ea7164d96a4476fb8c531a1186ac0dfc17c98dce87b4da7f011ec48c97271d2c20f9b928fe2270d6fb863d51738b48eeee314a7cc8ab932164548e526ae90224368517acfeabd6bb3732bc0e9da99832b61ca01b6de56244a9e88d5f9b37973f622a43d14a6599b1f654cb45a74e355a5"
+		  
+		  SecretKey = SecretKey.Derive(DecodeHex(secret_key))
+		  nonce = DecodeHex(box_nonce)
+		  
+		  msg1 = box_message
+		  crypted = libsodium.SKI.EncryptData(msg1, SecretKey, nonce)
+		  msg2 = libsodium.SKI.DecryptData(crypted, SecretKey, nonce)
+		  
+		  Assert(msg1 = msg2)
 		End Sub
 	#tag EndMethod
 
@@ -329,7 +432,7 @@ Protected Module Testing
 		  Assert(h = m)
 		  
 		  Dim n As MemoryBlock = libsodium.PKI.EncryptionKey.RandomNonce
-		  Assert(n <> libsodium.IncrementNonce(n))
+		  Assert(libsodium.CompareNonce(n, libsodium.IncrementNonce(n)) <> 0)
 		End Sub
 	#tag EndMethod
 
