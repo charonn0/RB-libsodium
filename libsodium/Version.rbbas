@@ -41,6 +41,38 @@ Protected Module Version
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function HasSSE2() As Boolean
+		  If System.IsFunctionAvailable("sodium_runtime_has_sse2", "libsodium") Then
+		    Return sodium_runtime_has_sse2 = 0
+		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function HasSSE3() As Boolean
+		  If System.IsFunctionAvailable("sodium_runtime_has_sse3", "libsodium") Then
+		    Return sodium_runtime_has_sse3 = 0
+		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function HasSSE41() As Boolean
+		  If System.IsFunctionAvailable("sodium_runtime_has_sse41", "libsodium") Then
+		    Return sodium_runtime_has_sse41 = 0
+		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function HasSSSE3() As Boolean
+		  If System.IsFunctionAvailable("sodium_runtime_has_ssse3", "libsodium") Then
+		    Return sodium_runtime_has_ssse3 = 0
+		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function MajorNumber() As Int32
 		  If libsodium.IsAvailable Then Return sodium_library_version_major()
 		End Function
@@ -99,6 +131,14 @@ Protected Module Version
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function sodium_version_string Lib "libsodium" () As Ptr
 	#tag EndExternalMethod
+
+	#tag Method, Flags = &h1
+		Protected Function VersionString() As String
+		  If Not libsodium.IsAvailable Then Return ""
+		  Dim mb As MemoryBlock = sodium_version_string()
+		  If mb <> Nil Then Return mb.CString(0)
+		End Function
+	#tag EndMethod
 
 
 	#tag ViewBehavior
