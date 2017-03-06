@@ -26,6 +26,7 @@ Inherits libsodium.SKI.KeyContainer
 		Protected Sub Constructor(SharedKey As MemoryBlock)
 		  CheckSize(SharedKey, crypto_box_BEFORENMBYTES)
 		  // Calling the overridden superclass constructor.
+		  // Constructor(KeyData As MemoryBlock) -- From KeyContainer
 		  Super.Constructor(SharedKey)
 		End Sub
 	#tag EndMethod
@@ -43,9 +44,9 @@ Inherits libsodium.SKI.KeyContainer
 		  ' For this reason, instead of directly using the return value as a shared key, 
 		  ' it is recommended to use:
 		  '
-		  '  GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
+		  '    GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
 		  '
-		  '  Or just call the Constructor, which does it for you.
+		  ' Or just call the Constructor, which does it for you.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.DeriveSharedSecret

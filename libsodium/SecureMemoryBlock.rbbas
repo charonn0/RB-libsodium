@@ -171,7 +171,7 @@ Class SecureMemoryBlock
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
-		  mb.Int16Value(Offset) = NewInt
+		  mb.Int32Value(Offset) = NewInt
 		End Sub
 	#tag EndMethod
 
@@ -343,7 +343,7 @@ Class SecureMemoryBlock
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
-		  mb.UInt16Value(Offset) = NewInt
+		  mb.UInt32Value(Offset) = NewInt
 		End Sub
 	#tag EndMethod
 
@@ -385,13 +385,13 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function UShortValue(Offset As UInt64) As UInt16
-		  Return Me.UInt16Value(Offset)
+		  Return Me.UShortValue(Offset)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub UShortValue(Offset As UInt64, Assigns NewInt As UInt16)
-		  Me.UInt16Value(Offset) = NewInt
+		  Me.UShortValue(Offset) = NewInt
 		End Sub
 	#tag EndMethod
 
@@ -424,7 +424,7 @@ Class SecureMemoryBlock
 
 	#tag Note, Name = About this class
 		libsodium provides heap allocation features for storing sensitive data. These features are wrapped by this class in 
-		a MemoryBlock-like interface. Memory allocation using this class are slowed and require 3 or 4 extra pages of virtual memory.
+		a MemoryBlock-like interface. Memory allocations using this class are slower and require 3 or 4 extra pages of virtual memory.
 		
 		##Guard features
 		The allocated region is placed at the end of a page boundary, immediately followed by a guard page. As a result, accessing 
