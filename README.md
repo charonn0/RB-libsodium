@@ -56,5 +56,5 @@ RB-libsodium will raise a PlatformNotSupportedException when used if all require
     * [Encrypt data](https://github.com/charonn0/RB-libsodium/wiki/SKI-Encryption-Examples#encrypt-data)
     * [Decrypt data](https://github.com/charonn0/RB-libsodium/wiki/SKI-Encryption-Examples#decrypt-data)
   * Message authentication
-	* [Generate a MAC](https://github.com/charonn0/RB-libsodium/wiki/SKI-Encryption-Examples#MAC)
-    * [Verify a MAC](https://github.com/charonn0/RB-libsodium/wiki/SKI-Encryption-Examples#MACVerify)
+	* [Generate a MAC](https://github.com/charonn0/RB-libsodium/wiki/SKI-Encryption-Examples#generate-and-validate-a-message-authentication-code)
+    * [Verify a MAC](https://github.com/charonn0/RB-libsodium/wiki/SKI-Encryption-Examples#generate-and-validate-a-message-authentication-code)
