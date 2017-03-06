@@ -32,7 +32,7 @@ Protected Class GenericHashDigest
 
 	#tag Method, Flags = &h0
 		Sub Constructor(KeyData As libsodium.Password, Salt As MemoryBlock, Type As libsodium.HashType = libsodium.HashType.Generic)
-		  ' Instantiates the processor for hashing. If KeyData is specified then the hash is keyed using a derived key
+		  ' Instantiates the processor for hashing using a key derived from KeyData
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Constructor
