@@ -199,8 +199,9 @@ Class SecureMemoryBlock
 		  ' if non-zero bits are found. Execution time is constant for a given length.
 		  
 		  If mPtr = Nil Then Return True
+		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
 		  Dim p As Ptr
-		  If Length = -1 Then Length = mSize
+		  If Length < 0 Then Length = mSize
 		  If Offset + Length > mSize Then Raise New SodiumException(ERR_OUT_OF_RANGE)
 		  If Offset > 0 Then
 		    p = Ptr(Integer(mPtr) + Offset)
@@ -427,8 +428,9 @@ Class SecureMemoryBlock
 		  ' This method fills the SecureMemoryBlock with zeroes, overwriting any previous data.
 		  
 		  If mPtr = Nil Then Return
+		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
 		  Dim p As Ptr
-		  If Length = -1 Then Length = mSize
+		  If Length < 0 Then Length = mSize
 		  If Offset + Length > mSize Then Raise New SodiumException(ERR_OUT_OF_RANGE)
 		  If Offset > 0 Then
 		    p = Ptr(Integer(mPtr) + Offset)
