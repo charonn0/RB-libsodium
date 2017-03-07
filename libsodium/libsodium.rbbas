@@ -330,8 +330,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
-		  ' Returns a MemoryBlock filled with the requested number of bytes of
-		  ' cryptographically random data.
+		  ' Returns a MemoryBlock filled with the requested number of unpredictable bytes.
 		  '   On Win32, the RtlGenRandom() function is used
 		  '   On BSD, the arc4random() function is used
 		  '   On recent Linux kernels, the getrandom system call is used (since Sodium 1.0.3)
@@ -361,7 +360,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function RandomUInt32(Optional UpperBound As UInt32) As UInt32
-		  ' Returns a random UInt32 between 0 and &hffffffff. If UpperBound is specified
+		  ' Returns an unpredictable UInt32 between 0 and &hffffffff. If UpperBound is specified
 		  ' then the value will be less-than or equal-to UpperBound
 		  ' https://download.libsodium.org/doc/generating_random_data/
 		  
