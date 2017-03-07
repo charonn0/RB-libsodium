@@ -517,12 +517,19 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub ZeroFill(Extends mb As MemoryBlock)
+		Sub ZeroFill(Extends mb As MemoryBlock, Offset As Int32 = 0, Length As Int32 = -1)
 		  ' Overwrites the data in the MemoryBlock with zeroes.
 		  
 		  If mb = Nil Then Return
-		  If mb.Size < 0 Then Raise New OutOfBoundsException ' can't pass a MemoryBlock of unknown size
-		  sodium_memzero(mb, mb.Size)
+		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If Offset + Length > mb.Size Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  
+		  Dim p As Ptr = mb
+		  If Length < 0 Then Length = mb.Size
+		  If Offset > 0 Then p = Ptr(Integer(p) + Offset)
+		  
+		  sodium_memzero(p, Length)
 		End Sub
 	#tag EndMethod
 
