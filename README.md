@@ -4,7 +4,7 @@
 **RB-libsodium** is a libsodium [binding](http://en.wikipedia.org/wiki/Language_binding) for Realbasic and Xojo ("classic" framework) projects. It is designed and tested using REALstudio 2011r4.3 on Windows 7. Library binaries for [a number of platforms](https://download.libsodium.org/libsodium/releases/) are available, or can built from source. 
 
 ##Example
-This example generates and validates a password hash that is suitable to be stored in a database:
+This example generates and validates a password hash that is suitable to be stored in a database ([more examples](https://github.com/charonn0/RB-libsodium/wiki#examples)):
 ```vbnet
   Dim pw As libsodium.Password = "seekrit"
   Dim hash As String = pw.GenerateHash()
