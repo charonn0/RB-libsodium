@@ -165,7 +165,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
-		  ' decodes ASCII hexadecimal to Binary. On error, returns Nil. IgnoredChars
+		  ' Encodes ASCII hexadecimal to Binary. On error, returns Nil. IgnoredChars
 		  ' is an optional string of characters to skip when interpreting the HexData
 		  '
 		  ' See:
@@ -417,11 +417,14 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function ShortHash(InputData As MemoryBlock, Key As MemoryBlock) As UInt64
-		  ' Generates a 64-bit hawsh of the InputData using the specified key. This method
-		  ' outputs short but unpredictable (without knowing the secret key) values suitable
-		  ' for picking a list in a hash table for a given key.
+		  ' Generates a 64-bit (8-byte) hash of the InputData using the specified key. The
+		  ' output is a short but unpredictable (without knowing the secret key) value 
+		  ' suitable for picking a list in a hash table for a given key. The Key must be 
+		  ' exactly 16 bytes in size. This hash function should not be considered to be
+		  ' collision resistant.
 		  '
 		  ' See:
+		  ' https://download.libsodium.org/doc/hashing/short-input_hashing.html
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.ShortHash
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
