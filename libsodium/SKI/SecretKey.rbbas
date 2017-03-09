@@ -122,6 +122,14 @@ Inherits libsodium.SKI.KeyContainer
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function Salt() As MemoryBlock
+		  ' If the Key was derived from a Password then this method will return the salt, otherwise it returns Nil.
+		  
+		  Return mPasswdSalt
+		End Function
+	#tag EndMethod
+
 
 	#tag Note, Name = Usage
 		This class contains a symmetric key for use with secret key encryption and message authentication. Encryption, 
@@ -158,6 +166,11 @@ Inherits libsodium.SKI.KeyContainer
 		    Dim msg As MemoryBlock = libsodium.SKI.EncryptData("Hello, world!", sk, n)
 		    MsgBox(libsodium.SKI.DecryptData(msg, sk, n))
 	#tag EndNote
+
+
+	#tag Property, Flags = &h21
+		Private mPasswdSalt As MemoryBlock
+	#tag EndProperty
 
 
 	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN XSALSA20 KEY BLOCK-----", Scope = Private

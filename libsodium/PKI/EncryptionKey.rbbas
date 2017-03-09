@@ -12,6 +12,7 @@ Inherits libsodium.PKI.KeyPair
 		  
 		  If Salt = Nil Then Salt = PasswordData.RandomSalt(HashAlgorithm)
 		  Me.Constructor(PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, HashAlgorithm))
+		  mPasswdSalt = Salt
 		End Sub
 	#tag EndMethod
 

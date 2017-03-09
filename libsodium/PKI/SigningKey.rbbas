@@ -10,9 +10,9 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Constructor
 		  
-		  If Salt = Nil Then Salt = libsodium.Password.RandomSalt(HashAlgorithm)
-		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_sign_SECRETKEYBYTES, Salt, Limits, HashAlgorithm)
-		  Me.Constructor(seckey)
+		  If Salt = Nil Then Salt = PasswordData.RandomSalt(HashAlgorithm)
+		  Me.Constructor(PasswordData.DeriveKey(crypto_sign_SECRETKEYBYTES, Salt, Limits, HashAlgorithm))
+		  mPasswdSalt = Salt
 		End Sub
 	#tag EndMethod
 
@@ -138,7 +138,6 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Import
 		  
-		  'Dim pk As MemoryBlock = ExtractKey(ExportedKey, PublicPrefix, PublicSuffix)
 		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportSigningPrivatePrefix, ExportSigningPrivateSuffix, Passwd)
 		  If sk <> Nil Then Return Derive(sk)
 		End Function
