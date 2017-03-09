@@ -93,10 +93,14 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function RandomSalt() As MemoryBlock
+		 Shared Function RandomSalt(HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a salt for Password.DeriveKey
 		  
-		  Return RandomBytes(crypto_pwhash_SALTBYTES)
+		  If HashAlgorithm = ALG_ARGON2 Then
+		    Return RandomBytes(crypto_pwhash_SALTBYTES)
+		  Else
+		    Return RandomBytes(crypto_pwhash_scryptsalsa208sha256_SALTBYTES)
+		  End If
 		End Function
 	#tag EndMethod
 
@@ -127,13 +131,19 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Constant, Name = ALG_SCRYPT, Type = Double, Dynamic = False, Default = \"1", Scope = Public
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_pwhash_ALG_DEFAULT, Type = Double, Dynamic = False, Default = \"1", Scope = Protected
+	#tag Constant, Name = crypto_pwhash_ALG_DEFAULT, Type = Double, Dynamic = False, Default = \"ALG_ARGON2", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_pwhash_SALTBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_pwhash_scryptsalsa208sha256_SALTBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_pwhash_scryptsalsa208sha256_STRBYTES, Type = Double, Dynamic = False, Default = \"102", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_pwhash_STRBYTES, Type = Double, Dynamic = False, Default = \"128", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = MEMLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"33554432", Scope = Protected

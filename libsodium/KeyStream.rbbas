@@ -14,7 +14,7 @@ Protected Class KeyStream
 		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
 		  ' parameters will produce the same output both times.
 		  
-		  If Salt = Nil Then Salt = FromPassword.RandomSalt
+		  If Salt = Nil Then Salt = FromPassword.RandomSalt(HashAlgorithm)
 		  Me.Constructor(FromPassword.DeriveKey(crypto_stream_KEYBYTES, Salt, Limits, HashAlgorithm))
 		End Sub
 	#tag EndMethod
@@ -95,6 +95,13 @@ Protected Class KeyStream
 	#tag Property, Flags = &h1
 		Protected mKey As libsodium.SKI.KeyContainer
 	#tag EndProperty
+
+
+	#tag Constant, Name = crypto_stream_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
+	#tag EndConstant
 
 
 	#tag ViewBehavior

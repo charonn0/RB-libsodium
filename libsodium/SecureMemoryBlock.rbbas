@@ -194,11 +194,22 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function IsZero() As Boolean
-		  ' This method returns True if the SecureMemoryBlock contains only zeros. It returns False 
+		Function IsZero(Offset As Int32 = 0, Length As Int32 = -1) As Boolean
+		  ' This method returns True if the SecureMemoryBlock contains only zeros. It returns False
 		  ' if non-zero bits are found. Execution time is constant for a given length.
 		  
-		  Return sodium_is_zero(mPtr, Me.Size) = 1
+		  If mPtr = Nil Then Return True
+		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  Dim p As Ptr
+		  If Length < 0 Then Length = mSize
+		  If Offset + Length > mSize Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  If Offset > 0 Then
+		    p = Ptr(Integer(mPtr) + Offset)
+		  Else
+		    p = mPtr
+		  End If
+		  
+		  Return sodium_is_zero(p, Length) = 1
 		End Function
 	#tag EndMethod
 
@@ -413,11 +424,21 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub ZeroFill()
+		Sub ZeroFill(Offset As Int32 = 0, Length As Int32 = -1)
 		  ' This method fills the SecureMemoryBlock with zeroes, overwriting any previous data.
 		  
 		  If mPtr = Nil Then Return
-		  sodium_memzero(mPtr, mSize)
+		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  Dim p As Ptr
+		  If Length < 0 Then Length = mSize
+		  If Offset + Length > mSize Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  If Offset > 0 Then
+		    p = Ptr(Integer(mPtr) + Offset)
+		  Else
+		    p = mPtr
+		  End If
+		  
+		  sodium_memzero(p, Length)
 		End Sub
 	#tag EndMethod
 

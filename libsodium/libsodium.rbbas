@@ -165,7 +165,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
-		  ' decodes ASCII hexadecimal to Binary. On error, returns Nil. IgnoredChars
+		  ' Encodes ASCII hexadecimal to Binary. On error, returns Nil. IgnoredChars
 		  ' is an optional string of characters to skip when interpreting the HexData
 		  '
 		  ' See:
@@ -253,7 +253,7 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil, HashSize As UInt32 = libsodium.crypto_generichash_BYTES_MAX) As String
+		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil, HashSize As UInt32 = libsodium.GenericHashDigest.crypto_generichash_BYTES_MAX) As String
 		  ' Generates a 512-bit BLAKE2b digest of the InputData, optionally using the specified key.
 		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
@@ -330,8 +330,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
-		  ' Returns a MemoryBlock filled with the requested number of bytes of
-		  ' cryptographically random data.
+		  ' Returns a MemoryBlock filled with the requested number of unpredictable bytes.
 		  '   On Win32, the RtlGenRandom() function is used
 		  '   On BSD, the arc4random() function is used
 		  '   On recent Linux kernels, the getrandom system call is used (since Sodium 1.0.3)
@@ -361,7 +360,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function RandomUInt32(Optional UpperBound As UInt32) As UInt32
-		  ' Returns a random UInt32 between 0 and &hffffffff. If UpperBound is specified
+		  ' Returns an unpredictable UInt32 between 0 and &hffffffff. If UpperBound is specified
 		  ' then the value will be less-than or equal-to UpperBound
 		  ' https://download.libsodium.org/doc/generating_random_data/
 		  
@@ -418,11 +417,14 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function ShortHash(InputData As MemoryBlock, Key As MemoryBlock) As UInt64
-		  ' Generates a 64-bit hawsh of the InputData using the specified key. This method
-		  ' outputs short but unpredictable (without knowing the secret key) values suitable
-		  ' for picking a list in a hash table for a given key.
+		  ' Generates a 64-bit (8-byte) hash of the InputData using the specified key. The
+		  ' output is a short but unpredictable (without knowing the secret key) value 
+		  ' suitable for picking a list in a hash table for a given key. The Key must be 
+		  ' exactly 16 bytes in size. This hash function should not be considered to be
+		  ' collision resistant.
 		  '
 		  ' See:
+		  ' https://download.libsodium.org/doc/hashing/short-input_hashing.html
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.ShortHash
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
@@ -517,50 +519,27 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub ZeroFill(Extends mb As MemoryBlock)
+		Sub ZeroFill(Extends mb As MemoryBlock, Offset As Int32 = 0, Length As Int32 = -1)
 		  ' Overwrites the data in the MemoryBlock with zeroes.
 		  
 		  If mb = Nil Then Return
-		  If mb.Size < 0 Then Raise New OutOfBoundsException ' can't pass a MemoryBlock of unknown size
-		  sodium_memzero(mb, mb.Size)
+		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If Offset + Length > mb.Size Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  
+		  Dim p As Ptr = mb
+		  If Length < 0 Then Length = mb.Size
+		  If Offset > 0 Then p = Ptr(Integer(p) + Offset)
+		  
+		  sodium_memzero(p, Length)
 		End Sub
 	#tag EndMethod
 
 
-	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_generichash_BYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_generichash_BYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_generichash_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_generichash_KEYBYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_generichash_KEYBYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_pwhash_SALTBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_pwhash_STRBYTES, Type = Double, Dynamic = False, Default = \"128", Scope = Private
-	#tag EndConstant
-
 	#tag Constant, Name = crypto_shorthash_BYTES, Type = Double, Dynamic = False, Default = \"8", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_shorthash_KEYBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_stream_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_stream_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
+	#tag Constant, Name = crypto_shorthash_KEYBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_CANT_ALLOC, Type = Double, Dynamic = False, Default = \"-5", Scope = Protected
