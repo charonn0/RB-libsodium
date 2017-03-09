@@ -22,6 +22,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' key pair can be used both for authenticated encryption and for signatures.
 		  ' 
 		  ' See:
+		  ' https://download.libsodium.org/doc/advanced/ed25519-curve25519.html
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
 		  
 		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
