@@ -2,7 +2,7 @@
 Protected Class EncryptionKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
-		Sub Constructor(PasswordData As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive)
+		Sub Constructor(PasswordData As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
 		  ' Generates a key pair by deriving it from a salted hash of the password. The operation is
 		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
 		  ' parameters will produce the same output both times.
@@ -10,8 +10,8 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
 		  
-		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = PasswordData.RandomSalt
-		  Me.Constructor(PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, libsodium.Password.ALG_ARGON2))
+		  If Salt = Nil Then Salt = PasswordData.RandomSalt(HashAlgorithm)
+		  Me.Constructor(PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, HashAlgorithm))
 		End Sub
 	#tag EndMethod
 

@@ -14,7 +14,7 @@ Protected Class KeyStream
 		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
 		  ' parameters will produce the same output both times.
 		  
-		  If Salt = Nil Then Salt = FromPassword.RandomSalt
+		  If Salt = Nil Then Salt = FromPassword.RandomSalt(HashAlgorithm)
 		  Me.Constructor(FromPassword.DeriveKey(crypto_stream_KEYBYTES, Salt, Limits, HashAlgorithm))
 		End Sub
 	#tag EndMethod
