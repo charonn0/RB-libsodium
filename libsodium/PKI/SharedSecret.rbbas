@@ -17,8 +17,7 @@ Inherits libsodium.SKI.KeyContainer
 		  If crypto_box_beforenm(buffer, RecipientPublicKey.Value, SenderPrivateKey.PrivateKey) <> 0 Then
 		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		  End If
-		  // Calling the overridden superclass constructor.
-		  Super.Constructor(buffer)
+		  Me.Constructor(buffer)
 		End Sub
 	#tag EndMethod
 
