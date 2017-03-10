@@ -44,7 +44,6 @@ Protected Class KeyPair
 
 	#tag Property, Flags = &h1
 		Protected mPasswdSalt As MemoryBlock
-
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
