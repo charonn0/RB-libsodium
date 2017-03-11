@@ -4,6 +4,11 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h0
 		Function DeriveKey(KeyLength As Int32, Salt As MemoryBlock, Limits As libsodium.ResourceLimits, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As MemoryBlock
 		  ' Computes a key of the specified KeySize using the password, Salt, and other parameters.
+		  '
+		  ' See:
+		  ' https://download.libsodium.org/doc/password_hashing/the_argon2i_function.html#key-derivation
+		  ' https://download.libsodium.org/doc/password_hashing/scrypt.html#key-derivation
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.DeriveKey
 		  
 		  Dim out As New MemoryBlock(KeyLength)
 		  Dim clearpw As MemoryBlock = Me.Value

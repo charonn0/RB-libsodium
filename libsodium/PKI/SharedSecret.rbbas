@@ -8,6 +8,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' to be performed once rather than on each Encrypt/Decrypt operation.
 		  '
 		  ' See:
+		  ' https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html#precalculation-interface
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Constructor
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
@@ -17,8 +18,7 @@ Inherits libsodium.SKI.KeyContainer
 		  If crypto_box_beforenm(buffer, RecipientPublicKey.Value, SenderPrivateKey.PrivateKey) <> 0 Then
 		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		  End If
-		  // Calling the overridden superclass constructor.
-		  Super.Constructor(buffer)
+		  Me.Constructor(buffer)
 		End Sub
 	#tag EndMethod
 
@@ -49,6 +49,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' Or just call the Constructor, which does it for you.
 		  '
 		  ' See:
+		  ' https://download.libsodium.org/doc/advanced/scalar_multiplication.html
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.DeriveSharedSecret
 		  
 		  CheckSize(RecipientPublicKey, crypto_scalarmult_BYTES)

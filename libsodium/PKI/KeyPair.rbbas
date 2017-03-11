@@ -33,6 +33,18 @@ Protected Class KeyPair
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function Salt() As MemoryBlock
+		  ' If the KeyPair was derived from a Password then this method will return the salt, otherwise it returns Nil.
+		  
+		  Return mPasswdSalt
+		End Function
+	#tag EndMethod
+
+
+	#tag Property, Flags = &h1
+		Protected mPasswdSalt As MemoryBlock
+	#tag EndProperty
 
 	#tag Property, Flags = &h1
 		Protected mPrivate As libsodium.SKI.KeyContainer
