@@ -1,6 +1,5 @@
 #tag Class
 Protected Class KeyPair
-Implements libsodium.Secureable
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
 		  mPrivate = New libsodium.SKI.KeyContainer(PrivateKeyData)
@@ -8,16 +7,8 @@ Implements libsodium.Secureable
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Sub Lock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  Secureable(mPrivate).Lock
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherKey As libsodium.PKI.KeyPair) As Integer
+		Function Operator_Compare(OtherKey As libsodium.PKI.KeyPair) As Int32
 		  ' This method overloads the comparison operator (=) allowing direct comparisons between
 		  ' instances of KeyPair. The comparison operation itself is a constant-time binary
 		  ' comparison of the private key halves of both key pairs; the public halves are not compared.
@@ -42,14 +33,18 @@ Implements libsodium.Secureable
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Sub Unlock()
-		  // Part of the libsodium.Secureable interface.
+	#tag Method, Flags = &h0
+		Function Salt() As MemoryBlock
+		  ' If the KeyPair was derived from a Password then this method will return the salt, otherwise it returns Nil.
 		  
-		  Secureable(mPrivate).Unlock
-		End Sub
+		  Return mPasswdSalt
+		End Function
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h1
+		Protected mPasswdSalt As MemoryBlock
+	#tag EndProperty
 
 	#tag Property, Flags = &h1
 		Protected mPrivate As libsodium.SKI.KeyContainer

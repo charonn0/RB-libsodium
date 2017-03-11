@@ -45,7 +45,10 @@ Protected Module SKI
 		  ' Decrypts the CipherText using the XSalsa20 stream cipher with the specified Key and Nonce. A
 		  ' Poly1305 message authentication code is prepended by the EncryptData method and will be
 		  ' validated by this method. The decrypted data is returned on success. On error returns Nil.
-		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
+		  '
+		  ' See: 
+		  ' https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.DecryptData
 		  
 		  Return DecryptData(CipherText, Key.Value, Nonce)
 		End Function
@@ -54,6 +57,7 @@ Protected Module SKI
 	#tag Method, Flags = &h21
 		Private Function DecryptData(CipherText As MemoryBlock, Key As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
 		  CheckSize(Nonce, crypto_secretbox_NONCEBYTES)
+		  CheckSize(Key, crypto_secretbox_KEYBYTES)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_secretbox_MACBYTES)
 		  If crypto_secretbox_open_easy(Buffer, CipherText, CipherText.Size, Nonce, Key) = 0 Then
@@ -146,7 +150,10 @@ Protected Module SKI
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the specified Key and Nonce. A
 		  ' Poly1305 message authentication code is also generated and prepended to the returned encrypted
 		  ' data. On error returns Nil.
-		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
+		  '
+		  ' See:
+		  ' https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.EncryptData
 		  
 		  Return EncryptData(ClearText, Key.Value, Nonce)
 		End Function
