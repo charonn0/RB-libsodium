@@ -239,9 +239,11 @@ Protected Module PKI
 	#tag Method, Flags = &h1
 		Protected Function VerifyData(SignedMessage As MemoryBlock, SignerPublicKey As libsodium.PKI.ForeignKey) As MemoryBlock
 		  ' Validate a Ed25519 signature for the Message that was generated using the signer's PRIVATE key.
-		  ' If the signature was not prepended to the message (the default for SignData) then the signature
-		  ' must be passed as DetatchedSignature.
-		  ' See: https://download.libsodium.org/doc/public-key_cryptography/public-key_signatures.html
+		  ' The signature is expected to be prepended to the message (the default for SignData).
+		  '
+		  ' See:
+		  ' https://download.libsodium.org/doc/public-key_cryptography/public-key_signatures.html
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.VerifyData
 		  
 		  
 		  CheckSize(SignerPublicKey.Value, crypto_sign_PUBLICKEYBYTES)
@@ -259,7 +261,10 @@ Protected Module PKI
 		  ' Validate a Ed25519 signature for the Message that was generated using the signer's PRIVATE key.
 		  ' If the signature was not prepended to the message (the default for SignData) then the signature
 		  ' must be passed as DetatchedSignature.
-		  ' See: https://download.libsodium.org/doc/public-key_cryptography/public-key_signatures.html
+		  '
+		  ' See:
+		  ' https://download.libsodium.org/doc/public-key_cryptography/public-key_signatures.html
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.VerifyData
 		  
 		  
 		  CheckSize(SignerPublicKey.Value, crypto_sign_PUBLICKEYBYTES)

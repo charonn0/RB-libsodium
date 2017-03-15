@@ -1,6 +1,5 @@
 #tag Class
 Class SecureMemoryBlock
-Implements libsodium.Secureable
 	#tag Method, Flags = &h0
 		Function BooleanValue(Offset As UInt64) As Boolean
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
@@ -172,7 +171,7 @@ Implements libsodium.Secureable
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
-		  mb.Int16Value(Offset) = NewInt
+		  mb.Int32Value(Offset) = NewInt
 		End Sub
 	#tag EndMethod
 
@@ -195,17 +194,23 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function IsZero() As Boolean
-		  Return sodium_is_zero(mPtr, Me.Size) = 1
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
-		Protected Sub Lock()
-		  // Part of the libsodium.Secureable interface.
+		Function IsZero(Offset As Int32 = 0, Length As Int32 = -1) As Boolean
+		  ' This method returns True if the SecureMemoryBlock contains only zeros. It returns False
+		  ' if non-zero bits are found. Execution time is constant for a given length.
 		  
-		  Me.ProtectionLevel = libsodium.ProtectionLevel.NoAccess
-		End Sub
+		  If mPtr = Nil Then Return True
+		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  Dim p As Ptr
+		  If Length < 0 Then Length = mSize
+		  If Offset + Length > mSize Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  If Offset > 0 Then
+		    p = Ptr(Integer(mPtr) + Offset)
+		  Else
+		    p = mPtr
+		  End If
+		  
+		  Return sodium_is_zero(p, Length) = 1
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -311,15 +316,10 @@ Implements libsodium.Secureable
 		Sub StringValue(Offset As UInt64, Length As UInt64, Assigns NewData As MemoryBlock)
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + Length > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  Me.ZeroFill
 		  Dim mb As MemoryBlock = mPtr
 		  mb.StringValue(Offset, Length) = NewData
 		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function TruePtr() As Ptr
-		  Return mPtr
-		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -354,7 +354,7 @@ Implements libsodium.Secureable
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
-		  mb.UInt16Value(Offset) = NewInt
+		  mb.UInt32Value(Offset) = NewInt
 		End Sub
 	#tag EndMethod
 
@@ -394,23 +394,15 @@ Implements libsodium.Secureable
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Sub Unlock()
-		  // Part of the libsodium.Secureable interface.
-		  
-		  Me.ProtectionLevel = libsodium.ProtectionLevel.ReadOnly
-		End Sub
-	#tag EndMethod
-
 	#tag Method, Flags = &h0
 		Function UShortValue(Offset As UInt64) As UInt16
-		  Return Me.UInt16Value(Offset)
+		  Return Me.UShortValue(Offset)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub UShortValue(Offset As UInt64, Assigns NewInt As UInt16)
-		  Me.UInt16Value(Offset) = NewInt
+		  Me.UShortValue(Offset) = NewInt
 		End Sub
 	#tag EndMethod
 
@@ -432,16 +424,28 @@ Implements libsodium.Secureable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub ZeroFill()
+		Sub ZeroFill(Offset As Int32 = 0, Length As Int32 = -1)
+		  ' This method fills the SecureMemoryBlock with zeroes, overwriting any previous data.
+		  
 		  If mPtr = Nil Then Return
-		  sodium_memzero(mPtr, mSize)
+		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  Dim p As Ptr
+		  If Length < 0 Then Length = mSize
+		  If Offset + Length > mSize Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  If Offset > 0 Then
+		    p = Ptr(Integer(mPtr) + Offset)
+		  Else
+		    p = mPtr
+		  End If
+		  
+		  sodium_memzero(p, Length)
 		End Sub
 	#tag EndMethod
 
 
 	#tag Note, Name = About this class
 		libsodium provides heap allocation features for storing sensitive data. These features are wrapped by this class in 
-		a MemoryBlock-like interface. Memory allocation using this class are slowed and require 3 or 4 extra pages of virtual memory.
+		a MemoryBlock-like interface. Memory allocations using this class are slower and require 3 or 4 extra pages of virtual memory.
 		
 		##Guard features
 		The allocated region is placed at the end of a page boundary, immediately followed by a guard page. As a result, accessing 

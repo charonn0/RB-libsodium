@@ -4,6 +4,11 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h0
 		Function DeriveKey(KeyLength As Int32, Salt As MemoryBlock, Limits As libsodium.ResourceLimits, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As MemoryBlock
 		  ' Computes a key of the specified KeySize using the password, Salt, and other parameters.
+		  '
+		  ' See:
+		  ' https://download.libsodium.org/doc/password_hashing/the_argon2i_function.html#key-derivation
+		  ' https://download.libsodium.org/doc/password_hashing/scrypt.html#key-derivation
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.DeriveKey
 		  
 		  Dim out As New MemoryBlock(KeyLength)
 		  Dim clearpw As MemoryBlock = Me.Value
@@ -93,10 +98,14 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function RandomSalt() As MemoryBlock
+		 Shared Function RandomSalt(HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a salt for Password.DeriveKey
 		  
-		  Return RandomBytes(crypto_pwhash_SALTBYTES)
+		  If HashAlgorithm = ALG_ARGON2 Then
+		    Return RandomBytes(crypto_pwhash_SALTBYTES)
+		  Else
+		    Return RandomBytes(crypto_pwhash_scryptsalsa208sha256_SALTBYTES)
+		  End If
 		End Function
 	#tag EndMethod
 
@@ -105,16 +114,16 @@ Inherits libsodium.SKI.KeyContainer
 		  ' This method verifies that the HashValue is a valid hash for the password (as generated
 		  ' by Password.GenerateHash)
 		  
-		  Dim clearpw As SecureMemoryBlock = Me.Value
+		  Dim clearpw As MemoryBlock = Me.Value
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
 		    If HashValue.Size <= crypto_pwhash_STRBYTES Then HashValue.Size = crypto_pwhash_STRBYTES Else CheckSize(HashValue, crypto_pwhash_STRBYTES)
-		    Return crypto_pwhash_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
+		    Return crypto_pwhash_str_verify(HashValue, clearpw, clearpw.Size) = 0
 		    
 		  Case ALG_SCRYPT
 		    HashValue = HashValue + Chr(0)
 		    CheckSize(HashValue, crypto_pwhash_scryptsalsa208sha256_STRBYTES)
-		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw.TruePtr, clearpw.Size) = 0
+		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw, clearpw.Size) = 0
 		  End Select
 		  
 		End Function
@@ -127,13 +136,19 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Constant, Name = ALG_SCRYPT, Type = Double, Dynamic = False, Default = \"1", Scope = Public
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_pwhash_ALG_DEFAULT, Type = Double, Dynamic = False, Default = \"1", Scope = Protected
+	#tag Constant, Name = crypto_pwhash_ALG_DEFAULT, Type = Double, Dynamic = False, Default = \"ALG_ARGON2", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_pwhash_SALTBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_pwhash_scryptsalsa208sha256_SALTBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_pwhash_scryptsalsa208sha256_STRBYTES, Type = Double, Dynamic = False, Default = \"102", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_pwhash_STRBYTES, Type = Double, Dynamic = False, Default = \"128", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = MEMLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"33554432", Scope = Protected

@@ -10,9 +10,9 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Constructor
 		  
-		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = libsodium.Password.RandomSalt
-		  Dim seckey As MemoryBlock = PasswordData.DeriveKey(crypto_sign_SECRETKEYBYTES, Salt, Limits, HashAlgorithm)
-		  Me.Constructor(seckey)
+		  If Salt = Nil Then Salt = PasswordData.RandomSalt(HashAlgorithm)
+		  Me.Constructor(PasswordData.DeriveKey(crypto_sign_SECRETKEYBYTES, Salt, Limits, HashAlgorithm))
+		  mPasswdSalt = Salt
 		End Sub
 	#tag EndMethod
 
@@ -42,7 +42,6 @@ Inherits libsodium.PKI.KeyPair
 		  // Calling the overridden superclass constructor.
 		  // Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock) -- From KeyPair
 		  Super.Constructor(PrivateKeyData, PublicKeyData)
-		  Me.Lock()
 		End Sub
 	#tag EndMethod
 
@@ -139,14 +138,13 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Import
 		  
-		  'Dim pk As MemoryBlock = ExtractKey(ExportedKey, PublicPrefix, PublicSuffix)
 		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportSigningPrivatePrefix, ExportSigningPrivateSuffix, Passwd)
 		  If sk <> Nil Then Return Derive(sk)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Operator_Compare(OtherKey As libsodium.PKI.SigningKey) As Integer
+		Function Operator_Compare(OtherKey As libsodium.PKI.SigningKey) As Int32
 		  ' This method overloads the comparison operator (=) allowing direct comparisons between
 		  ' instances of SigningKey. The comparison operation itself is a constant-time binary
 		  ' comparison of the private key halves of both key pairs; the public halves are not compared.

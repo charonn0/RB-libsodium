@@ -32,7 +32,7 @@ Protected Class GenericHashDigest
 
 	#tag Method, Flags = &h0
 		Sub Constructor(KeyData As libsodium.Password, Salt As MemoryBlock, Type As libsodium.HashType = libsodium.HashType.Generic)
-		  ' Instantiates the processor for hashing. If KeyData is specified then the hash is keyed using a derived key
+		  ' Instantiates the processor for hashing using a key derived from KeyData
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Constructor
@@ -98,7 +98,7 @@ Protected Class GenericHashDigest
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function RandomKey() As MemoryBlock
+		 Shared Function RandomKey(Type As libsodium.HashType = libsodium.HashType.Generic) As MemoryBlock
 		  ' Returns random bytes that are suitable to be used as a key for GenericHashDigest.Constructor
 		  '
 		  ' See: 
@@ -106,7 +106,18 @@ Protected Class GenericHashDigest
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
-		  Return RandomBytes(crypto_generichash_KEYBYTES)
+		  Select Case Type
+		  Case HashType.Generic
+		    Return RandomBytes(crypto_generichash_KEYBYTES)
+		    
+		  Case HashType.SHA256
+		    Return RandomBytes(crypto_auth_hmacsha256_KEYBYTES)
+		    
+		  Case HashType.SHA512
+		    Return RandomBytes(crypto_auth_hmacsha512_KEYBYTES)
+		    
+		  End Select
+		  
 		End Function
 	#tag EndMethod
 
@@ -207,6 +218,24 @@ Protected Class GenericHashDigest
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_auth_hmacsha512_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_BYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_BYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Public
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_KEYBYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_generichash_KEYBYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_hash_sha256_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected

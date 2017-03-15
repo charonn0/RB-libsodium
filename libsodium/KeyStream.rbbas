@@ -2,7 +2,10 @@
 Protected Class KeyStream
 	#tag Method, Flags = &h0
 		Sub Constructor()
-		  ' Generates a random key stream. 
+		  ' Generates a random key stream.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
 		  
 		  Me.Constructor(RandomBytes(crypto_stream_KEYBYTES))
 		End Sub
@@ -13,15 +16,21 @@ Protected Class KeyStream
 		  ' Generates a key stream by deriving it from a salted hash of the password. The operation is
 		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
 		  ' parameters will produce the same output both times.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
 		  
-		  If Salt = Nil Then Salt = FromPassword.RandomSalt
+		  If Salt = Nil Then Salt = FromPassword.RandomSalt(HashAlgorithm)
 		  Me.Constructor(FromPassword.DeriveKey(crypto_stream_KEYBYTES, Salt, Limits, HashAlgorithm))
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub Constructor(KeyData As libsodium.PKI.ForeignKey)
-		  ' Uses the KeyData as the key for the key stream
+		  ' Uses the KeyData as the key for the key stream.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
 		  
 		  Me.Constructor(KeyData.Value)
 		End Sub
@@ -38,7 +47,11 @@ Protected Class KeyStream
 	#tag Method, Flags = &h0
 		Function DeriveKey(Size As Int32, Optional Nonce As MemoryBlock) As MemoryBlock
 		  ' Returns the requested number of bytes from the key stream. Suitable for generating
-		  ' keys or other pseudo-random data
+		  ' keys or other pseudo-random data.
+		  '
+		  ' See:
+		  ' https://download.libsodium.org/doc/advanced/xsalsa20.html
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.DeriveKey
 		  
 		  If Nonce = Nil Then Nonce = Me.RandomNonce()
 		  CheckSize(Nonce, crypto_stream_NONCEBYTES)
@@ -51,6 +64,10 @@ Protected Class KeyStream
 	#tag Method, Flags = &h0
 		Function Process(Data As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
 		  ' Encrypts or decrypts the Data by XOR'ing it with the key stream.
+		  '
+		  ' See:
+		  ' https://download.libsodium.org/doc/advanced/xsalsa20.html
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Process
 		  
 		  CheckSize(Nonce, crypto_stream_NONCEBYTES)
 		  Dim output As New MemoryBlock(Data.Size)
@@ -95,6 +112,13 @@ Protected Class KeyStream
 	#tag Property, Flags = &h1
 		Protected mKey As libsodium.SKI.KeyContainer
 	#tag EndProperty
+
+
+	#tag Constant, Name = crypto_stream_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
+	#tag EndConstant
 
 
 	#tag ViewBehavior

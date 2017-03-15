@@ -2,7 +2,7 @@
 Protected Class EncryptionKey
 Inherits libsodium.PKI.KeyPair
 	#tag Method, Flags = &h1000
-		Sub Constructor(PasswordData As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive)
+		Sub Constructor(PasswordData As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
 		  ' Generates a key pair by deriving it from a salted hash of the password. The operation is
 		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
 		  ' parameters will produce the same output both times.
@@ -10,17 +10,19 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
 		  
-		  If Salt <> Nil Then CheckSize(Salt, crypto_pwhash_SALTBYTES) Else Salt = PasswordData.RandomSalt
-		  Me.Constructor(PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, libsodium.Password.ALG_ARGON2))
+		  If Salt = Nil Then Salt = PasswordData.RandomSalt(HashAlgorithm)
+		  Me.Constructor(PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, HashAlgorithm))
+		  mPasswdSalt = Salt
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h1000
 		Sub Constructor(FromSigningKey As libsodium.PKI.SigningKey)
-		  ' Converts the FromSigningKey(Ed25519) into an EncryptionKey(Curve25519), so that the same 
-		  ' key pair can be used both for authenticated encryption and for signatures.
-		  ' 
+		  ' Converts the SigningKey(Ed25519) into an EncryptionKey(Curve25519), so that the same
+		  ' key pair can be used both for authenticated encryption and digital signatures.
+		  '
 		  ' See:
+		  ' https://download.libsodium.org/doc/advanced/ed25519-curve25519.html
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
 		  
 		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
@@ -47,7 +49,13 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock)
-		  ' Given a user's private key, this method computes their public key
+		  ' Given a user's private key this method computes their public key using X25519, a 
+		  ' state-of-the-art Elliptic Curve Diffie-Hellman (ECDH) function suitable for a wide 
+		  ' variety of applications.
+		  '
+		  ' See:
+		  ' https://download.libsodium.org/doc/advanced/scalar_multiplication.html
+		  ' https://tools.ietf.org/html/rfc7748
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
@@ -70,15 +78,18 @@ Inherits libsodium.PKI.KeyPair
 		  // Calling the overridden superclass constructor.
 		  // Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock) -- From KeyPair
 		  Super.Constructor(PrivateKeyData, PublicKeyData)
-		  Me.Lock()
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		 Shared Function Derive(PrivateKeyData As MemoryBlock) As libsodium.PKI.EncryptionKey
-		  ' Given a user's private key, this method generates an EncryptionKey pair
+		  ' Given a user's private key this method computes their public key using X25519, a
+		  ' state-of-the-art Elliptic Curve Diffie-Hellman (ECDH) function suitable for a wide
+		  ' variety of applications.
 		  '
 		  ' See:
+		  ' https://download.libsodium.org/doc/advanced/scalar_multiplication.html
+		  ' https://tools.ietf.org/html/rfc7748
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Derive
 		  
 		  Return New EncryptionKey(PrivateKeyData)
@@ -124,7 +135,7 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1000
 		 Shared Function Generate(Optional SeedData As MemoryBlock) As libsodium.PKI.EncryptionKey
-		  ' This method randomly generates an EncryptionKey pair, optionally using the specified seed.
+		  ' This method generates an unpredictable EncryptionKey pair, optionally using the specified seed.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Generate
