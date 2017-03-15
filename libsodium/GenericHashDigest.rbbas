@@ -77,6 +77,12 @@ Protected Class GenericHashDigest
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function HashType() As libsodium.HashType
+		  Return mType
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Process(NewData As MemoryBlock)
 		  ' Processes the NewData into a running hash.
 		  ' 
