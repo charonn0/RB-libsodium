@@ -198,7 +198,7 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomNonce() As MemoryBlock
-		  ' Returns unpredictable bytes that are suitable to be used as a Nonce for use with an EncryptionKey
+		  ' Returns unpredictable bytes that are suitable to be used as a nonce in encryption.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomNonce
