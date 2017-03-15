@@ -79,7 +79,7 @@ Protected Class KeyStream
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomNonce() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a Nonce for use with KeyStream.Process
+		  ' Returns unpredictable bytes that are suitable to be used as a Nonce for use with KeyStream.Process
 		  ' and KeyStream.DeriveKey
 		  '
 		  ' See:
@@ -91,7 +91,7 @@ Protected Class KeyStream
 
 
 	#tag Note, Name = About key streams
-		The DeriveKey method, viewed as a function of the nonce for a uniform random key, is designed to meet the standard notion
+		The Process method, viewed as a function of the nonce for a uniform random key, is designed to meet the standard notion
 		of unpredictability ("PRF"). For a formal definition see, e.g., Section 2.3 of Bellare, Kilian, and Rogaway, "The security of the 
 		cipher block chaining message authentication code," Journal of Computer and System Sciences 61 (2000), 362–399; 
 		http://www-cse.ucsd.edu/~mihir/papers/cbc.html.
