@@ -89,7 +89,7 @@ Inherits libsodium.SKI.KeyContainer
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
 		  
-		  bs.Write(PackKey(Me.Value, ExportPrefix, ExportSuffix, Passwd))
+		  bs.Write(libsodium.Exporting.Export(Me.Value, libsodium.Exporting.ExportableType.SharedSecret, Passwd))
 		  
 		  bs.Close
 		  Return data
@@ -117,7 +117,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Import
 		  
-		  Dim secret As MemoryBlock = ExtractKey(ExportedKey, ExportPrefix, ExportSuffix, Passwd)
+		  Dim secret As MemoryBlock = libsodium.Exporting.Import(ExportedKey, Passwd)
 		  If secret <> Nil Then Return New SharedSecret(secret)
 		End Function
 	#tag EndMethod
