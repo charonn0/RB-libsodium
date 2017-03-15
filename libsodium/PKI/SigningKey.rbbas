@@ -87,10 +87,7 @@ Inherits libsodium.PKI.KeyPair
 		  
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
-		  
-		  bs.Write(PackKey(Me.PublicKey, ExportSigningPublicPrefix, ExportSigningPublicSuffix, Nil))
-		  bs.Write(PackKey(Me.PrivateKey, ExportSigningPrivatePrefix, ExportSigningPrivateSuffix, Passwd))
-		  
+		  bs.Write(libsodium.Exporting.Export(Me.PrivateKey, libsodium.Exporting.ExportableType.SignPrivate, Passwd))
 		  bs.Close
 		  Return data
 		End Function
@@ -138,7 +135,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Import
 		  
-		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportSigningPrivatePrefix, ExportSigningPrivateSuffix, Passwd)
+		  Dim sk As MemoryBlock = libsodium.Exporting.Import(ExportedKey, Passwd)
 		  If sk <> Nil Then Return Derive(sk)
 		End Function
 	#tag EndMethod
