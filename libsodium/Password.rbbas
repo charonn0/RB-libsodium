@@ -99,7 +99,7 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomSalt(HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a salt for Password.DeriveKey
+		  ' Returns unpredictable bytes that are suitable to be used as a salt for Password.DeriveKey
 		  
 		  If HashAlgorithm = ALG_ARGON2 Then
 		    Return RandomBytes(crypto_pwhash_SALTBYTES)

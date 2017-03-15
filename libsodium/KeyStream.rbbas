@@ -79,7 +79,7 @@ Protected Class KeyStream
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomNonce() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a Nonce for use with KeyStream.Process
+		  ' Returns unpredictable bytes that are suitable to be used as a Nonce for use with KeyStream.Process
 		  ' and KeyStream.DeriveKey
 		  '
 		  ' See:

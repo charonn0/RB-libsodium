@@ -44,7 +44,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function CombineNonce(Nonce1 As MemoryBlock, Nonce2 As MemoryBlock) As MemoryBlock
-		  ' Combines Nonce1 with Nonce2 in constant time.
+		  ' Combines Nonce1 with Nonce2 in constant time. The combination formula is
+		  ' (Nonce1 + Nonce2) mod 2^(8*len)
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CombineNonce
@@ -361,7 +362,7 @@ Protected Module libsodium
 	#tag Method, Flags = &h1
 		Protected Function RandomUInt32(Optional UpperBound As UInt32) As UInt32
 		  ' Returns an unpredictable UInt32 between 0 and &hffffffff. If UpperBound is specified
-		  ' then the value will be less-than or equal-to UpperBound
+		  ' then the value will be less-than UpperBound.
 		  ' https://download.libsodium.org/doc/generating_random_data/
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
