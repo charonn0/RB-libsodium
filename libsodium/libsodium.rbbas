@@ -551,6 +551,9 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_CONVERSION_FAILED, Type = Double, Dynamic = False, Default = \"-18", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_IMPORT_PASSWORD, Type = Double, Dynamic = False, Default = \"-19", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_INIT_FAILED, Type = Double, Dynamic = False, Default = \"-2", Scope = Protected
 	#tag EndConstant
 
@@ -596,15 +599,6 @@ Protected Module libsodium
 	#tag Constant, Name = STRICT_CONVERT, Type = Boolean, Dynamic = False, Default = \"False", Scope = Private
 	#tag EndConstant
 
-
-	#tag Enum, Name = ExportableType, Type = Integer, Flags = &h1
-		CryptPrivate
-		  CryptPublic
-		  SignPrivate
-		  SignPublic
-		  Secret
-		Unknown
-	#tag EndEnum
 
 	#tag Enum, Name = HashType, Type = Integer, Flags = &h1
 		Generic

@@ -52,6 +52,10 @@ Inherits RuntimeException
 		    
 		  Case ERR_CONVERSION_FAILED
 		    Me.Message = "The requested key-type conversion failed."
+		    
+		  Case ERR_IMPORT_PASSWORD
+		    Me.Message = "The given password does not decrypt this exported key."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    
