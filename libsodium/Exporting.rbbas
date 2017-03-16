@@ -126,16 +126,26 @@ Protected Module Exporting
 		  Select Case Type
 		  Case ExportableType.CryptPrivate
 		    Return EncryptionPrivatePrefix
+		    
 		  Case ExportableType.CryptPublic
 		    Return EncryptionPublicPrefix
+		    
 		  Case ExportableType.SignPrivate
 		    Return SigningPrivatePrefix
+		    
 		  Case ExportableType.SignPublic
 		    Return SigningPublicPrefix
+		    
 		  Case ExportableType.SharedSecret
 		    Return SharedPrefix
 		  Else
+		    
+		  Case ExportableType.Secret
 		    Return SalsaPrefix
+		    
+		  Else
+		    Return UnknownPrefix
+		    
 		  End Select
 		End Function
 	#tag EndMethod
@@ -145,16 +155,24 @@ Protected Module Exporting
 		  Select Case Type
 		  Case ExportableType.CryptPrivate
 		    Return EncryptionPrivateSuffix
+		    
 		  Case ExportableType.CryptPublic
 		    Return EncryptionPublicSuffix
+		    
 		  Case ExportableType.SignPrivate
 		    Return SigningPrivateSuffix
+		    
 		  Case ExportableType.SignPublic
 		    Return SigningPublicSuffix
+		    
 		  Case ExportableType.SharedSecret
 		    Return SharedSuffix
-		  Else
+		    
+		  Case ExportableType.Secret
 		    Return SalsaSuffix
+		    
+		  Else
+		    Return UnknownSuffix
 		  End Select
 		End Function
 	#tag EndMethod
@@ -257,6 +275,12 @@ Protected Module Exporting
 	#tag EndConstant
 
 	#tag Constant, Name = SigningPublicSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PUBLIC KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = UnknownPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN DATA BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = UnknownSuffix, Type = String, Dynamic = False, Default = \"-----END DATA BLOCK-----", Scope = Private
 	#tag EndConstant
 
 
