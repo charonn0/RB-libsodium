@@ -141,7 +141,6 @@ Protected Module Exporting
 		    
 		  Case ExportableType.SharedSecret
 		    Return SharedPrefix
-		  Else
 		    
 		  Case ExportableType.Secret
 		    Return SalsaPrefix
