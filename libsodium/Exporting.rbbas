@@ -179,8 +179,8 @@ Protected Module Exporting
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Function GetType(EncodedKey As MemoryBlock) As libsodium.Exporting.ExportableType
+	#tag Method, Flags = &h21
+		Private Function GetType(EncodedKey As MemoryBlock) As libsodium.Exporting.ExportableType
 		  Static Prefixes() As String = Array(EncryptionPrivatePrefix, EncryptionPublicPrefix, SigningPrivatePrefix, SigningPublicPrefix, SalsaSuffix, SharedPrefix)
 		  Dim ExportedKey As MemoryBlock = ReplaceLineEndings(EncodedKey, EndOfLine.Windows)
 		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
