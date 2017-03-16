@@ -118,6 +118,9 @@ Protected Module Exporting
 		  Next
 		  
 		  Return MetaData
+		  
+		Exception
+		  Return Nil
 		End Function
 	#tag EndMethod
 
