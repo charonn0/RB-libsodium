@@ -12,7 +12,6 @@ Protected Module Exporting
 		  
 		  Dim data As New MemoryBlock(0)
 		  Dim output As New BinaryStream(data)
-		  Dim ExportedKey As MemoryBlock
 		  output.Write(GetPrefix(Type) + EndOfLine.Windows)
 		  
 		  If Passwd <> Nil Then
@@ -20,7 +19,7 @@ Protected Module Exporting
 		    Dim key As libsodium.SKI.SecretKey
 		    Dim nonce As MemoryBlock = key.RandomNonce
 		    key = New libsodium.SKI.SecretKey(Passwd, salt, Limits)
-		    ExportedKey = libsodium.SKI.EncryptData(KeyData, key, nonce)
+		    KeyData = libsodium.SKI.EncryptData(KeyData, key, nonce)
 		    output.Write("#Salt=")
 		    output.Write(libsodium.EncodeHex(salt))
 		    output.Write(EndOfLine.Windows)
@@ -35,8 +34,6 @@ Protected Module Exporting
 		    Case ResourceLimits.Sensitive
 		      output.Write("#Limits=Sensitive" + EndOfLine.Windows)
 		    End Select
-		  Else
-		    ExportedKey = KeyData
 		  End If
 		  If MetaData <> Nil Then
 		    For Each Key As String In MetaData.Keys
@@ -44,8 +41,8 @@ Protected Module Exporting
 		    Next
 		  End If
 		  output.Write(EndOfLine.Windows)
-		  ExportedKey = libsodium.EncodeHex(ExportedKey)
-		  Dim bs As New BinaryStream(ExportedKey)
+		  KeyData = libsodium.EncodeHex(KeyData)
+		  Dim bs As New BinaryStream(KeyData)
 		  Do
 		    output.Write(bs.Read(64) + EndOfLine.Windows)
 		  Loop Until bs.EOF
