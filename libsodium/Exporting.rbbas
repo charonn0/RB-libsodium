@@ -1,14 +1,14 @@
 #tag Module
 Protected Module Exporting
 	#tag Method, Flags = &h1
-		Protected Function Export(KeyData As MemoryBlock, Type As libsodium.Exporting.ExportableType, Optional Passwd As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, Optional MetaData As Dictionary) As MemoryBlock
+		Protected Function Export(KeyData As MemoryBlock, Type As libsodium.Exporting.ExportableType, Optional Passwd As libsodium.Password, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Moderate, Optional MetaData As Dictionary) As MemoryBlock
 		  Dim data As New MemoryBlock(0)
 		  Dim output As New BinaryStream(data)
 		  Dim ExportedKey As MemoryBlock
 		  output.Write(GetPrefix(Type) + EndOfLine.Windows)
 		  
 		  If Passwd <> Nil Then
-		    If salt = Nil Then salt = Passwd.RandomSalt
+		    Dim salt As MemoryBlock = Passwd.RandomSalt
 		    Dim key As libsodium.SKI.SecretKey
 		    Dim nonce As MemoryBlock = key.RandomNonce
 		    key = New libsodium.SKI.SecretKey(Passwd, salt, Limits)
