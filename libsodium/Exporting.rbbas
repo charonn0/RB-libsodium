@@ -184,9 +184,8 @@ Protected Module Exporting
 		  Suffix = GetSuffix(Type)
 		  
 		  Dim metadata As Dictionary = GetMetaData(EncodedKey)
-		  If metadata = Nil Or metadata.Count = 0 Then Raise New UnsupportedFormatException
 		  EncodedKey = GetKeyData(EncodedKey, Type)
-		  If Passwd <> Nil Then
+		  If Passwd <> Nil And metadata <> Nil Then
 		    Dim n As MemoryBlock = metadata.Value("Nonce")
 		    Dim s As MemoryBlock = metadata.Value("Salt")
 		    Dim l As ResourceLimits = metadata.Value("Limits")
@@ -195,8 +194,7 @@ Protected Module Exporting
 		    If EncodedKey = Nil Then Raise New SodiumException(ERR_IMPORT_PASSWORD)
 		  End If
 		  
-		  If EncodedKey <> Nil Then EncodedKey = Trim(EncodedKey) Else Raise New UnsupportedFormatException
-		  Return EncodedKey
+		  Return Trim(EncodedKey)
 		End Function
 	#tag EndMethod
 
