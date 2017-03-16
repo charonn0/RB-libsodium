@@ -215,11 +215,14 @@ Protected Module Exporting
 		  
 		  Dim metadata As Dictionary = GetMetaData(EncodedKey)
 		  EncodedKey = GetKeyData(EncodedKey, Type)
-		  If Passwd <> Nil And metadata <> Nil Then
+		  If metadata.HasKey("Nonce") And metadata.HasKey("Salt") And metadata.HasKey("Limits") Then
+		    If Passwd = Nil Then Raise New SodiumException(ERR_IMPORT_ENCRYPTED)
 		    Dim n As MemoryBlock = metadata.Value("Nonce")
 		    Dim s As MemoryBlock = metadata.Value("Salt")
 		    Dim l As ResourceLimits = metadata.Value("Limits")
-		    Dim sk As New libsodium.SKI.SecretKey(Passwd, s, l)
+		    Dim a As Int32 = metadata.Lookup("Alg", Passwd.ALG_ARGON2)
+		    
+		    Dim sk As New libsodium.SKI.SecretKey(Passwd, s, l, a)
 		    EncodedKey = libsodium.SKI.DecryptData(EncodedKey, sk, n)
 		    If EncodedKey = Nil Then Raise New SodiumException(ERR_IMPORT_PASSWORD)
 		  End If
