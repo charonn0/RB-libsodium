@@ -26,6 +26,7 @@ Protected Module Exporting
 		    output.Write("#Nonce=")
 		    output.Write(libsodium.EncodeHex(nonce))
 		    output.Write(EndOfLine.Windows)
+		    output.Write("#Alg=Argon2" + EndOfLine.Windows)
 		    Select Case Limits
 		    Case ResourceLimits.Interactive
 		      output.Write("#Limits=Interactive" + EndOfLine.Windows)
