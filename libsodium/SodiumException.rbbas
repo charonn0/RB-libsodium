@@ -33,7 +33,7 @@ Inherits RuntimeException
 		    Me.Message = "The requested operation is illegal in the current context."
 		    
 		  Case ERR_COMPUTATION_FAILED
-		    Me.Message = "The requested operation failed, possibly due to resource constraints."
+		    Me.Message = "The requested operation failed, possibly due to resource limits."
 		    
 		  Case ERR_SIZE_MISMATCH
 		    Me.Message = "The requested operation expected input of a different length than what was provided."
