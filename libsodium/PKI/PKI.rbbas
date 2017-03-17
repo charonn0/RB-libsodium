@@ -97,26 +97,6 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DecodeSignature(SigData As MemoryBlock) As MemoryBlock
-		  Dim lines() As String = SplitB(SigData, EndOfLine.Windows)
-		  If lines(0) <> "-----BEGIN ED25519 SIGNATURE-----" Then Return Nil
-		  Dim sig As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(sig)
-		  Dim i As Integer
-		  For i = 1 To UBound(lines)
-		    If lines(i) <> "-----END ED25519 SIGNATURE-----" Then
-		      bs.Write(lines(i) + EndOfLine.Windows)
-		    Else
-		      Exit For
-		    End If
-		  Next
-		  bs.Close
-		  
-		  Return DecodeBase64(sig)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, SenderPublicKey As libsodium.PKI.ForeignKey, RecipientPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Decrypts the CipherText using the XSalsa20 stream cipher with a shared key, which is derived
 		  ' from the SenderPublicKey and RecipientPrivateKey, and a Nonce. A Poly1305 message authentication
