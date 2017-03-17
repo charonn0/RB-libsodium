@@ -32,6 +32,7 @@ Protected Module SKI
 
 	#tag Method, Flags = &h21
 		Private Function DecryptData(CipherText As MemoryBlock, Key As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		  If Nonce = Nil Then CipherText = libsodium.Exporting.DecodeMessage(CipherText, Nonce)
 		  CheckSize(Nonce, crypto_secretbox_NONCEBYTES)
 		  CheckSize(Key, crypto_secretbox_KEYBYTES)
 		  
@@ -43,7 +44,7 @@ Protected Module SKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function EncryptData(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock) As MemoryBlock
+		Protected Function EncryptData(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, Exportable As Boolean = False) As MemoryBlock
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with the specified Key and Nonce. A
 		  ' Poly1305 message authentication code is also generated and prepended to the returned encrypted
 		  ' data. On error returns Nil.
@@ -52,24 +53,26 @@ Protected Module SKI
 		  ' https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.EncryptData
 		  
-		  Return EncryptData(ClearText, Key.Value, Nonce)
+		  Return EncryptData(ClearText, Key.Value, Nonce, Exportable)
+		  
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function EncryptData(ClearText As MemoryBlock, Key As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
+		Private Function EncryptData(ClearText As MemoryBlock, Key As MemoryBlock, Nonce As MemoryBlock, Exportable As Boolean = False) As MemoryBlock
 		  CheckSize(Nonce, crypto_secretbox_NONCEBYTES)
 		  CheckSize(Key, crypto_secretbox_KEYBYTES)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_secretbox_MACBYTES)
 		  If crypto_secretbox_easy(buffer, ClearText, ClearText.Size, Nonce, Key) = 0 Then
+		    If Exportable Then buffer = libsodium.Exporting.EncodeMessage(buffer, Nonce)
 		    Return buffer
 		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GenerateMAC(Message As MemoryBlock, Key As libsodium.SKI.SecretKey) As MemoryBlock
+		Protected Function GenerateMAC(Message As MemoryBlock, Key As libsodium.SKI.SecretKey, Exportable As Boolean = False) As MemoryBlock
 		  ' Generate a HMAC-SHA512256 authentication code for the Message using SecretKey.
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/secret-key_authentication.html
 		  
@@ -77,6 +80,7 @@ Protected Module SKI
 		  
 		  Dim signature As New MemoryBlock(crypto_auth_BYTES)
 		  If crypto_auth(signature, Message, Message.Size, Key.Value) = 0 Then
+		    If Exportable Then signature = libsodium.Exporting.Export(signature, libsodium.Exporting.ExportableType.HMAC)
 		    Return signature
 		  End If
 		End Function
@@ -88,7 +92,8 @@ Protected Module SKI
 		  ' See: https://download.libsodium.org/doc/secret-key_cryptography/secret-key_authentication.html
 		  
 		  CheckSize(Key.Value, crypto_auth_KEYBYTES)
-		  
+		  If Left(MAC, 5) = "-----" Then MAC = libsodium.Exporting.Import(MAC)
+		  If Left(Message, 5) = "-----" Then Message = libsodium.Exporting.Import(Message)
 		  Return crypto_auth_verify(MAC, Message, Message.Size, Key.Value) = 0
 		End Function
 	#tag EndMethod
