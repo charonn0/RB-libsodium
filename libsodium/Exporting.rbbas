@@ -137,8 +137,8 @@ Private Module Exporting
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Function GetMetaData(EncodedKey As MemoryBlock) As Dictionary
+	#tag Method, Flags = &h21
+		Private Function GetMetaData(EncodedKey As MemoryBlock) As Dictionary
 		  EncodedKey = ReplaceLineEndings(EncodedKey, EndOfLine.Windows)
 		  Dim lines() As String = SplitB(EncodedKey, EndOfLine.Windows)
 		  Dim MetaData As New Dictionary
