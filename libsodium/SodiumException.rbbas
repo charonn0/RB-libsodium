@@ -56,6 +56,9 @@ Inherits RuntimeException
 		  Case ERR_IMPORT_PASSWORD
 		    Me.Message = "The given password does not decrypt this exported key."
 		    
+		  Case ERR_IMPORT_ENCRYPTED
+		    Me.Message = "This exported key is password protected but no password was provided."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    
