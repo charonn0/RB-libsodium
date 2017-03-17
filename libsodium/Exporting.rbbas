@@ -259,13 +259,8 @@ Protected Module Exporting
 		  ' and returns the raw binary data of the key. If a Password is specified then then key will
 		  ' be decrypted with a SecretKey derived from the password.
 		  
-		  Dim Type As libsodium.Exporting.ExportableType = GetType(EncodedKey)
-		  Dim Prefix, Suffix As String
-		  Prefix = GetPrefix(Type)
-		  Suffix = GetSuffix(Type)
-		  
 		  Dim metadata As Dictionary = GetMetaData(EncodedKey)
-		  EncodedKey = GetKeyData(EncodedKey, Type)
+		  EncodedKey = GetKeyData(EncodedKey, GetType(EncodedKey))
 		  If metadata.HasKey("Nonce") And metadata.HasKey("Salt") And metadata.HasKey("Limits") Then
 		    If Passwd = Nil Then Raise New SodiumException(ERR_IMPORT_ENCRYPTED)
 		    Dim n As MemoryBlock = metadata.Value("Nonce")
