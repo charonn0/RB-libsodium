@@ -273,7 +273,7 @@ Protected Module Exporting
 		    If EncodedKey = Nil Then Raise New SodiumException(ERR_IMPORT_PASSWORD)
 		  End If
 		  
-		  Return Trim(EncodedKey)
+		  Return EncodedKey
 		End Function
 	#tag EndMethod
 
