@@ -1,5 +1,5 @@
 #tag Module
-Protected Module Exporting
+Private Module Exporting
 	#tag Method, Flags = &h1
 		Protected Function DecodeMessage(BinaryMessage As MemoryBlock) As MemoryBlock
 		  Dim n As MemoryBlock
