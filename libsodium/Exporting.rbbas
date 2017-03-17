@@ -14,13 +14,14 @@ Private Module Exporting
 		  ' the Nonce parameter will be modified to point to the nonce value.
 		  
 		  Dim Prefix, Suffix As String
-		  Prefix = GetPrefix(ExportableType.Unknown)
-		  Suffix = GetSuffix(ExportableType.Unknown)
+		  Dim t As ExportableType = GetType(EncodedMessage)
+		  Prefix = GetPrefix(t)
+		  Suffix = GetSuffix(t)
 		  
-		  Dim metadata As Dictionary = GetMetaData(BinaryMessage)
-		  BinaryMessage = GetKeyData(BinaryMessage, ExportableType.Unknown)
+		  Dim metadata As Dictionary = GetMetaData(EncodedMessage)
+		  EncodedMessage = GetKeyData(EncodedMessage, t)
 		  NonceValue = metadata.Lookup("Nonce", Nil)
-		  Return BinaryMessage
+		  Return EncodedMessage
 		End Function
 	#tag EndMethod
 
