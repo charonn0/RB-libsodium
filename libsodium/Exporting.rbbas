@@ -195,6 +195,12 @@ Private Module Exporting
 		  Case ExportableType.Secret
 		    Return SalsaPrefix
 		    
+		  Case ExportableType.Signature
+		    Return SignaturePrefix
+		    
+		  Case ExportableType.HMAC
+		    Return HMACPrefix
+		    
 		  Else
 		    Return UnknownPrefix
 		    
@@ -222,6 +228,12 @@ Private Module Exporting
 		    
 		  Case ExportableType.Secret
 		    Return SalsaSuffix
+		    
+		  Case ExportableType.Signature
+		    Return SignatureSuffix
+		    
+		  Case ExportableType.HMAC
+		    Return HMACSuffix
 		    
 		  Else
 		    Return UnknownSuffix
