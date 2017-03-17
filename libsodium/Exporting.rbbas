@@ -243,7 +243,8 @@ Private Module Exporting
 
 	#tag Method, Flags = &h21
 		Private Function GetType(EncodedKey As MemoryBlock) As libsodium.Exporting.ExportableType
-		  Static Prefixes() As String = Array(EncryptionPrivatePrefix, EncryptionPublicPrefix, SigningPrivatePrefix, SigningPublicPrefix, SalsaSuffix, SharedPrefix)
+		  Static Prefixes() As String = Array(EncryptionPrivatePrefix, EncryptionPublicPrefix, _
+		  SigningPrivatePrefix, SigningPublicPrefix, SalsaPrefix, SharedPrefix, SignaturePrefix, HMACPrefix)
 		  Dim ExportedKey As MemoryBlock = ReplaceLineEndings(EncodedKey, EndOfLine.Windows)
 		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
 		  For i As Integer = 0 To UBound(lines)
@@ -260,6 +261,10 @@ Private Module Exporting
 		      Return ExportableType.Secret
 		    Case 5 'Shared secret
 		      Return ExportableType.SharedSecret
+		    Case 6 'Signature
+		      Return ExportableType.Signature
+		    Case 7 'MAC
+		      Return ExportableType.HMAC
 		    End Select
 		  Next
 		  Return ExportableType.Unknown
@@ -303,6 +308,12 @@ Private Module Exporting
 	#tag Constant, Name = EncryptionPublicSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 PUBLIC KEY BLOCK-----", Scope = Private
 	#tag EndConstant
 
+	#tag Constant, Name = HMACPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN POLY1305 MAC BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = HMACSuffix, Type = String, Dynamic = False, Default = \"-----END POLY1305 MAC BLOCK-----", Scope = Private
+	#tag EndConstant
+
 	#tag Constant, Name = MessagePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 MESSAGE-----", Scope = Private
 	#tag EndConstant
 
@@ -325,6 +336,12 @@ Private Module Exporting
 	#tag EndConstant
 
 	#tag Constant, Name = SharedSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 SHARED KEY BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = SignaturePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 SIGNATURE BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = SignatureSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 SIGNATURE BLOCK-----", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = SigningPrivatePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PRIVATE KEY BLOCK-----", Scope = Private
@@ -353,7 +370,9 @@ Private Module Exporting
 		  SignPublic
 		  Secret
 		  SharedSecret
-		Unknown
+		  Unknown
+		  Signature
+		HMAC
 	#tag EndEnum
 
 
