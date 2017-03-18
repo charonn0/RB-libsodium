@@ -76,16 +76,19 @@ Protected Class ForeignKey
 	#tag Method, Flags = &h0
 		 Shared Function Import(KeyData As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.PKI.ForeignKey
 		  Dim typ As KeyType
+		  Dim extype As libsodium.Exporting.ExportableType = libsodium.Exporting.GetType(KeyData)
 		  Dim key As MemoryBlock = libsodium.Exporting.Import(KeyData, Passwd)
-		  Select Case True
-		  Case InStrB(KeyData, ExportSigningPublicPrefix) > 0
+		  Select Case extype
+		  Case libsodium.Exporting.ExportableType.SignPublic
 		    typ = KeyType.Signature
 		    CheckSize(key, crypto_sign_PUBLICKEYBYTES)
-		  Case InStrB(KeyData, ExportEncryptionPublicPrefix) > 0
+		  Case libsodium.Exporting.ExportableType.CryptPublic
 		    typ = KeyType.Encryption
 		    CheckSize(key, crypto_box_PUBLICKEYBYTES)
-		  Case InStrB(KeyData, ExportPrefix) > 0
+		  Case libsodium.Exporting.ExportableType.Secret
 		    typ = KeyType.Generic
+		  Case libsodium.Exporting.ExportableType.CryptPrivate, libsodium.Exporting.ExportableType.SignPrivate
+		    Raise New SodiumException(ERR_WRONG_HALF)
 		  Else
 		    typ = KeyType.Unknown
 		  End Select
