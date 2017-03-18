@@ -68,10 +68,9 @@ Private Module Exporting
 		  
 		  If Passwd <> Nil Then
 		    Dim salt As MemoryBlock = Passwd.RandomSalt
-		    Dim key As libsodium.SKI.SecretKey
-		    Dim nonce As MemoryBlock = key.RandomNonce
-		    key = New libsodium.SKI.SecretKey(Passwd, salt, Limits)
-		    KeyData = libsodium.SKI.EncryptData(KeyData, key, nonce)
+		    Dim sk As New libsodium.SKI.SecretKey(Passwd, salt, Limits)
+		    Dim nonce As MemoryBlock = sk.RandomNonce
+		    KeyData = libsodium.SKI.EncryptData(KeyData, sk, nonce)
 		    output.Write("#Salt=")
 		    output.Write(libsodium.EncodeHex(salt))
 		    output.Write(EndOfLine.Windows)
@@ -89,8 +88,8 @@ Private Module Exporting
 		    End Select
 		  End If
 		  If MetaData <> Nil Then
-		    For Each Key As String In MetaData.Keys
-		      output.Write("#" + Key + "=" + MetaData.Value(Key) + EndOfLine.Windows)
+		    For Each name As String In MetaData.Keys
+		      output.Write("#" + name + "=" + MetaData.Value(name) + EndOfLine.Windows)
 		    Next
 		  End If
 		  output.Write(EndOfLine.Windows)
