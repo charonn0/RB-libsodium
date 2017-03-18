@@ -129,6 +129,17 @@ Inherits libsodium.SKI.KeyContainer
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		 Shared Function RandomNonce() As MemoryBlock
+		  ' Returns unpredictable bytes that are suitable to be used as a nonce in encryption.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomNonce
+		  
+		  Return EncryptionKey.RandomNonce()
+		End Function
+	#tag EndMethod
+
 
 	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 SHARED KEY BLOCK-----", Scope = Protected
 	#tag EndConstant
