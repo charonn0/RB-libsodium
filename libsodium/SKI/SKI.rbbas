@@ -53,6 +53,7 @@ Protected Module SKI
 		  ' https://download.libsodium.org/doc/secret-key_cryptography/authenticated_encryption.html#combined-mode
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.EncryptData
 		  
+		  If Nonce = Nil And Exportable Then Nonce = Key.RandomNonce
 		  Return EncryptData(ClearText, Key.Value, Nonce, Exportable)
 		  
 		End Function

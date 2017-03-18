@@ -139,6 +139,7 @@ Protected Module PKI
 		  ' code is also generated and prepended to the returned encrypted data. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
+		  If Nonce = Nil And Exportable Then Nonce = SenderPrivateKey.RandomNonce
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  CheckSize(RecipientPublicKey.Value, crypto_box_PUBLICKEYBYTES)
 		  CheckSize(SenderPrivateKey.PrivateKey, crypto_box_SECRETKEYBYTES)
@@ -158,6 +159,7 @@ Protected Module PKI
 		  ' encrypted data. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
+		  If Nonce = Nil And Exportable Then Nonce = SharedKey.RandomNonce
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
