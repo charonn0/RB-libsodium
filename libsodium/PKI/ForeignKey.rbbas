@@ -145,13 +145,6 @@ Protected Class ForeignKey
 	#tag EndProperty
 
 
-	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN PUBLIC KEY BLOCK-----", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = ExportSuffix, Type = String, Dynamic = False, Default = \"-----END PUBLIC KEY BLOCK-----", Scope = Protected
-	#tag EndConstant
-
-
 	#tag Enum, Name = KeyType, Type = Integer, Flags = &h0
 		Encryption
 		  Signature

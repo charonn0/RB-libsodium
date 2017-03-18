@@ -141,13 +141,6 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndMethod
 
 
-	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 SHARED KEY BLOCK-----", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = ExportSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 SHARED KEY BLOCK-----", Scope = Protected
-	#tag EndConstant
-
-
 	#tag ViewBehavior
 		#tag ViewProperty
 			Name="Index"

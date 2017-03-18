@@ -517,6 +517,9 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_WRITE_DENIED, Type = Double, Dynamic = False, Default = \"-8", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_WRONG_HALF, Type = Double, Dynamic = False, Default = \"-21", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = STRICT_CONVERT, Type = Boolean, Dynamic = False, Default = \"False", Scope = Private
 	#tag EndConstant
 
