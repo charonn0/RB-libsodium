@@ -240,8 +240,8 @@ Private Module Exporting
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h21
-		Private Function GetType(EncodedKey As MemoryBlock) As libsodium.Exporting.ExportableType
+	#tag Method, Flags = &h1
+		Protected Function GetType(EncodedKey As MemoryBlock) As libsodium.Exporting.ExportableType
 		  Static Prefixes() As String = Array(EncryptionPrivatePrefix, EncryptionPublicPrefix, _
 		  SigningPrivatePrefix, SigningPublicPrefix, SalsaPrefix, SharedPrefix, SignaturePrefix, HMACPrefix)
 		  Dim ExportedKey As MemoryBlock = ReplaceLineEndings(EncodedKey, EndOfLine.Windows)
