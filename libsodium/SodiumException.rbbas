@@ -59,6 +59,9 @@ Inherits RuntimeException
 		  Case ERR_IMPORT_ENCRYPTED
 		    Me.Message = "This exported key is password protected but no password was provided."
 		    
+		  Case ERR_WRONG_HALF
+		    Me.Message = "The ForeignKey class may not be used with the secret half of keypairs."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    
