@@ -524,12 +524,12 @@ Protected Module libsodium
 		  ' Overwrites the data in the MemoryBlock with zeroes.
 		  
 		  If mb = Nil Then Return
-		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  If Offset + Length > mb.Size Then Raise New SodiumException(ERR_OUT_OF_RANGE)
-		  
 		  Dim p As Ptr = mb
 		  If Length < 0 Then Length = mb.Size
+		  CheckSize(Offset, 0, mb.Size)
+		  CheckSize(Length, 0, mb.Size - Offset)
+		  CheckSize(Offset + Length, 0, mb.Size)
 		  If Offset > 0 Then p = Ptr(Integer(p) + Offset)
 		  
 		  sodium_memzero(p, Length)
