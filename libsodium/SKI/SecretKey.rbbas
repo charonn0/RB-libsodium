@@ -69,7 +69,7 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h1000
 		 Shared Function Generate() As libsodium.SKI.SecretKey
-		  ' Returns random bytes that are suitable to be used as a secret key.
+		  ' Returns unpredictable bytes that are suitable to be used as a secret key.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Generate
@@ -113,7 +113,7 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomNonce() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a Nonce.
+		  ' Returns unpredictable bytes that are suitable to be used as a Nonce.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.RandomNonce
