@@ -159,7 +159,7 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomSeed() As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a seed for SigningKey.Generate
+		  ' Returns unpredictable bytes that are suitable to be used as a seed for SigningKey.Generate
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.RandomSeed

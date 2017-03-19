@@ -99,7 +99,7 @@ Protected Class GenericHashDigest
 
 	#tag Method, Flags = &h0
 		 Shared Function RandomKey(Type As libsodium.HashType = libsodium.HashType.Generic) As MemoryBlock
-		  ' Returns random bytes that are suitable to be used as a key for GenericHashDigest.Constructor
+		  ' Returns unpredictable bytes that are suitable to be used as a key for GenericHashDigest.Constructor
 		  '
 		  ' See: 
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.RandomKey
@@ -159,7 +159,15 @@ Protected Class GenericHashDigest
 		      mLastError = crypto_hash_sha512_init(mState)
 		    End Select
 		  End If
+		  
+		  mOutput = Nil
 		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Type() As libsodium.HashType
+		  Return mType
+		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
