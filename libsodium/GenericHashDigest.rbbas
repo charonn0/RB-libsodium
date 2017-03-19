@@ -159,6 +159,8 @@ Protected Class GenericHashDigest
 		      mLastError = crypto_hash_sha512_init(mState)
 		    End Select
 		  End If
+		  
+		  mOutput = Nil
 		End Sub
 	#tag EndMethod
 
