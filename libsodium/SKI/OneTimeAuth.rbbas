@@ -9,7 +9,7 @@ Protected Module OneTimeAuth
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Generate(Message As MemoryBlock, Key As libsodium.SKI.SecretKey, Exportable As Boolean = False) As MemoryBlock
+		Protected Function GenerateMAC(Message As MemoryBlock, Key As libsodium.SKI.SecretKey, Exportable As Boolean = False) As MemoryBlock
 		  ' Generate a Poly1305 *one-time* authentication code for the Message using SecretKey. Due
 		  ' to its small output size, Poly1305 is recommended for online protocols, exchanging many
 		  ' small messages, rather than for authenticating very large files.
@@ -28,7 +28,7 @@ Protected Module OneTimeAuth
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Verify(Authenticator As MemoryBlock, Message As MemoryBlock, Key As libsodium.SKI.SecretKey) As Boolean
+		Protected Function VerifyMAC(Authenticator As MemoryBlock, Message As MemoryBlock, Key As libsodium.SKI.SecretKey) As Boolean
 		  ' Validate the Poly1305 *one-time* authentication code for the Message using SecretKey. Due
 		  ' to its small output size, Poly1305 is recommended for online protocols, exchanging many
 		  ' small messages, rather than for authenticating very large files.
