@@ -89,7 +89,7 @@ Inherits libsodium.SKI.KeyContainer
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
 		  
-		  bs.Write(PackKey(Me.Value, ExportPrefix, ExportSuffix, Passwd))
+		  bs.Write(libsodium.Exporting.Export(Me.Value, libsodium.Exporting.ExportableType.SharedSecret, Passwd))
 		  
 		  bs.Close
 		  Return data
@@ -117,7 +117,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Import
 		  
-		  Dim secret As MemoryBlock = ExtractKey(ExportedKey, ExportPrefix, ExportSuffix, Passwd)
+		  Dim secret As MemoryBlock = libsodium.Exporting.Import(ExportedKey, Passwd)
 		  If secret <> Nil Then Return New SharedSecret(secret)
 		End Function
 	#tag EndMethod
@@ -129,12 +129,16 @@ Inherits libsodium.SKI.KeyContainer
 		End Function
 	#tag EndMethod
 
-
-	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 SHARED KEY BLOCK-----", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = ExportSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 SHARED KEY BLOCK-----", Scope = Protected
-	#tag EndConstant
+	#tag Method, Flags = &h0
+		 Shared Function RandomNonce() As MemoryBlock
+		  ' Returns unpredictable bytes that are suitable to be used as a nonce in encryption.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomNonce
+		  
+		  Return EncryptionKey.RandomNonce()
+		End Function
+	#tag EndMethod
 
 
 	#tag ViewBehavior

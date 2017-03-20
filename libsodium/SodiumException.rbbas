@@ -33,7 +33,7 @@ Inherits RuntimeException
 		    Me.Message = "The requested operation is illegal in the current context."
 		    
 		  Case ERR_COMPUTATION_FAILED
-		    Me.Message = "The requested operation failed, possibly due to resource constraints."
+		    Me.Message = "The requested operation failed, possibly due to resource limits."
 		    
 		  Case ERR_SIZE_MISMATCH
 		    Me.Message = "The requested operation expected input of a different length than what was provided."
@@ -52,6 +52,16 @@ Inherits RuntimeException
 		    
 		  Case ERR_CONVERSION_FAILED
 		    Me.Message = "The requested key-type conversion failed."
+		    
+		  Case ERR_IMPORT_PASSWORD
+		    Me.Message = "The given password does not decrypt this exported key."
+		    
+		  Case ERR_IMPORT_ENCRYPTED
+		    Me.Message = "This exported key is password protected but no password was provided."
+		    
+		  Case ERR_WRONG_HALF
+		    Me.Message = "The ForeignKey class may not be used with the secret half of keypairs."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    
