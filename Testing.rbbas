@@ -442,16 +442,16 @@ Protected Module Testing
 	#tag EndProperty
 
 
-	#tag Constant, Name = TestEncryptionKey, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 PUBLIC KEY BLOCK-----\r\rLYZ55Sw452an+FXE1V3xgpkC0GUtpZIyxak3LOJAgSQ\x3D\r-----END CURVE25519 PUBLIC KEY BLOCK-----\r-----BEGIN CURVE25519 PRIVATE KEY BLOCK-----\r#Salt\x3Dmi9PO0+v/YS2eNoTUfGUWg\x3D\x3D\r#Nonce\x3Dou+bKNkVj6Rcd+dDP00Pf+BhDrrTmV5l\r#Limits\x3DInteractive\r\rAn5AdaE3gxGa2KKVqLjgK0cnKqXNkujAvz6TB+JryBCt2PBX+bCTIbtW8p6MZmcV\r-----END CURVE25519 PRIVATE KEY BLOCK-----", Scope = Private
+	#tag Constant, Name = TestEncryptionKey, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 PRIVATE KEY BLOCK-----\r#Salt\x3D9A2F4F3B4FAFFD84B678DA1351F1945A\r#Nonce\x3DA2EF9B28D9158FA45C77E7433F4D0F7FE0610EBAD3995E65\r#Limits\x3DInteractive\r\r027E4075A13783119AD8A295A8B8E02B47272AA5CD92E8C0BF3E9307E26BC810\rADD8F057F9B09321BB56F29E8C666715\r-----END CURVE25519 PRIVATE KEY BLOCK-----c", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = TestPasswordValue, Type = String, Dynamic = False, Default = \"SeeKritPassW0rd111", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = TestSecretKey, Type = String, Dynamic = False, Default = \"-----BEGIN XSALSA20 KEY BLOCK-----\r#Salt\x3DjTBDkxcDwy/IwGNlvXl0Tw\x3D\x3D\r#Nonce\x3DiUGg2lC9OksFLwDZwZ7jPIIyTNhEcszo\r#Limits\x3DInteractive\r\rAETMF1emsH4TUf1Wm4C3XeenJFhwZ56nHj6M4ve43DFmE9aJREh1cX4ZJV1y+Ui5\r-----END XSALSA20 KEY BLOCK-----", Scope = Private
+	#tag Constant, Name = TestSecretKey, Type = String, Dynamic = False, Default = \"-----BEGIN XSALSA20 KEY BLOCK-----\r#Salt\x3D8D3043931703C32FC8C06365BD79744F\r#Nonce\x3D8941A0DA50BD3A4B052F00D9C19EE33C82324CD84472CCE8\r#Limits\x3DInteractive\r\r0044CC1757A6B07E1351FD569B80B75DE7A7245870679EA71E3E8CE2F7B8DC31\r6613D689444875717E19255D72F948B9\r-----END XSALSA20 KEY BLOCK-----", Scope = Private
 	#tag EndConstant
 
-	#tag Constant, Name = TestSigningKey, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PUBLIC KEY BLOCK-----\r\r2wnixPmaTtrQAvVfsnVuRgx722t8+/ucVnb0mGv8MRc\x3D\r-----END ED25519 PUBLIC KEY BLOCK-----\r-----BEGIN ED25519 PRIVATE KEY BLOCK-----\r#Salt\x3DfFRRYkW+0FUHgZ4M4rW/nw\x3D\x3D\r#Nonce\x3DXtNtXV/RKZOwaSwCeeQlBNM3P7GJP/Hq\r#Limits\x3DInteractive\r\rHa2tM9Kaby/GVIEvRXSJvfTCLfEjq3mQzlYBnhvyayXWLtbW7D4FnDKtXdiukd0hGLTmXPeR+5AE\rXh9jPNCC/dEsM/zrd+llwXq0TBXQAwg\x3D\r-----END ED25519 PRIVATE KEY BLOCK-----", Scope = Private
+	#tag Constant, Name = TestSigningKey, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PRIVATE KEY BLOCK-----\r#Salt\x3D7C54516245BED05507819E0CE2B5BF9F\r#Nonce\x3D5ED36D5D5FD12993B0692C0279E42504D3373FB1893FF1EA\r#Limits\x3DInteractive\r\r1DADAD33D29A6F2FC654812F457489BDF4C22DF123AB7990CE56019E1BF26B25\rD62ED6D6EC3E059C32AD5DD8AE91DD2118B4E65CF791FB90045E1F633CD082FD\rD12C33FCEB77E965C17AB44C15D00308\r-----END ED25519 PRIVATE KEY BLOCK-----", Scope = Private
 	#tag EndConstant
 
 
