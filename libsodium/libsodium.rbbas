@@ -202,57 +202,6 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h21
-		Private Function ExtractKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password) As MemoryBlock
-		  ExportedKey = ReplaceLineEndings(ExportedKey, EndOfLine.Windows)
-		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
-		  Dim i As Integer
-		  Do Until Ubound(lines) <= i Or lines(i) = Prefix
-		    i = i + 1
-		  Loop
-		  If i = UBound(lines) Then Return Nil
-		  
-		  Dim key As New MemoryBlock(0)
-		  Dim output As New BinaryStream(key)
-		  Dim PasswdSalt, Nonce As MemoryBlock
-		  Dim Limits As libsodium.ResourceLimits = ResourceLimits.Interactive
-		  For i = i + 1 To UBound(lines)
-		    Dim s As String = lines(i)
-		    Select Case True
-		    Case Left(s, 6) = "#Salt="
-		      PasswdSalt = DecodeBase64(Right(s, s.Len - 6))
-		    Case Left(s, 7) = "#Nonce="
-		      Nonce = DecodeBase64(Right(s, s.Len - 7))
-		    Case Left(s, 8) = "#Limits="
-		      Select Case Right(s, s.Len - 8)
-		      Case "Interactive"
-		        Limits = ResourceLimits.Interactive
-		      Case "Moderate"
-		        Limits = ResourceLimits.Moderate
-		      Case "Sensitive"
-		        Limits = ResourceLimits.Sensitive
-		      Else
-		        Raise New UnsupportedFormatException
-		      End Select
-		    Case Left(s, 1) = "#", s.Trim = "" ' comment/blank line
-		      Continue
-		    Case s = Suffix
-		      Exit For
-		    Else
-		      output.Write(s + EndOfLine.Windows)
-		    End Select
-		  Next
-		  output.Close
-		  key = DecodeBase64(key.Trim)
-		  If Passwd <> Nil Then
-		    Dim sk As New libsodium.SKI.SecretKey(Passwd, PasswdSalt, Limits)
-		    key = libsodium.SKI.DecryptData(key, sk, Nonce)
-		  End If
-		  
-		  If key <> Nil Then Return Trim(key)
-		End Function
-	#tag EndMethod
-
 	#tag Method, Flags = &h1
 		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil, HashSize As UInt32 = libsodium.GenericHashDigest.crypto_generichash_BYTES_MAX) As String
 		  ' Generates a 512-bit BLAKE2b digest of the InputData, optionally using the specified key.
@@ -294,38 +243,6 @@ Protected Module libsodium
 		    If sodium_init() = -1 Then available = False Else available = True
 		  End If
 		  Return available
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
-		Private Function PackKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password, Salt As MemoryBlock = Nil, Nonce As MemoryBlock = Nil, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As MemoryBlock
-		  Dim data As New MemoryBlock(0)
-		  Dim output As New BinaryStream(data)
-		  output.Write(Prefix + EndOfLine.Windows)
-		  
-		  If Passwd <> Nil Then
-		    If Salt = Nil Then Salt = Passwd.RandomSalt
-		    Dim key As libsodium.SKI.SecretKey
-		    If Nonce = Nil Then Nonce = key.RandomNonce
-		    key = New libsodium.SKI.SecretKey(Passwd, Salt, Limits)
-		    ExportedKey = libsodium.SKI.EncryptData(ExportedKey, key, Nonce)
-		    output.Write("#Salt=" + EncodeBase64(Salt) + EndOfLine.Windows)
-		    output.Write("#Nonce=" + EncodeBase64(Nonce) + EndOfLine.Windows)
-		    Select Case Limits
-		    Case ResourceLimits.Interactive
-		      output.Write("#Limits=Interactive" + EndOfLine.Windows)
-		    Case ResourceLimits.Moderate
-		      output.Write("#Limits=Moderate" + EndOfLine.Windows)
-		    Case ResourceLimits.Sensitive
-		      output.Write("#Limits=Sensitive" + EndOfLine.Windows)
-		    End Select
-		  End If
-		  output.Write(EndOfLine.Windows)
-		  output.Write(EncodeBase64(ExportedKey) + EndOfLine.Windows)
-		  output.Write(Suffix + EndOfLine.Windows)
-		  
-		  output.Close
-		  Return data
 		End Function
 	#tag EndMethod
 
@@ -552,6 +469,12 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_CONVERSION_FAILED, Type = Double, Dynamic = False, Default = \"-18", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_IMPORT_ENCRYPTED, Type = Double, Dynamic = False, Default = \"-20", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_IMPORT_PASSWORD, Type = Double, Dynamic = False, Default = \"-19", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_INIT_FAILED, Type = Double, Dynamic = False, Default = \"-2", Scope = Protected
 	#tag EndConstant
 
@@ -594,7 +517,7 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_WRITE_DENIED, Type = Double, Dynamic = False, Default = \"-8", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = STRICT_CONVERT, Type = Boolean, Dynamic = False, Default = \"False", Scope = Private
+	#tag Constant, Name = ERR_WRONG_HALF, Type = Double, Dynamic = False, Default = \"-21", Scope = Protected
 	#tag EndConstant
 
 
