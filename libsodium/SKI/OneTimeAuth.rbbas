@@ -9,7 +9,7 @@ Protected Module OneTimeAuth
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Generate(Message As MemoryBlock, Key As libsodium.SKI.SecretKey) As MemoryBlock
+		Protected Function Generate(Message As MemoryBlock, Key As libsodium.SKI.SecretKey, Exportable As Boolean = False) As MemoryBlock
 		  ' Generate a Poly1305 *one-time* authentication code for the Message using SecretKey. Due
 		  ' to its small output size, Poly1305 is recommended for online protocols, exchanging many
 		  ' small messages, rather than for authenticating very large files.
@@ -21,6 +21,7 @@ Protected Module OneTimeAuth
 		  
 		  Dim authenticator As New MemoryBlock(crypto_onetimeauth_BYTES)
 		  If crypto_onetimeauth(authenticator, Message, Message.Size, Key.Value) = 0 Then
+		    If Exportable Then authenticator = libsodium.Exporting.Export(authenticator, libsodium.Exporting.ExportableType.HMAC)
 		    Return authenticator
 		  End If
 		End Function
@@ -35,7 +36,8 @@ Protected Module OneTimeAuth
 		  ' See: https://download.libsodium.org/doc/advanced/poly1305.html
 		  
 		  CheckSize(Key.Value, crypto_onetimeauth_KEYBYTES)
-		  
+		  If Left(Authenticator, 5) = "-----" Then Authenticator = libsodium.Exporting.Import(Authenticator)
+		  If Left(Message, 5) = "-----" Then Message = libsodium.Exporting.Import(Message)
 		  Return crypto_onetimeauth_verify(Authenticator, Message, Message.Size, Key.Value) = 0
 		End Function
 	#tag EndMethod
