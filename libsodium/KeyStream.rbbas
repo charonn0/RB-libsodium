@@ -1,18 +1,32 @@
 #tag Class
 Protected Class KeyStream
 	#tag Method, Flags = &h0
-		Sub Constructor()
+		Sub Constructor(Cipher As libsodium.KeyStream.CipherType = libsodium.KeyStream.CipherType.XSalsa20)
 		  ' Generates a random key stream.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
 		  
-		  Me.Constructor(RandomBytes(crypto_stream_KEYBYTES))
+		  mType = Cipher
+		  Select Case mType
+		  Case CipherType.ChaCha20
+		    Me.Constructor(RandomBytes(crypto_stream_chacha20_KEYBYTES))
+		    
+		  Case CipherType.XChaCha20
+		    Me.Constructor(RandomBytes(crypto_stream_xchacha20_KEYBYTES))
+		    
+		  Case CipherType.Salsa20
+		    Me.Constructor(RandomBytes(crypto_stream_salsa20_KEYBYTES))
+		    
+		  Case CipherType.XSalsa20
+		    Me.Constructor(RandomBytes(crypto_stream_xsalsa20_KEYBYTES))
+		    
+		  End Select
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(FromPassword As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
+		Sub Constructor(Cipher As libsodium.KeyStream.CipherType = libsodium.KeyStream.CipherType.XSalsa20, FromPassword As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
 		  ' Generates a key stream by deriving it from a salted hash of the password. The operation is
 		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
 		  ' parameters will produce the same output both times.
@@ -21,7 +35,21 @@ Protected Class KeyStream
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
 		  
 		  If Salt = Nil Then Salt = FromPassword.RandomSalt(HashAlgorithm)
-		  Me.Constructor(FromPassword.DeriveKey(crypto_stream_KEYBYTES, Salt, Limits, HashAlgorithm))
+		  mType = Cipher
+		  Select Case mType
+		  Case CipherType.ChaCha20
+		    Me.Constructor(FromPassword.DeriveKey(crypto_stream_chacha20_KEYBYTES, Salt, Limits, HashAlgorithm))
+		    
+		  Case CipherType.XChaCha20
+		    Me.Constructor(FromPassword.DeriveKey(crypto_stream_xchacha20_KEYBYTES, Salt, Limits, HashAlgorithm))
+		    
+		  Case CipherType.Salsa20
+		    Me.Constructor(FromPassword.DeriveKey(crypto_stream_salsa20_KEYBYTES, Salt, Limits, HashAlgorithm))
+		    
+		  Case CipherType.XSalsa20
+		    Me.Constructor(FromPassword.DeriveKey(crypto_stream_xsalsa20_KEYBYTES, Salt, Limits, HashAlgorithm))
+		    
+		  End Select
 		End Sub
 	#tag EndMethod
 
@@ -53,10 +81,28 @@ Protected Class KeyStream
 		  ' https://download.libsodium.org/doc/advanced/xsalsa20.html
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.DeriveKey
 		  
-		  If Nonce = Nil Then Nonce = Me.RandomNonce()
-		  CheckSize(Nonce, crypto_stream_NONCEBYTES)
+		  If Nonce = Nil Then Nonce = Me.RandomNonce(mType)
 		  Dim mb As New MemoryBlock(Size)
-		  If crypto_stream(mb, mb.Size, Nonce, mKey.Value) <> 0 Then Return Nil
+		  
+		  Select Case mType
+		  Case CipherType.ChaCha20
+		    CheckSize(Nonce, crypto_stream_chacha20_NONCEBYTES)
+		    If crypto_stream_chacha20(mb, mb.Size, Nonce, mKey.Value) <> 0 Then Return Nil
+		    
+		  Case CipherType.XChaCha20
+		    CheckSize(Nonce, crypto_stream_xchacha20_NONCEBYTES)
+		    If crypto_stream_xchacha20(mb, mb.Size, Nonce, mKey.Value) <> 0 Then Return Nil
+		    
+		  Case CipherType.Salsa20
+		    CheckSize(Nonce, crypto_stream_salsa20_NONCEBYTES)
+		    If crypto_stream_salsa20(mb, mb.Size, Nonce, mKey.Value) <> 0 Then Return Nil
+		    
+		  Case CipherType.XSalsa20
+		    CheckSize(Nonce, crypto_stream_xsalsa20_NONCEBYTES)
+		    If crypto_stream(mb, mb.Size, Nonce, mKey.Value) <> 0 Then Return Nil
+		    
+		  End Select
+		  
 		  Return mb
 		End Function
 	#tag EndMethod
@@ -69,23 +115,61 @@ Protected Class KeyStream
 		  ' https://download.libsodium.org/doc/advanced/xsalsa20.html
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Process
 		  
-		  CheckSize(Nonce, crypto_stream_NONCEBYTES)
 		  Dim output As New MemoryBlock(Data.Size)
-		  If crypto_stream_xor(output, Data, Data.Size, Nonce, mKey.Value) <> 0 Then Return Nil
+		  
+		  Select Case mType
+		  Case CipherType.ChaCha20
+		    CheckSize(Nonce, crypto_stream_chacha20_NONCEBYTES)
+		    If crypto_stream_chacha20_xor(output, Data, Data.Size, Nonce, mKey.Value) <> 0 Then output = Nil
+		    
+		  Case CipherType.XChaCha20
+		    CheckSize(Nonce, crypto_stream_xchacha20_NONCEBYTES)
+		    If crypto_stream_xchacha20_xor(output, Data, Data.Size, Nonce, mKey.Value) <> 0 Then output = Nil
+		    
+		  Case CipherType.Salsa20
+		    CheckSize(Nonce, crypto_stream_salsa20_NONCEBYTES)
+		    If crypto_stream_salsa20_xor(output, Data, Data.Size, Nonce, mKey.Value) <> 0 Then output = Nil
+		    
+		  Case CipherType.XSalsa20
+		    CheckSize(Nonce, crypto_stream_xsalsa20_NONCEBYTES)
+		    If crypto_stream_xor(output, Data, Data.Size, Nonce, mKey.Value) <> 0 Then output = Nil
+		    
+		  End Select
+		  
 		  Return output
 		  
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function RandomNonce() As MemoryBlock
+		 Shared Function RandomNonce(Cipher As libsodium.KeyStream.CipherType = libsodium.KeyStream.CipherType.XSalsa20) As MemoryBlock
 		  ' Returns unpredictable bytes that are suitable to be used as a Nonce for use with KeyStream.Process
 		  ' and KeyStream.DeriveKey
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.RandomNonce
 		  
-		  Return RandomBytes(crypto_stream_NONCEBYTES)
+		  Select Case Cipher
+		  Case CipherType.ChaCha20
+		    Return RandomBytes(crypto_stream_chacha20_NONCEBYTES)
+		    
+		  Case CipherType.XChaCha20
+		    Return RandomBytes(crypto_stream_xchacha20_NONCEBYTES)
+		    
+		  Case CipherType.Salsa20
+		    Return RandomBytes(crypto_stream_salsa20_NONCEBYTES)
+		    
+		  Case CipherType.XSalsa20
+		    Return RandomBytes(crypto_stream_xsalsa20_NONCEBYTES)
+		    
+		  End Select
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Type() As libsodium.KeyStream.CipherType
+		  Return mType
 		End Function
 	#tag EndMethod
 
@@ -113,12 +197,48 @@ Protected Class KeyStream
 		Protected mKey As libsodium.SKI.KeyContainer
 	#tag EndProperty
 
+	#tag Property, Flags = &h1
+		Protected mType As libsodium.KeyStream.CipherType
+	#tag EndProperty
+
+
+	#tag Constant, Name = crypto_stream_chacha20_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_chacha20_NONCEBYTES, Type = Double, Dynamic = False, Default = \"8", Scope = Private
+	#tag EndConstant
 
 	#tag Constant, Name = crypto_stream_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_stream_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
 	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_salsa20_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_salsa20_NONCEBYTES, Type = Double, Dynamic = False, Default = \"8", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_xchacha20_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_xchacha20_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_xsalsa20_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_xsalsa20_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
+	#tag EndConstant
+
+
+	#tag Enum, Name = CipherType, Type = Integer, Flags = &h0
+		ChaCha20
+		  XChaCha20
+		  Salsa20
+		XSalsa20
+	#tag EndEnum
 
 
 	#tag ViewBehavior
