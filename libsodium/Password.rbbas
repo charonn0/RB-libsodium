@@ -18,7 +18,8 @@ Inherits libsodium.SKI.KeyContainer
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
 		    CheckSize(Salt, crypto_pwhash_SALTBYTES)
-		    If crypto_pwhash(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit, crypto_pwhash_ALG_DEFAULT) = -1 Then
+		    If crypto_pwhash_argon2i(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit, crypto_pwhash_ALG_DEFAULT) = -1 Then
+		      HashAlgorithm = get_errno
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
 		    
@@ -44,7 +45,7 @@ Inherits libsodium.SKI.KeyContainer
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
 		    out = New MemoryBlock(crypto_pwhash_STRBYTES)
-		    If crypto_pwhash_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then
+		    If crypto_pwhash_argon2i_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
 		  Case ALG_SCRYPT
@@ -63,23 +64,42 @@ Inherits libsodium.SKI.KeyContainer
 		  If Algorithm = ALG_ARGON2 Then
 		    Select Case Limits
 		    Case libsodium.ResourceLimits.Interactive
-		      Memlimit = MEMLIMIT_INTERACTIVE
-		      OpsLimit = OPSLIMIT_INTERACTIVE
+		      Memlimit = crypto_pwhash_argon2i_memlimit_interactive()
+		      OpsLimit = crypto_pwhash_argon2i_opslimit_interactive()
 		    Case libsodium.ResourceLimits.Moderate
-		      Memlimit = MEMLIMIT_MODERATE
-		      OpsLimit = OPSLIMIT_MODERATE
+		      Memlimit = crypto_pwhash_argon2i_memlimit_moderate()
+		      OpsLimit = crypto_pwhash_argon2i_opslimit_moderate()
 		    Case libsodium.ResourceLimits.Sensitive
-		      Memlimit = MEMLIMIT_SENSITIVE
-		      OpsLimit = OPSLIMIT_SENSITIVE
+		      Memlimit = crypto_pwhash_argon2i_memlimit_sensitive()
+		      OpsLimit = crypto_pwhash_argon2i_opslimit_sensitive()
 		    End Select
 		  Else
 		    If Limits = libsodium.ResourceLimits.Interactive Then
-		      Memlimit = scrypt_MEMLIMIT_INTERACTIVE
-		      OpsLimit = scrypt_OPSLIMIT_INTERACTIVE
+		      Memlimit = crypto_pwhash_scryptsalsa208sha256_memlimit_interactive()
+		      OpsLimit = crypto_pwhash_scryptsalsa208sha256_opslimit_interactive()
 		    Else
-		      Memlimit = scrypt_MEMLIMIT_SENSITIVE
-		      OpsLimit = scrypt_OPSLIMIT_SENSITIVE
+		      Memlimit = crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive()
+		      OpsLimit = crypto_pwhash_scryptsalsa208sha256_opslimit_sensitive()
 		    End If
+		  End If
+		  
+		  If System.IsFunctionAvailable("crypto_pwhash_argon2i_opslimit_max", "libsodium") Then
+		    Dim mnm, mxm, mno, mxo As UInt64
+		    If Algorithm = ALG_ARGON2 Then
+		      mnm = crypto_pwhash_argon2i_memlimit_min()
+		      mxm = crypto_pwhash_argon2i_memlimit_max()
+		      mno = crypto_pwhash_argon2i_opslimit_min()
+		      mxo = crypto_pwhash_argon2i_opslimit_max()
+		    Else
+		      mnm = crypto_pwhash_scryptsalsa208sha256_memlimit_min()
+		      mxm = crypto_pwhash_scryptsalsa208sha256_memlimit_max()
+		      mno = crypto_pwhash_scryptsalsa208sha256_opslimit_min()
+		      mxo = crypto_pwhash_scryptsalsa208sha256_opslimit_max()
+		    End If
+		    'If OpsLimit > mxo Then OpsLimit = mxo
+		    'If Memlimit > mxm Then Memlimit = mxm
+		    'If OpsLimit < mno Then OpsLimit = mno
+		    'If Memlimit < mnm Then Memlimit = mnm
 		  End If
 		End Sub
 	#tag EndMethod
@@ -149,36 +169,6 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_pwhash_STRBYTES, Type = Double, Dynamic = False, Default = \"128", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = MEMLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"33554432", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = MEMLIMIT_MODERATE, Type = Double, Dynamic = False, Default = \"134217728", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = MEMLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"536870912", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = OPSLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"4", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = OPSLIMIT_MODERATE, Type = Double, Dynamic = False, Default = \"6", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = OPSLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"8", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = Scrypt_MEMLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"16777216", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = Scrypt_MEMLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"1073741824", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = Scrypt_OPSLIMIT_INTERACTIVE, Type = Double, Dynamic = False, Default = \"524288", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = Scrypt_OPSLIMIT_SENSITIVE, Type = Double, Dynamic = False, Default = \"33554432", Scope = Protected
 	#tag EndConstant
 
 

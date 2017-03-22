@@ -133,7 +133,95 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Passwd As Ptr, PasswdSize As UInt64, SaltBuffer As Ptr, OpsLimit As UInt64, MemLimit As UInt64, Algorithm As Int32) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_memlimit_interactive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_memlimit_max Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_memlimit_min Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_memlimit_moderate Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_memlimit_sensitive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_opslimit_interactive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_opslimit_max Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_opslimit_min Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_opslimit_moderate Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_opslimit_sensitive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_str Lib "libsodium" (Buffer As Ptr, Passwd As Ptr, PasswdSize As UInt64, OpsLimit As UInt64, MemLimit As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256 Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Passwd As Ptr, PasswdSize As UInt64, SaltBuffer As Ptr, OpsLimit As UInt64, MemLimit As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_memlimit_interactive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_memlimit_max Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_memlimit_min Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_memlimit_moderate Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_opslimit_interactive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_opslimit_max Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_opslimit_min Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_opslimit_moderate Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_opslimit_sensitive Lib "libsodium" () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -210,6 +298,27 @@ Protected Module libsodium
 		  Dim h As New GenericHashDigest(HashSize, Key)
 		  h.Process(InputData)
 		  Return h.Value
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function get_errno() As Integer
+		  Dim err As Integer
+		  Dim mb As MemoryBlock
+		  #If TargetWin32 Then
+		    Declare Function _get_errno Lib "msvcrt" (ByRef Error As Integer) As Integer
+		    Dim e As Integer = _get_errno(err)
+		    If e <> 0 Then err = e
+		  #elseif TargetLinux
+		    Declare Function __errno_location Lib "libc.so" () As Ptr
+		    mb = __errno_location()
+		  #elseif TargetMacOS
+		    Declare Function __error Lib "System" () As Ptr
+		    mb = __error()
+		  #endif
+		  If mb <> Nil Then err = mb.Int32Value(0)
+		  Return err
+		  
 		End Function
 	#tag EndMethod
 
