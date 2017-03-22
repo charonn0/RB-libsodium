@@ -98,6 +98,15 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function DeriveChild(Nonce As MemoryBlock) As libsodium.PKI.EncryptionKey
+		  Dim fk As ForeignKey = Me.PrivateKey
+		  Dim stream As New KeyStream(fk)
+		  Dim sk As MemoryBlock = stream.DeriveKey(crypto_box_SECRETKEYBYTES, Nonce)
+		  If sk <> Nil Then Return New EncryptionKey(sk)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
 		  ' Exports the EncryptionKey in a format that is understood by EncryptionKey.Import
 		  '

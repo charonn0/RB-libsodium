@@ -61,6 +61,15 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function DeriveChild(Nonce As MemoryBlock) As libsodium.PKI.SigningKey
+		  Dim fk As ForeignKey = LeftB(Me.PrivateKey, 32) ' truncate
+		  Dim stream As New KeyStream(fk)
+		  Dim sk As MemoryBlock = stream.DeriveKey(crypto_sign_SECRETKEYBYTES, Nonce)
+		  If sk <> Nil Then Return New SigningKey(sk)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
 		  ' Exports the SigningKey in a format that is understood by SigningKey.Import(FolderItem)
 		  '
