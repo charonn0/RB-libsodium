@@ -25,7 +25,7 @@ Protected Module AEAD
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DecryptData(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, AdditionalData As MemoryBlock, Type As libsodium.SKI.AEAD.AEADType = libsodium.SKI.AEAD.AEADType.ChaCha20Poly1305) As MemoryBlock
+		Protected Function DecryptData(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, ByRef AdditionalData As MemoryBlock, Type As AEADType = AEADType.ChaCha20Poly1305) As MemoryBlock
 		  ' Authenticated Encryption with Additional Data (AEAD) verifies that the CipherText includes a valid
 		  ' message authentication code using the SecretKey, a public nonce, and optional additional data. If
 		  ' the verification succeeds, the function returns the decrypted message. On error returns Nil.
@@ -45,7 +45,7 @@ Protected Module AEAD
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function DecryptData_AES256GCM(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, AdditionalData As MemoryBlock) As MemoryBlock
+		Private Function DecryptData_AES256GCM(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, ByRef AdditionalData As MemoryBlock) As MemoryBlock
 		  Static HasAES256GCM As Boolean = libsodium.Version.HasAES256GCM
 		  If Not HasAES256GCM Then Raise New PlatformNotSupportedException
 		  CheckSize(Key.Value, crypto_aead_aes256gcm_KEYBYTES)
@@ -66,7 +66,7 @@ Protected Module AEAD
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function DecryptData_ChaCha20Poly1305(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, AdditionalData As MemoryBlock) As MemoryBlock
+		Private Function DecryptData_ChaCha20Poly1305(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, ByRef AdditionalData As MemoryBlock) As MemoryBlock
 		  CheckSize(Key.Value, crypto_aead_chacha20poly1305_KEYBYTES)
 		  CheckSize(Nonce, crypto_aead_chacha20poly1305_NPUBBYTES)
 		  
@@ -85,7 +85,7 @@ Protected Module AEAD
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function DecryptData_ChaCha20Poly1305_IETF(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, AdditionalData As MemoryBlock) As MemoryBlock
+		Private Function DecryptData_ChaCha20Poly1305_IETF(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, ByRef AdditionalData As MemoryBlock) As MemoryBlock
 		  CheckSize(Key.Value, crypto_aead_chacha20poly1305_IETF_KEYBYTES)
 		  CheckSize(Nonce, crypto_aead_chacha20poly1305_IETF_NPUBBYTES)
 		  
@@ -104,7 +104,7 @@ Protected Module AEAD
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function EncryptData(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, AdditionalData As MemoryBlock, Type As libsodium.SKI.AEAD.AEADType = libsodium.SKI.AEAD.AEADType.ChaCha20Poly1305) As MemoryBlock
+		Protected Function EncryptData(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, ByRef AdditionalData As MemoryBlock, Type As AEADType = AEADType.ChaCha20Poly1305) As MemoryBlock
 		  ' Authenticated Encryption with Additional Data (AEAD) encrypts the ClearText using a secret key
 		  ' and public nonce. A message authentication code for both the encrypted message and the optional
 		  ' AdditionalData is computed and prepended to the encrypted message. AdditionalData may be Nil
@@ -129,7 +129,7 @@ Protected Module AEAD
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function EncryptData_AES256GCM(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, AdditionalData As MemoryBlock) As MemoryBlock
+		Private Function EncryptData_AES256GCM(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, ByRef AdditionalData As MemoryBlock) As MemoryBlock
 		  Static HasAES256GCM As Boolean = libsodium.Version.HasAES256GCM
 		  If Not HasAES256GCM Then Raise New PlatformNotSupportedException
 		  CheckSize(Key.Value, crypto_aead_aes256gcm_KEYBYTES)
@@ -147,7 +147,7 @@ Protected Module AEAD
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function EncryptData_ChaCha20Poly1305(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, AdditionalData As MemoryBlock) As MemoryBlock
+		Private Function EncryptData_ChaCha20Poly1305(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, ByRef AdditionalData As MemoryBlock) As MemoryBlock
 		  CheckSize(Key.Value, crypto_aead_chacha20poly1305_KEYBYTES)
 		  CheckSize(Nonce, crypto_aead_chacha20poly1305_NPUBBYTES)
 		  
@@ -163,7 +163,7 @@ Protected Module AEAD
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function EncryptData_ChaCha20Poly1305_IETF(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, AdditionalData As MemoryBlock) As MemoryBlock
+		Private Function EncryptData_ChaCha20Poly1305_IETF(ClearText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock, ByRef AdditionalData As MemoryBlock) As MemoryBlock
 		  CheckSize(Key.Value, crypto_aead_chacha20poly1305_IETF_KEYBYTES)
 		  CheckSize(Nonce, crypto_aead_chacha20poly1305_IETF_NPUBBYTES)
 		  
