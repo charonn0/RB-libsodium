@@ -97,26 +97,6 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DecodeSignature(SigData As MemoryBlock) As MemoryBlock
-		  Dim lines() As String = SplitB(SigData, EndOfLine.Windows)
-		  If lines(0) <> "-----BEGIN ED25519 SIGNATURE-----" Then Return Nil
-		  Dim sig As New MemoryBlock(0)
-		  Dim bs As New BinaryStream(sig)
-		  Dim i As Integer
-		  For i = 1 To UBound(lines)
-		    If lines(i) <> "-----END ED25519 SIGNATURE-----" Then
-		      bs.Write(lines(i) + EndOfLine.Windows)
-		    Else
-		      Exit For
-		    End If
-		  Next
-		  bs.Close
-		  
-		  Return DecodeBase64(sig)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, SenderPublicKey As libsodium.PKI.ForeignKey, RecipientPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Decrypts the CipherText using the XSalsa20 stream cipher with a shared key, which is derived
 		  ' from the SenderPublicKey and RecipientPrivateKey, and a Nonce. A Poly1305 message authentication
@@ -124,6 +104,7 @@ Protected Module PKI
 		  ' data is returned  on success. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
+		  If Nonce = Nil And Left(CipherText, 5) = "-----" Then CipherText = libsodium.Exporting.DecodeMessage(CipherText, Nonce)
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  CheckSize(SenderPublicKey.Value, crypto_box_PUBLICKEYBYTES)
 		  
@@ -141,6 +122,7 @@ Protected Module PKI
 		  ' be validated by this method. The decrypted data is returned  on success. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
+		  If Nonce = Nil And Left(CipherText, 5) = "-----" Then CipherText = libsodium.Exporting.DecodeMessage(CipherText, Nonce)
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
@@ -151,41 +133,45 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.ForeignKey, SenderPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
+		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.ForeignKey, SenderPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock, Exportable As Boolean = False) As MemoryBlock
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a shared key, which is derived
 		  ' from the RecipientPublicKey and SenderPrivateKey, and a Nonce. A Poly1305 message authentication
 		  ' code is also generated and prepended to the returned encrypted data. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
+		  If Nonce = Nil And Exportable Then Nonce = SenderPrivateKey.RandomNonce
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  CheckSize(RecipientPublicKey.Value, crypto_box_PUBLICKEYBYTES)
 		  CheckSize(SenderPrivateKey.PrivateKey, crypto_box_SECRETKEYBYTES)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
 		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey.Value, SenderPrivateKey.PrivateKey) = 0 Then
+		    If Exportable Then buffer = libsodium.Exporting.EncodeMessage(buffer, Nonce)
 		    Return buffer
 		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function EncryptData(ClearText As MemoryBlock, SharedKey As libsodium.PKI.SharedSecret, Nonce As MemoryBlock) As MemoryBlock
+		Protected Function EncryptData(ClearText As MemoryBlock, SharedKey As libsodium.PKI.SharedSecret, Nonce As MemoryBlock, Exportable As Boolean = False) As MemoryBlock
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a precalculated shared key and a
 		  ' Nonce. A Poly1305 message authentication code is also generated and prepended to the returned
 		  ' encrypted data. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
+		  If Nonce = Nil And Exportable Then Nonce = SharedKey.RandomNonce
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
 		  If crypto_box_easy_afternm(buffer, ClearText, ClearText.Size, Nonce, SharedKey.Value) = 0 Then
+		    If Exportable Then buffer = libsodium.Exporting.EncodeMessage(buffer, Nonce)
 		    Return buffer
 		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function SealData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.ForeignKey) As MemoryBlock
+		Protected Function SealData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.ForeignKey, Exportable As Boolean = False) As MemoryBlock
 		  ' Seals the ClearText using the XSalsa20 stream cipher with the recipient's public key and an
 		  ' ephemeral private key. On error returns Nil.
 		  '
@@ -193,13 +179,14 @@ Protected Module PKI
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_PUBLICKEYBYTES + crypto_box_MACBYTES)
 		  If crypto_box_seal(buffer, ClearText, ClearText.Size, RecipientPublicKey.Value) = 0 Then
+		    If Exportable Then buffer = libsodium.Exporting.EncodeMessage(buffer)
 		    Return buffer
 		  End If
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function SignData(Message As MemoryBlock, SenderKey As libsodium.PKI.SigningKey, Detached As Boolean = False) As MemoryBlock
+		Protected Function SignData(Message As MemoryBlock, SenderKey As libsodium.PKI.SigningKey, Detached As Boolean = False, Exportable As Boolean = False) As MemoryBlock
 		  ' Generate a Ed25519 signature for the Message using the SenderKey. If Detached=True then
 		  ' only the signature is returned; otherwise the signature is prepended to the message and
 		  ' both are returned.
@@ -212,13 +199,16 @@ Protected Module PKI
 		  If Not Detached Then
 		    signature = New MemoryBlock(Message.Size + crypto_sign_BYTES)
 		    siglen = signature.Size
-		    If crypto_sign(signature, siglen, Message, Message.Size, SenderKey.PrivateKey) <> 0 Then signature = Nil
+		    If crypto_sign(signature, siglen, Message, Message.Size, SenderKey.PrivateKey) <> 0 Then Return Nil
 		  Else
 		    signature = New MemoryBlock(crypto_sign_BYTES)
-		    If crypto_sign_detached(signature, siglen, Message, Message.Size, SenderKey.PrivateKey) <> 0 Then signature = Nil
+		    If crypto_sign_detached(signature, siglen, Message, Message.Size, SenderKey.PrivateKey) <> 0 Then Return Nil
 		  End If
 		  
-		  If signature <> Nil Then Return signature.StringValue(0, siglen)
+		  signature = signature.StringValue(0, siglen)
+		  If Exportable Then signature = libsodium.Exporting.Export(signature, libsodium.Exporting.ExportableType.Signature)
+		  Return signature
+		  
 		End Function
 	#tag EndMethod
 
@@ -229,6 +219,7 @@ Protected Module PKI
 		  '
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/sealed_boxes.html
 		  
+		  If Left(SealedBox, 5) = "-----" Then SealedBox = libsodium.Exporting.DecodeMessage(SealedBox)
 		  Dim buffer As New MemoryBlock(SealedBox.Size - crypto_box_PUBLICKEYBYTES - crypto_box_MACBYTES)
 		  If crypto_box_seal_open(Buffer, SealedBox, SealedBox.Size, RecipientPrivateKey.Publickey, RecipientPrivateKey.PrivateKey) = 0 Then
 		    Return buffer
@@ -247,6 +238,7 @@ Protected Module PKI
 		  
 		  
 		  CheckSize(SignerPublicKey.Value, crypto_sign_PUBLICKEYBYTES)
+		  If Left(SignedMessage, 5) = "-----" Then SignedMessage = libsodium.Exporting.Import(SignedMessage)
 		  Dim tmp As New MemoryBlock(SignedMessage.Size - crypto_sign_BYTES)
 		  Dim sz As UInt64 = tmp.Size
 		  If crypto_sign_open(tmp, sz, SignedMessage, SignedMessage.Size, SignerPublicKey.Value) = 0 Then
@@ -268,6 +260,7 @@ Protected Module PKI
 		  
 		  
 		  CheckSize(SignerPublicKey.Value, crypto_sign_PUBLICKEYBYTES)
+		  If Left(DetachedSignature, 5) = "-----" Then DetachedSignature = libsodium.Exporting.Import(DetachedSignature)
 		  Return crypto_sign_verify_detached(DetachedSignature, SignedMessage, SignedMessage.Size, SignerPublicKey.Value) = 0
 		  
 		End Function
@@ -305,30 +298,6 @@ Protected Module PKI
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_sign_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = ExportEncryptionPrivatePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 PRIVATE KEY BLOCK-----", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = ExportEncryptionPrivateSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 PRIVATE KEY BLOCK-----", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = ExportEncryptionPublicPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN CURVE25519 PUBLIC KEY BLOCK-----", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = ExportEncryptionPublicSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 PUBLIC KEY BLOCK-----", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = ExportSigningPrivatePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PRIVATE KEY BLOCK-----", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = ExportSigningPrivateSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PRIVATE KEY BLOCK-----", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = ExportSigningPublicPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 PUBLIC KEY BLOCK-----", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = ExportSigningPublicSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PUBLIC KEY BLOCK-----", Scope = Private
 	#tag EndConstant
 
 
