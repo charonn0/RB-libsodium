@@ -104,7 +104,13 @@ Protected Module PKI
 		  ' data is returned  on success. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
-		  If Nonce = Nil And Left(CipherText, 5) = "-----" Then CipherText = libsodium.Exporting.DecodeMessage(CipherText, Nonce)
+		  If Left(CipherText, 5) = "-----" Then
+		    If Nonce = Nil Then
+		      CipherText = libsodium.Exporting.DecodeMessage(CipherText, Nonce)
+		    Else
+		      CipherText = libsodium.Exporting.DecodeMessage(CipherText)
+		    End If
+		  End If
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  CheckSize(SenderPublicKey.Value, crypto_box_PUBLICKEYBYTES)
 		  
@@ -122,7 +128,13 @@ Protected Module PKI
 		  ' be validated by this method. The decrypted data is returned  on success. On error returns Nil.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
-		  If Nonce = Nil And Left(CipherText, 5) = "-----" Then CipherText = libsodium.Exporting.DecodeMessage(CipherText, Nonce)
+		  If Left(CipherText, 5) = "-----" Then
+		    If Nonce = Nil Then
+		      CipherText = libsodium.Exporting.DecodeMessage(CipherText, Nonce)
+		    Else
+		      CipherText = libsodium.Exporting.DecodeMessage(CipherText)
+		    End If
+		  End If
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  
 		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
