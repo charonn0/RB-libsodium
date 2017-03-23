@@ -69,7 +69,9 @@ Protected Module Testing
 	#tag Method, Flags = &h21
 		Private Sub TestHash()
 		  Const key = "27F2B73F7A94144A7F459792892D2CFFB78FB442FE64D451EDB63B08DA940C27"
-		  Const hash = "2D4B92842EACAE0B7B3804FC70092CB0A1D09691D12AC8477B58D36701F1C79926FE8DC8397CC54CB5013BA024A037DDBAB3EE6BB2F1863779A4BD6AA0515068"
+		  Const hash = "9BE9B8EB8DD91BCC39C1A0AD306FBFDBBCC7872AEDCBDB60BB9961B1AD341A845E65ECB18859F488FB262D99DA5CB3CE5ADD0D968A1260BE6F804B25EF2BB2B9"
+		  // The quick brown fox jumps over the lazy dog.
+		  Const test_message = "54686520717569636b2062726f776e20666f78206a756d7073206f76657220746865206c617a7920646f672e"
 		  
 		  Assert(EncodeHex(libsodium.GenericHash("Hello, world!", DecodeHex(key))) = hash)
 		  
@@ -78,12 +80,11 @@ Protected Module Testing
 		  
 		  
 		  // Taken from the NSRL test vectors = http://www.nsrl.nist.gov/testdata/
-		  Const sha256_message = "6162636462636465636465666465666765666768666768696768696a68696a6b696a6b6c6a6b6c6d6b6c6d6e6c6d6e6f6d6e6f706e6f7071"
-		  Const sha256_digest = "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
+		  Const sha256_digest = "EF537F25C895BFA782526529A9B63D97AA631564D5D789C2B765448C8635FB6C"
 		  Const sha256_empty = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 		  
 		  Dim h, m As MemoryBlock
-		  h = libsodium.SHA256(DecodeHex(sha256_message))
+		  h = libsodium.SHA256(DecodeHex(test_message))
 		  m = DecodeHex(sha256_digest)
 		  Assert(h = m)
 		  
@@ -91,45 +92,29 @@ Protected Module Testing
 		  m = DecodeHex(sha256_empty)
 		  Assert(h = m)
 		  
-		  // self-created (FIXME: find standard test vectors)
-		  Const sha512_message = "54686520717569636b2062726f776e20666f78206a756d7073206f76657220746865206c617a7920646f672e"
 		  Const sha512_digest = "91ea1245f20d46ae9a037a989f54f1f790f0a47607eeb8a14d12890cea77a1bbc6c7ed9cf205e67b7f2b8fd4c7dfd3a7a8617e45f3c463d481c7e586c39ac1ed"
 		  Const sha512_empty = "cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e"
 		  
-		  h = libsodium.SHA512(DecodeHex(sha512_message))
+		  h = libsodium.SHA512(DecodeHex(test_message))
 		  m = DecodeHex(sha512_digest)
 		  Assert(h = m)
 		  
+		  // the empty string
 		  h = libsodium.SHA512("")
 		  m = DecodeHex(sha512_empty)
 		  Assert(h = m)
 		  
+		  Const blake2b_digest = "a8add4bdddfd93e4877d2746e62817b116364a1fa7bc148d95090bc7333b3673f82401cf7aa2e4cb1ecd90296e3f14cb5413f8ed77be73045b13914cdcd6a918"
+		  Const blake2b_empty = "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce"
 		  
-		  // self-created? (TODO: double check, fix)
-		  'Const blake2b_message = "54686520717569636b2062726f776e20666f78206a756d7073206f76657220746865206c617a7920646f67"
-		  'Const blake2b_digest = "a8add4bdddfd93e4877d2746e62817b116364a1fa7bc148d95090bc7333b3673f82401cf7aa2e4cb1ecd90296e3f14cb5413f8ed77be73045b13914cdcd6a918"
-		  'Const blake2b_empty = "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce"
-		  '
-		  'h = libsodium.GenericHash(DecodeHex(blake2b_message))
-		  'm = DecodeHex(blake2b_digest)
-		  ''Assert(h = m)
-		  '
-		  'Dim p As libsodium.Password = DecodeHex(blake2b_message)
-		  'Dim k As MemoryBlock = p.DeriveKey(crypto_generichash_BYTES_MAX)
-		  '
-		  'h = libsodium.GenericHash("")
-		  'm = DecodeHex(blake2b_empty)
-		  'Assert(h = m)
+		  h = libsodium.GenericHash(DecodeHex(test_message))
+		  m = DecodeHex(blake2b_digest)
+		  Assert(h = m)
 		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
-		  
+		  // the empty string
+		  h = libsodium.GenericHash("")
+		  m = DecodeHex(blake2b_empty)
+		  Assert(h = m)
 		End Sub
 	#tag EndMethod
 
