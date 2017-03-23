@@ -17,6 +17,21 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h1000
+		Sub Constructor(ParentKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock)
+		  ' Generates a key pair by deriving it from the ParentKey and a nonce. The operation is
+		  ' deterministic, such that calling this method twice with the same parameters will
+		  ' produce the same output both times.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
+		  
+		  
+		  Dim stream As New KeyStream(ParentKey)
+		  Me.Constructor(stream.DeriveKey(crypto_box_SECRETKEYBYTES, Nonce))
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1000
 		Sub Constructor(FromSigningKey As libsodium.PKI.SigningKey)
 		  ' Converts the SigningKey(Ed25519) into an EncryptionKey(Curve25519), so that the same
 		  ' key pair can be used both for authenticated encryption and digital signatures.
@@ -98,11 +113,11 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function DeriveChild(Nonce As MemoryBlock) As libsodium.PKI.EncryptionKey
-		  Dim fk As ForeignKey = Me.PrivateKey
-		  Dim stream As New KeyStream(fk)
-		  Dim sk As MemoryBlock = stream.DeriveKey(crypto_box_SECRETKEYBYTES, Nonce)
-		  If sk <> Nil Then Return New EncryptionKey(sk)
+		Function DerivedFromNonce() As MemoryBlock
+		  ' If the Key was derived from another EncryptionKey then this method will return the Nonce used in
+		  ' the derivation function, otherwise it returns Nil.
+		  
+		  Return mDeriveChildNonce
 		End Function
 	#tag EndMethod
 

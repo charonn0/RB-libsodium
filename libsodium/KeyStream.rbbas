@@ -26,7 +26,41 @@ Protected Class KeyStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub Constructor(KeyData As libsodium.PKI.EncryptionKey)
+		  ' Uses the KeyData as the key for the key stream.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
+		  
+		  Me.Constructor(KeyData.PrivateKey)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Sub Constructor(KeyData As libsodium.PKI.ForeignKey)
+		  ' Uses the KeyData as the key for the key stream.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
+		  
+		  Me.Constructor(KeyData.Value)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Constructor(KeyData As libsodium.PKI.SigningKey)
+		  ' Uses the KeyData as the key for the key stream.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
+		  
+		  Dim k As MemoryBlock = LeftB(KeyData.PrivateKey, 32) ' truncate
+		  Me.Constructor(k) 
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Constructor(KeyData As libsodium.SKI.SecretKey)
 		  ' Uses the KeyData as the key for the key stream.
 		  '
 		  ' See:

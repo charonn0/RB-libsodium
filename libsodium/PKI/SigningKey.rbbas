@@ -16,6 +16,22 @@ Inherits libsodium.PKI.KeyPair
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h1000
+		Sub Constructor(ParentKey As libsodium.PKI.SigningKey, Nonce As MemoryBlock)
+		  ' Generates a key pair by deriving it from the ParentKey and a nonce. The operation is
+		  ' deterministic, such that calling this method twice with the same parameters will 
+		  ' produce the same output both times.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Constructor
+		  
+		  
+		  Dim stream As New KeyStream(ParentKey) ' truncate
+		  Me.Constructor(stream.DeriveKey(crypto_sign_SECRETKEYBYTES, Nonce))
+		  mDeriveChildNonce = Nonce
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock)
 		  ' Given a user's private key, this method computes their public key
@@ -61,11 +77,11 @@ Inherits libsodium.PKI.KeyPair
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function DeriveChild(Nonce As MemoryBlock) As libsodium.PKI.SigningKey
-		  Dim fk As ForeignKey = LeftB(Me.PrivateKey, 32) ' truncate
-		  Dim stream As New KeyStream(fk)
-		  Dim sk As MemoryBlock = stream.DeriveKey(crypto_sign_SECRETKEYBYTES, Nonce)
-		  If sk <> Nil Then Return New SigningKey(sk)
+		Function DerivedFromNonce() As MemoryBlock
+		  ' If the Key was derived from another SigningKey then this method will return the Nonce used in
+		  ' the derivation function, otherwise it returns Nil.
+		  
+		  Return mDeriveChildNonce
 		End Function
 	#tag EndMethod
 

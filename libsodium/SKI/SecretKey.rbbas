@@ -11,8 +11,24 @@ Inherits libsodium.SKI.KeyContainer
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Constructor
 		  
 		  If Salt = Nil Then Salt = FromPassword.RandomSalt(HashAlgorithm)
-		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, Salt, Limits, HashAlgorithm)
-		  Me.Constructor(key)
+		  Me.Constructor(FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, Salt, Limits, HashAlgorithm))
+		  mPasswdSalt = Salt
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1000
+		Sub Constructor(ParentKey As libsodium.SKI.SecretKey, Nonce As MemoryBlock)
+		  ' Generates a key by deriving it from the ParentKey and a nonce. The operation is
+		  ' deterministic, such that calling this method twice with the same parameters will
+		  ' produce the same output both times.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Constructor
+		  
+		  
+		  Dim stream As New KeyStream(ParentKey)
+		  Me.Constructor(stream.DeriveKey(crypto_secretbox_KEYBYTES, Nonce))
+		  mDeriveChildNonce = Nonce
 		  
 		End Sub
 	#tag EndMethod
@@ -39,11 +55,11 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function DeriveChild(Nonce As MemoryBlock) As libsodium.SKI.SecretKey
-		  Dim fk As libsodium.PKI.ForeignKey = Me.Value
-		  Dim stream As New KeyStream(fk)
-		  Dim sk As MemoryBlock = stream.DeriveKey(crypto_secretbox_KEYBYTES, Nonce)
-		  If sk <> Nil Then Return New SecretKey(sk)
+		Function DerivedFromNonce() As MemoryBlock
+		  ' If the Key was derived from another SecretKey then this method will return the Nonce used in
+		  ' the derivation function, otherwise it returns Nil.
+		  
+		  Return mDeriveChildNonce
 		End Function
 	#tag EndMethod
 
@@ -176,6 +192,10 @@ Inherits libsodium.SKI.KeyContainer
 		    MsgBox(libsodium.SKI.DecryptData(msg, sk, n))
 	#tag EndNote
 
+
+	#tag Property, Flags = &h21
+		Private mDeriveChildNonce As MemoryBlock
+	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private mPasswdSalt As MemoryBlock
