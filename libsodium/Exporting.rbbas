@@ -77,7 +77,12 @@ Private Module Exporting
 		    output.Write("#Nonce=")
 		    output.Write(libsodium.EncodeHex(nonce))
 		    output.Write(EndOfLine.Windows)
-		    output.Write("#Alg=Argon2" + EndOfLine.Windows)
+		    Select Case PBKDF_ALG
+		    Case Passwd.ALG_ARGON2
+		      output.Write("#Alg=Argon2" + EndOfLine.Windows)
+		    Case Passwd.ALG_ARGON2
+		      output.Write("#Alg=scrypt" + EndOfLine.Windows)
+		    End Select
 		    Select Case Limits
 		    Case ResourceLimits.Interactive
 		      output.Write("#Limits=Interactive" + EndOfLine.Windows)
@@ -149,6 +154,13 @@ Private Module Exporting
 		        MetaData.Value("Salt") = libsodium.DecodeHex(Right(s, s.Len - 6))
 		      Case Left(s, 7) = "#Nonce="
 		        MetaData.Value("Nonce") = libsodium.DecodeHex(Right(s, s.Len - 7))
+		      Case Left(s, 5) = "#Alg="
+		        Select Case Right(s, s.Len - 5)
+		        Case "Argon2"
+		          MetaData.Value("Alg") = Password.ALG_ARGON2
+		        Case "scrypt"
+		          MetaData.Value("Alg") = Password.ALG_SCRYPT
+		        End Select
 		      Case Left(s, 8) = "#Limits="
 		        Select Case Right(s, s.Len - 8)
 		        Case "Interactive"
@@ -323,6 +335,9 @@ Private Module Exporting
 	#tag EndConstant
 
 	#tag Constant, Name = NonceSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 NONCE-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = PBKDF_ALG, Type = Double, Dynamic = False, Default = \"libsodium.Password.ALG_ARGON2", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = SalsaPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN XSALSA20 KEY BLOCK-----", Scope = Private
