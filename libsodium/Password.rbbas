@@ -83,24 +83,15 @@ Inherits libsodium.SKI.KeyContainer
 		    End If
 		  End If
 		  
-		  If System.IsFunctionAvailable("crypto_pwhash_argon2i_opslimit_max", "libsodium") Then
-		    Dim mnm, mxm, mno, mxo As UInt64
-		    If Algorithm = ALG_ARGON2 Then
-		      mnm = crypto_pwhash_argon2i_memlimit_min()
-		      mxm = crypto_pwhash_argon2i_memlimit_max()
-		      mno = crypto_pwhash_argon2i_opslimit_min()
-		      mxo = crypto_pwhash_argon2i_opslimit_max()
-		    Else
-		      mnm = crypto_pwhash_scryptsalsa208sha256_memlimit_min()
-		      mxm = crypto_pwhash_scryptsalsa208sha256_memlimit_max()
-		      mno = crypto_pwhash_scryptsalsa208sha256_opslimit_min()
-		      mxo = crypto_pwhash_scryptsalsa208sha256_opslimit_max()
-		    End If
-		    'If OpsLimit > mxo Then OpsLimit = mxo
-		    'If Memlimit > mxm Then Memlimit = mxm
-		    'If OpsLimit < mno Then OpsLimit = mno
-		    'If Memlimit < mnm Then Memlimit = mnm
-		  End If
+		  'If System.IsFunctionAvailable("crypto_pwhash_argon2i_opslimit_max", "libsodium") Then
+		  'If Algorithm = ALG_ARGON2 Then
+		  'CheckSize(Memlimit, crypto_pwhash_argon2i_memlimit_min(), crypto_pwhash_argon2i_memlimit_max())
+		  'CheckSize(OpsLimit, crypto_pwhash_argon2i_opslimit_min(), crypto_pwhash_argon2i_opslimit_max())
+		  'Else
+		  'CheckSize(Memlimit, crypto_pwhash_scryptsalsa208sha256_memlimit_min(), crypto_pwhash_scryptsalsa208sha256_memlimit_max())
+		  'CheckSize(OpsLimit, crypto_pwhash_scryptsalsa208sha256_opslimit_min(), crypto_pwhash_scryptsalsa208sha256_opslimit_max())
+		  'End If
+		  'End If
 		End Sub
 	#tag EndMethod
 
