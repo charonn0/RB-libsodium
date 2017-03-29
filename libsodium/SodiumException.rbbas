@@ -62,6 +62,9 @@ Inherits RuntimeException
 		  Case ERR_WRONG_HALF
 		    Me.Message = "The ForeignKey class may not be used with the secret half of keypairs."
 		    
+		  Case ERR_NO_RANDOM
+		    Me.Message = "The random number generator is not functioning properly."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    

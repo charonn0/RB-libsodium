@@ -351,6 +351,27 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function IsZero(Extends mb As MemoryBlock, Offset As Int32 = 0, Length As Int32 = - 1) As Boolean
+		  ' This method returns True if the MemoryBlock contains only zeros. It returns False
+		  ' if non-zero bits are found. Execution time is constant for a given length.
+		  
+		  If mb = Nil Then Return True
+		  If Offset < 0 Or mb.Size = -1 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  If Length < 0 Then Length = mb.Size
+		  If Offset + Length > mb.Size Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  Dim p As Ptr
+		  If Offset > 0 Then
+		    p = mb
+		    p = Ptr(Integer(p) + Offset)
+		  Else
+		    p = mb
+		  End If
+		  
+		  Return sodium_is_zero(p, Length) = 1
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
 		  ' Returns a MemoryBlock filled with the requested number of unpredictable bytes.
@@ -365,6 +386,7 @@ Protected Module libsodium
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim mb As New MemoryBlock(Count)
 		  randombytes_buf(mb, mb.Size)
+		  If mb.IsZero Then Raise New SodiumException(ERR_NO_RANDOM)
 		  Return mb
 		End Function
 	#tag EndMethod
@@ -593,6 +615,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_LOCK_DENIED, Type = Double, Dynamic = False, Default = \"-9", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_NO_RANDOM, Type = Double, Dynamic = False, Default = \"-22", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_OPSLIMIT, Type = Double, Dynamic = False, Default = \"-16", Scope = Protected
