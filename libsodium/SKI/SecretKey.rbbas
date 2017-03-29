@@ -63,7 +63,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Export
 		  
-		  Return PackKey(Me.Value, ExportPrefix, ExportSuffix, Passwd)
+		  Return libsodium.Exporting.Export(Me.Value, libsodium.Exporting.ExportableType.Secret, Passwd)
 		End Function
 	#tag EndMethod
 
@@ -99,7 +99,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
 		  
-		  Dim sk As MemoryBlock = ExtractKey(ExportedKey, ExportPrefix, ExportSuffix, Passwd)
+		  Dim sk As MemoryBlock = libsodium.Exporting.Import(ExportedKey, Passwd)
 		  If sk <> Nil Then Return New SecretKey(sk)
 		End Function
 	#tag EndMethod
@@ -171,13 +171,6 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Property, Flags = &h21
 		Private mPasswdSalt As MemoryBlock
 	#tag EndProperty
-
-
-	#tag Constant, Name = ExportPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN XSALSA20 KEY BLOCK-----", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = ExportSuffix, Type = String, Dynamic = False, Default = \"-----END XSALSA20 KEY BLOCK-----", Scope = Private
-	#tag EndConstant
 
 
 	#tag ViewBehavior

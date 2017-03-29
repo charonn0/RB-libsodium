@@ -133,9 +133,9 @@ Protected Class GenericHashDigest
 		  Case HashType.Generic
 		    sz = crypto_generichash_statebytes()
 		  Case HashType.SHA256
-		    sz = crypto_hash_sha256_statebytes
+		    sz = crypto_hash_sha256_statebytes()
 		  Case HashType.SHA512
-		    sz = crypto_hash_sha512_statebytes
+		    sz = crypto_hash_sha512_statebytes()
 		  End Select
 		  
 		  mState = New MemoryBlock(sz)

@@ -26,10 +26,10 @@ Protected Module libsodium
 		  Select Case True
 		  Case Upperbound > 0 And (Size > Upperbound Or Size < Expected)
 		    err = New SodiumException(ERR_OUT_OF_RANGE)
-		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "-" + Format(Upperbound, "############0") + "; Got: " + Format(Size, "############0") + ")"
+		    err.Message = err.Message + " (Needs: " + Format(Expected, "-############0") + "-" + Format(Upperbound, "-############0") + "; Got: " + Format(Size, "-############0") + ")"
 		  Case Size <> Expected And Upperbound = 0
 		    err = New SodiumException(ERR_SIZE_MISMATCH)
-		    err.Message = err.Message + " (Needs: " + Format(Expected, "############0") + "; Got: " + Format(Size, "############0") + ")"
+		    err.Message = err.Message + " (Needs: " + Format(Expected, "-############0") + "; Got: " + Format(Size, "-############0") + ")"
 		  End Select
 		  
 		  If err <> Nil Then Raise err
@@ -73,11 +73,11 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_generichash_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt64) As Int32
+		Private Soft Declare Function crypto_generichash_final Lib "libsodium" (State As Ptr, OutputBuffer As Ptr, OutputSize As UInt32) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_generichash_init Lib "libsodium" (State As Ptr, Key As Ptr, KeySize As Int64, OutLength As Int64) As Int32
+		Private Soft Declare Function crypto_generichash_init Lib "libsodium" (State As Ptr, Key As Ptr, KeySize As UInt32, OutLength As UInt32) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -101,7 +101,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_hash_sha256_statebytes Lib "libsodium" () As UInt64
+		Private Soft Declare Function crypto_hash_sha256_statebytes Lib "libsodium" () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -121,7 +121,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_hash_sha512_statebytes Lib "libsodium" () As UInt64
+		Private Soft Declare Function crypto_hash_sha512_statebytes Lib "libsodium" () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -141,11 +141,95 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256 Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Passwd As Ptr, PasswdSize As UInt64, SaltBuffer As Ptr, OpsLimit As UInt64, MemLimit As UInt64) As Int32
+		Private Soft Declare Function crypto_pwhash_argon2i_memlimit_interactive Lib "libsodium" () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_str Lib "libsodium" (Buffer As Ptr, Passwd As Ptr, PasswdSize As UInt64, OpsLimit As UInt64, MemLimit As UInt64) As Int32
+		Private Soft Declare Function crypto_pwhash_argon2i_memlimit_max Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_memlimit_min Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_memlimit_moderate Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_memlimit_sensitive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_opslimit_interactive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_opslimit_max Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_opslimit_min Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_opslimit_moderate Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_opslimit_sensitive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_argon2i_str Lib "libsodium" (Buffer As Ptr, Passwd As Ptr, PasswdSize As UInt64, OpsLimit As UInt64, MemLimit As UInt32) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256 Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Passwd As Ptr, PasswdSize As UInt64, SaltBuffer As Ptr, OpsLimit As UInt64, MemLimit As UInt32) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_memlimit_interactive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_memlimit_max Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_memlimit_min Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_memlimit_moderate Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_memlimit_sensitive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_opslimit_interactive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_opslimit_max Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_opslimit_min Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_opslimit_moderate Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_opslimit_sensitive Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_scryptsalsa208sha256_str Lib "libsodium" (Buffer As Ptr, Passwd As Ptr, PasswdSize As UInt64, OpsLimit As UInt64, MemLimit As UInt32) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -153,7 +237,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_pwhash_str Lib "libsodium" (Buffer As Ptr, Passwd As Ptr, PasswdSize As UInt64, OpsLimit As UInt64, MemLimit As UInt64) As Int32
+		Private Soft Declare Function crypto_pwhash_str Lib "libsodium" (Buffer As Ptr, Passwd As Ptr, PasswdSize As UInt64, OpsLimit As UInt64, MemLimit As UInt32) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -210,57 +294,6 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h21
-		Private Function ExtractKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password) As MemoryBlock
-		  ExportedKey = ReplaceLineEndings(ExportedKey, EndOfLine.Windows)
-		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
-		  Dim i As Integer
-		  Do Until Ubound(lines) <= i Or lines(i) = Prefix
-		    i = i + 1
-		  Loop
-		  If i = UBound(lines) Then Return Nil
-		  
-		  Dim key As New MemoryBlock(0)
-		  Dim output As New BinaryStream(key)
-		  Dim PasswdSalt, Nonce As MemoryBlock
-		  Dim Limits As libsodium.ResourceLimits = ResourceLimits.Interactive
-		  For i = i + 1 To UBound(lines)
-		    Dim s As String = lines(i)
-		    Select Case True
-		    Case Left(s, 6) = "#Salt="
-		      PasswdSalt = DecodeBase64(Right(s, s.Len - 6))
-		    Case Left(s, 7) = "#Nonce="
-		      Nonce = DecodeBase64(Right(s, s.Len - 7))
-		    Case Left(s, 8) = "#Limits="
-		      Select Case Right(s, s.Len - 8)
-		      Case "Interactive"
-		        Limits = ResourceLimits.Interactive
-		      Case "Moderate"
-		        Limits = ResourceLimits.Moderate
-		      Case "Sensitive"
-		        Limits = ResourceLimits.Sensitive
-		      Else
-		        Raise New UnsupportedFormatException
-		      End Select
-		    Case Left(s, 1) = "#", s.Trim = "" ' comment/blank line
-		      Continue
-		    Case s = Suffix
-		      Exit For
-		    Else
-		      output.Write(s + EndOfLine.Windows)
-		    End Select
-		  Next
-		  output.Close
-		  key = DecodeBase64(key.Trim)
-		  If Passwd <> Nil Then
-		    Dim sk As New libsodium.SKI.SecretKey(Passwd, PasswdSalt, Limits)
-		    key = libsodium.SKI.DecryptData(key, sk, Nonce)
-		  End If
-		  
-		  If key <> Nil Then Return Trim(key)
-		End Function
-	#tag EndMethod
-
 	#tag Method, Flags = &h1
 		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil, HashSize As UInt32 = libsodium.GenericHashDigest.crypto_generichash_BYTES_MAX) As String
 		  ' Generates a 512-bit BLAKE2b digest of the InputData, optionally using the specified key.
@@ -269,6 +302,27 @@ Protected Module libsodium
 		  Dim h As New GenericHashDigest(HashSize, Key)
 		  h.Process(InputData)
 		  Return h.Value
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function get_errno() As Integer
+		  Dim err As Integer
+		  Dim mb As MemoryBlock
+		  #If TargetWin32 Then
+		    Declare Function _get_errno Lib "msvcrt" (ByRef Error As Integer) As Integer
+		    Dim e As Integer = _get_errno(err)
+		    If e <> 0 Then err = e
+		  #elseif TargetLinux
+		    Declare Function __errno_location Lib "libc.so" () As Ptr
+		    mb = __errno_location()
+		  #elseif TargetMacOS
+		    Declare Function __error Lib "System" () As Ptr
+		    mb = __error()
+		  #endif
+		  If mb <> Nil Then err = mb.Int32Value(0)
+		  Return err
+		  
 		End Function
 	#tag EndMethod
 
@@ -305,38 +359,6 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h21
-		Private Function PackKey(ExportedKey As MemoryBlock, Prefix As String, Suffix As String, Passwd As libsodium.Password, Salt As MemoryBlock = Nil, Nonce As MemoryBlock = Nil, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As MemoryBlock
-		  Dim data As New MemoryBlock(0)
-		  Dim output As New BinaryStream(data)
-		  output.Write(Prefix + EndOfLine.Windows)
-		  
-		  If Passwd <> Nil Then
-		    If Salt = Nil Then Salt = Passwd.RandomSalt
-		    Dim key As libsodium.SKI.SecretKey
-		    If Nonce = Nil Then Nonce = key.RandomNonce
-		    key = New libsodium.SKI.SecretKey(Passwd, Salt, Limits)
-		    ExportedKey = libsodium.SKI.EncryptData(ExportedKey, key, Nonce)
-		    output.Write("#Salt=" + EncodeBase64(Salt) + EndOfLine.Windows)
-		    output.Write("#Nonce=" + EncodeBase64(Nonce) + EndOfLine.Windows)
-		    Select Case Limits
-		    Case ResourceLimits.Interactive
-		      output.Write("#Limits=Interactive" + EndOfLine.Windows)
-		    Case ResourceLimits.Moderate
-		      output.Write("#Limits=Moderate" + EndOfLine.Windows)
-		    Case ResourceLimits.Sensitive
-		      output.Write("#Limits=Sensitive" + EndOfLine.Windows)
-		    End Select
-		  End If
-		  output.Write(EndOfLine.Windows)
-		  output.Write(EncodeBase64(ExportedKey) + EndOfLine.Windows)
-		  output.Write(Suffix + EndOfLine.Windows)
-		  
-		  output.Close
-		  Return data
-		End Function
-	#tag EndMethod
-
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
 		  ' Returns a MemoryBlock filled with the requested number of unpredictable bytes.
@@ -356,7 +378,7 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Sub randombytes_buf Lib "libsodium" (Buffer As Ptr, BufferSize As UInt64)
+		Private Soft Declare Sub randombytes_buf Lib "libsodium" (Buffer As Ptr, BufferSize As UInt32)
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -447,11 +469,11 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Sub sodium_add Lib "libsodium" (BufferA As Ptr, BufferB As Ptr, Length As UInt64)
+		Private Soft Declare Sub sodium_add Lib "libsodium" (BufferA As Ptr, BufferB As Ptr, Length As UInt32)
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_allocarray Lib "libsodium" (Count As UInt64, FieldSize As UInt64) As Ptr
+		Private Soft Declare Function sodium_allocarray Lib "libsodium" (Count As UInt32, FieldSize As UInt32) As Ptr
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -459,7 +481,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_compare Lib "libsodium" (Buffer1 As Ptr, Buffer2 As Ptr, Lenfth As UInt64) As Int32
+		Private Soft Declare Function sodium_compare Lib "libsodium" (Buffer1 As Ptr, Buffer2 As Ptr, Length As UInt32) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -471,7 +493,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Sub sodium_increment Lib "libsodium" (Number As Ptr, Length As UInt64)
+		Private Soft Declare Sub sodium_increment Lib "libsodium" (Number As Ptr, Length As UInt32)
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -479,23 +501,23 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_is_zero Lib "libsodium" (DataPtr As Ptr, Length As UInt64) As Int32
+		Private Soft Declare Function sodium_is_zero Lib "libsodium" (DataPtr As Ptr, Length As UInt32) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_malloc Lib "libsodium" (Length As UInt64) As Ptr
+		Private Soft Declare Function sodium_malloc Lib "libsodium" (Length As UInt32) As Ptr
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_memcmp Lib "libsodium" (Buffer1 As Ptr, Buffer2 As Ptr, Length As UInt64) As Int32
+		Private Soft Declare Function sodium_memcmp Lib "libsodium" (Buffer1 As Ptr, Buffer2 As Ptr, Length As UInt32) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Sub sodium_memzero Lib "libsodium" (DataPtr As Ptr, Length As UInt64)
+		Private Soft Declare Sub sodium_memzero Lib "libsodium" (DataPtr As Ptr, Length As UInt32)
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_mlock Lib "libsodium" (Address As Ptr, Length As UInt64) As Int32
+		Private Soft Declare Function sodium_mlock Lib "libsodium" (Address As Ptr, Length As UInt32) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -511,7 +533,7 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_munlock Lib "libsodium" (Address As Ptr, Length As UInt64) As Int32
+		Private Soft Declare Function sodium_munlock Lib "libsodium" (Address As Ptr, Length As UInt32) As Int32
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
@@ -532,12 +554,12 @@ Protected Module libsodium
 		  ' Overwrites the data in the MemoryBlock with zeroes.
 		  
 		  If mb = Nil Then Return
-		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  If Offset + Length > mb.Size Then Raise New SodiumException(ERR_OUT_OF_RANGE)
-		  
 		  Dim p As Ptr = mb
 		  If Length < 0 Then Length = mb.Size
+		  CheckSize(Offset, 0, mb.Size)
+		  CheckSize(Length, 0, mb.Size - Offset)
+		  CheckSize(Offset + Length, 0, mb.Size)
 		  If Offset > 0 Then p = Ptr(Integer(p) + Offset)
 		  
 		  sodium_memzero(p, Length)
@@ -558,6 +580,12 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_CONVERSION_FAILED, Type = Double, Dynamic = False, Default = \"-18", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_IMPORT_ENCRYPTED, Type = Double, Dynamic = False, Default = \"-20", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_IMPORT_PASSWORD, Type = Double, Dynamic = False, Default = \"-19", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_INIT_FAILED, Type = Double, Dynamic = False, Default = \"-2", Scope = Protected
@@ -602,7 +630,7 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_WRITE_DENIED, Type = Double, Dynamic = False, Default = \"-8", Scope = Protected
 	#tag EndConstant
 
-	#tag Constant, Name = STRICT_CONVERT, Type = Boolean, Dynamic = False, Default = \"False", Scope = Private
+	#tag Constant, Name = ERR_WRONG_HALF, Type = Double, Dynamic = False, Default = \"-21", Scope = Protected
 	#tag EndConstant
 
 

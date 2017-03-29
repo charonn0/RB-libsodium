@@ -23,13 +23,15 @@ This example generates and validates a password hash that is suitable to be stor
 ## Synopsis
 RB-libsodium is designed to make it as hard as possible to write bad crypto code. For example signing keys can't be used to perform encryption, so methods that need a signing key will require an instance of the [SigningKey](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey) class as a parameter; attempting to pass an [EncryptionKey](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey) will generate a compiler error. 
 
+libsodium uses state-of-the-art cryptographic primitives and algorithms based on [elliptic curves](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography) ("ECC"). ECC provides comparable security to older systems based on prime factorization, such as RSA, but with much smaller key sizes. For example, a 224-bit (28 byte) ECC key provides a level of security that is comparable to a 2,048-bit (256 byte) RSA key. For comparison, NIST recommends a RSA key size of at least 3,072 bits to ensure security through the year 2030.
+
 ## How to incorporate libsodium into your Realbasic/Xojo project
-## # Import the libsodium module
+### Import the libsodium module
 1. Download the RB-libsodium project either in [ZIP archive format](https://github.com/charonn0/RB-libsodium/archive/master.zip) or by cloning the repository with your Git client.
 2. Open the RB-libsodium project in REALstudio or Xojo. Open your project in a separate window.
 3. Copy the libsodium module into your project and save.
 
-## # Ensure the libsodium shared library is installed
+### Ensure the libsodium shared library is installed
 libsodium is not ordinarily installed by default on most operating systems, you will need to ship necessary DLL/SO/DyLibs with your application. You can use pre-built binaries available [here](https://download.libsodium.org/libsodium/releases/), or you can [build them yourself from source](https://github.com/jedisct1/libsodium). 
 
 RB-libsodium will raise a PlatformNotSupportedException when used if all required DLLs/SOs/DyLibs are not available at runtime. 

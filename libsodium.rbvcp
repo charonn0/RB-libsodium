@@ -5,6 +5,7 @@ Class=App;App.rbbas;&h1D84B7FF;&h0;false
 BuildSteps=Build Automation;Build Automation.rbbas;&h41FEF7FF;&h0;false
 Module=libsodium;libsodium/libsodium.rbbas;&h7228CFFF;&h0;false
 Class=MasterKey;libsodium/MasterKey.rbbas;&h3B95C7FF;&h7228CFFF;false
+Module=Exporting;libsodium/Exporting.rbbas;&h1E4E47FF;&h7228CFFF;false
 Class=KeyStream;libsodium/KeyStream.rbbas;&h4593B7FF;&h7228CFFF;false
 Module=Version;libsodium/Version.rbbas;&h47E0CFFF;&h7228CFFF;false
 Module=SKI;libsodium/SKI/SKI.rbbas;&hD91BFFF;&h7228CFFF;false
