@@ -118,6 +118,33 @@ Protected Module Testing
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h1
+		Protected Function TestName(Number As Integer) As String
+		  Select Case Number
+		  Case 1
+		    Return "TestPKIEncrypt"
+		  Case 2
+		    Return "TestPKISign"
+		  Case 3
+		    Return "TestUtils"
+		  Case 4
+		    Return "TestPassword"
+		  Case 5
+		    Return "TestSecureMemory"
+		  Case 6
+		    Return "TestHash"
+		  Case 7
+		    Return "TestPKIForeignKey"
+		  Case 8
+		    Return "TestPKIExchange"
+		  Case 9
+		    Return "TestPKISeal"
+		  Else
+		    Return "Unknown test"
+		  End Select
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h21
 		Private Sub TestPassword()
 		  Dim pass As New libsodium.Password(TestPasswordValue)

@@ -8,10 +8,10 @@ Inherits Application
 		  Else
 		    Dim s As String
 		    For i As Integer = 0 To UBound(Testing.Failures)
-		      s = s + Str(Testing.Failures(i))
-		      If i < UBound(Testing.Failures) Then s = s  + ", "
+		      s = s + Testing.TestName(Testing.Failures(i))
+		      If i < UBound(Testing.Failures) Then s = s  + ", " + EndOfLine
 		    Next
-		    MsgBox("Test(s) " + s + " failed!")
+		    MsgBox("Test failure(s): " + EndOfLine + s)
 		  End If
 		End Sub
 	#tag EndEvent
