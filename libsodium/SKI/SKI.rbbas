@@ -32,7 +32,13 @@ Protected Module SKI
 
 	#tag Method, Flags = &h21
 		Private Function DecryptData(CipherText As MemoryBlock, Key As MemoryBlock, Nonce As MemoryBlock) As MemoryBlock
-		  If Nonce = Nil And Left(CipherText, 5) = "-----" Then CipherText = libsodium.Exporting.DecodeMessage(CipherText, Nonce)
+		  If Left(CipherText, 5) = "-----" Then
+		    If Nonce = Nil Then
+		      CipherText = libsodium.Exporting.DecodeMessage(CipherText, Nonce)
+		    Else
+		      CipherText = libsodium.Exporting.DecodeMessage(CipherText)
+		    End If
+		  End If
 		  CheckSize(Nonce, crypto_secretbox_NONCEBYTES)
 		  CheckSize(Key, crypto_secretbox_KEYBYTES)
 		  
