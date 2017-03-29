@@ -7,7 +7,15 @@ Protected Class KeyStream
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
 		  
-		  Me.Constructor(RandomBytes(crypto_stream_KEYBYTES))
+		  Dim mb As MemoryBlock
+		  If System.IsFunctionAvailable("crypto_stream_keygen", "libsodium") Then
+		    mb = New MemoryBlock(crypto_stream_KEYBYTES)
+		    crypto_stream_keygen(mb)
+		  Else
+		    mb = RandomBytes(crypto_stream_KEYBYTES)
+		  End If
+		  
+		  Me.Constructor(mb)
 		End Sub
 	#tag EndMethod
 
