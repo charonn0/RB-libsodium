@@ -104,10 +104,14 @@ Protected Module Testing
 		  m = DecodeHex(sha512_empty)
 		  Assert(h = m)
 		  
+		  
+		  // The quick brown fox jumps over the lazy dog [no ending period]
+		  Const test_message1 = "54686520717569636B2062726F776E20666F78206A756D7073206F76657220746865206C617A7920646F67"
+		  
 		  Const blake2b_digest = "a8add4bdddfd93e4877d2746e62817b116364a1fa7bc148d95090bc7333b3673f82401cf7aa2e4cb1ecd90296e3f14cb5413f8ed77be73045b13914cdcd6a918"
 		  Const blake2b_empty = "786a02f742015903c6c6fd852552d272912f4740e15847618a86e217f71f5419d25e1031afee585313896444934eb04b903a685b1448b755d56f701afe9be2ce"
 		  
-		  h = libsodium.GenericHash(DecodeHex(test_message))
+		  h = libsodium.GenericHash(DecodeHex(test_message1))
 		  m = DecodeHex(blake2b_digest)
 		  Assert(h = m)
 		  
