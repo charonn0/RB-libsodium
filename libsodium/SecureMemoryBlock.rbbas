@@ -316,7 +316,6 @@ Class SecureMemoryBlock
 		Sub StringValue(Offset As UInt64, Length As UInt64, Assigns NewData As MemoryBlock)
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + Length > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
-		  Me.ZeroFill
 		  Dim mb As MemoryBlock = mPtr
 		  mb.StringValue(Offset, Length) = NewData
 		End Sub
