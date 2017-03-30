@@ -28,6 +28,7 @@ Inherits libsodium.PKI.KeyPair
 		  
 		  Dim stream As New KeyStream(ParentKey)
 		  Me.Constructor(stream.DeriveKey(crypto_box_SECRETKEYBYTES, Nonce))
+		  mDeriveChildNonce = Nonce
 		End Sub
 	#tag EndMethod
 
