@@ -396,13 +396,13 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function UShortValue(Offset As UInt64) As UInt16
-		  Return Me.UShortValue(Offset)
+		  Return Me.UInt16Value(Offset)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub UShortValue(Offset As UInt64, Assigns NewInt As UInt16)
-		  Me.UShortValue(Offset) = NewInt
+		  Me.UInt16Value(Offset) = NewInt
 		End Sub
 	#tag EndMethod
 
