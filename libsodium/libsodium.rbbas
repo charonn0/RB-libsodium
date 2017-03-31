@@ -67,9 +67,9 @@ Protected Module libsodium
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CompareNonce
-		  If Nonce1.Size < 0 Or Nonce2.Size < 0 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
-		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If Nonce1.Size < 0 Or Nonce2.Size < 0 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
 		  Return sodium_compare(Nonce1, Nonce2, Max(Nonce1.Size, Nonce2.Size))
 		End Function
 	#tag EndMethod
@@ -329,7 +329,7 @@ Protected Module libsodium
 		  ' Increments the Nonce in constant time.
 		  '
 		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CompareNonce
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.IncrementNonce
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
