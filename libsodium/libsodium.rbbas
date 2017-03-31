@@ -617,6 +617,9 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_SIZE_MISMATCH, Type = Double, Dynamic = False, Default = \"-13", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_SIZE_REQUIRED, Type = Double, Dynamic = False, Default = \"-22", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_TOO_LARGE, Type = Double, Dynamic = False, Default = \"-6", Scope = Protected
 	#tag EndConstant
 
