@@ -51,6 +51,8 @@ Protected Module libsodium
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CombineNonce
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If Nonce1.Size < 0 Or Nonce2.Size < 0 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
+		  
 		  Dim output As New MemoryBlock(Nonce1.Size)
 		  output.StringValue(0, output.Size) = Nonce1.StringValue(0, Nonce1.Size)
 		  sodium_add(output, Nonce2, Max(output.Size, Nonce2.Size))
@@ -67,7 +69,7 @@ Protected Module libsodium
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CompareNonce
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  
+		  If Nonce1.Size < 0 Or Nonce2.Size < 0 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
 		  Return sodium_compare(Nonce1, Nonce2, Max(Nonce1.Size, Nonce2.Size))
 		End Function
 	#tag EndMethod
@@ -253,6 +255,10 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Sub crypto_stream_keygen Lib "libsodium" (Buffer As Ptr)
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_stream_xor Lib "libsodium" (OutBuffer As Ptr, Message As Ptr, MsgSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
 	#tag EndExternalMethod
 
@@ -331,7 +337,7 @@ Protected Module libsodium
 		  ' Increments the Nonce in constant time.
 		  '
 		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CompareNonce
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.IncrementNonce
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
@@ -545,7 +551,16 @@ Protected Module libsodium
 		  
 		  Dim mb1 As MemoryBlock = String1
 		  Dim mb2 As MemoryBlock = String2
-		  Return sodium_memcmp(mb1, mb2, Max(mb1.Size, mb2.Size)) = 0
+		  Dim sz As UInt32
+		  If mb1.Size <> mb2.Size Then
+		    sz = Max(mb1.Size, mb2.Size)
+		    ' pad the smaller string with zeroes to preserve constant time
+		    If mb1.Size <> sz Then mb1.Size = sz Else mb2.Size = sz
+		  Else
+		    sz = mb1.Size
+		  End If
+		  
+		  Return sodium_memcmp(mb1, mb2, sz) = 0
 		End Function
 	#tag EndMethod
 
@@ -619,6 +634,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_SIZE_MISMATCH, Type = Double, Dynamic = False, Default = \"-13", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_SIZE_REQUIRED, Type = Double, Dynamic = False, Default = \"-22", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_TOO_LARGE, Type = Double, Dynamic = False, Default = \"-6", Scope = Protected
