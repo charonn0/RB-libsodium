@@ -62,6 +62,12 @@ Inherits RuntimeException
 		  Case ERR_WRONG_HALF
 		    Me.Message = "The ForeignKey class may not be used with the secret half of keypairs."
 		    
+		  Case ERR_OUT_OF_BOUNDS
+		    Me.Message = "The requested operation failed because it would have exceeded an allocation boundary."
+		    
+		  Case ERR_SIZE_REQUIRED
+		    Me.Message = "The requested operation can not be performed on MemoryBlocks of unknown size."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    

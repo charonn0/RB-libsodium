@@ -7,7 +7,15 @@ Protected Class KeyStream
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
 		  
-		  Me.Constructor(RandomBytes(crypto_stream_KEYBYTES))
+		  Dim mb As MemoryBlock
+		  If System.IsFunctionAvailable("crypto_stream_keygen", "libsodium") Then
+		    mb = New MemoryBlock(crypto_stream_KEYBYTES)
+		    crypto_stream_keygen(mb)
+		  Else
+		    mb = RandomBytes(crypto_stream_KEYBYTES)
+		  End If
+		  
+		  Me.Constructor(mb)
 		End Sub
 	#tag EndMethod
 
@@ -104,6 +112,7 @@ Protected Class KeyStream
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Process
 		  
 		  CheckSize(Nonce, crypto_stream_NONCEBYTES)
+		  If Data.Size < 0 Then Raise New SodiumException(ERR_SIZE_REQUIRED) ' can't pass a MemoryBlock of unknown size
 		  Dim output As New MemoryBlock(Data.Size)
 		  If crypto_stream_xor(output, Data, Data.Size, Nonce, mKey.Value) <> 0 Then Return Nil
 		  Return output
