@@ -84,6 +84,7 @@ Protected Class GenericHashDigest
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Process
 		  
 		  If mOutput <> Nil Then Raise New SodiumException(ERR_INVALID_STATE)
+		  If NewData.Size < 0 Then Raise New SodiumException(ERR_SIZE_REQUIRED) ' can't pass a MemoryBlock of unknown size
 		  Select Case mType
 		  Case HashType.Generic
 		    mLastError = crypto_generichash_update(mState, NewData, NewData.Size)

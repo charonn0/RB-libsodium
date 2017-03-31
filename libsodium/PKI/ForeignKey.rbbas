@@ -16,6 +16,7 @@ Protected Class ForeignKey
 
 	#tag Method, Flags = &h1
 		Protected Sub Constructor(KeyData As MemoryBlock)
+		  If KeyData.Size < 0 Then Raise New SodiumException(ERR_SIZE_REQUIRED) ' can't pass a MemoryBlock of unknown size
 		  mKeyData = KeyData
 		  mType = KeyType.Unknown
 		End Sub
