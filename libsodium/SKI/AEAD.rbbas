@@ -196,6 +196,18 @@ Protected Module AEAD
 	#tag EndMethod
 
 
+	#tag Note, Name = What is AEAD?
+		Authenticated Encryption with Additional Data (AEAD) encrypts the ClearText using a secret key and public nonce. A message 
+		authentication code for both the encrypted message and the optional, unencrypted additional data is computed and prepended to the 
+		encrypted message. 
+		
+		A typical use case for additional data is to store protocol-specific metadata about the message, such as its length and encoding.
+		
+		The public nonce should never ever be reused with the same key. The recommended way to generate it is to use libsodium.RandomBytes 
+		for the first message, and increment it for each subsequent message using the same key.
+	#tag EndNote
+
+
 	#tag Enum, Name = AEADType, Flags = &h1
 		ChaCha20Poly1305
 		  ChaCha20Poly1305_IETF
