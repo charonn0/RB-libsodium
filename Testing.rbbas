@@ -224,6 +224,7 @@ Protected Module Testing
 
 	#tag Method, Flags = &h21
 		Private Sub TestPKIExchange()
+		  // These test vectors are from https://tools.ietf.org/html/rfc7748#section-6.1
 		  Const ALICE_SK = "77076d0a7318a57d3c16c17251b26645df4c2f87ebc0992ab177fba51db92c2a"
 		  Const ALICE_PK = "8520f0098930a754748b7ddcb43ef75a0dbf3a0d26381af4eba4a98eaa9b4e6a"
 		  Const BOB_SK = "5dab087e624a8a4b79e17f8b83800ee66f3bb1292618b6fd1c2f8b27ff88e0eb"
@@ -292,19 +293,29 @@ Protected Module Testing
 		  Dim sig As MemoryBlock = libsodium.PKI.SignData(msg, senderkey)
 		  Assert(libsodium.PKI.VerifyData(sig, senderkey.PublicKey) <> Nil)
 		  
-		  '//These test vectors are from http://ed25519.cr.yp.to/python/sign.input
-		  'Const sign_private = "b18e1d0045995ec3d010c387ccfeb984d783af8fbb0f40fa7db126d889f6dadd"
-		  'Const sign_public = "77f48b59caeda77751ed138b0ec667ff50f8768c25d48309a8f386a2bad187fb"
-		  'Const sign_message = "916c7d1d268fc0e77c1bef238432573c39be577bbea0998936add2b50a653171ce18a542b0b7f96c1691a3be6031522894a8634183eda38798a0c5d5d79fbd01dd04a8646d71873b77b221998a81922d8105f892316369d5224c9983372d2313c6b1f4556ea26ba49d46e8b561e0fc76633ac9766e68e21fba7edca93c4c7460376d7f3ac22ff372c18f613f2ae2e856af40"
-		  'Const sign_signature = "6bd710a368c1249923fc7a1610747403040f0cc30815a00f9ff548a896bbda0b4eb2ca19ebcf917f0f34200a9edbad3901b64ab09cc5ef7b9bcc3c40c0ff7509"
-		  '
-		  'senderkey = senderkey.Derive(DecodeHex(sign_private))
-		  'Dim spk As MemoryBlock = senderkey.PublicKey
-		  'Dim kps As MemoryBlock = DecodeHex(sign_public)
-		  'Assert(spk = kps)
-		  'msg = DecodeHex(sign_message)
-		  'sig = libsodium.PKI.SignData(msg, senderkey, True)
-		  'Assert(sig = DecodeHex(sign_signature))
+		  //These test vectors are from http://ed25519.cr.yp.to/python/sign.input
+		  Dim f As FolderItem = App.ExecutableFile.Parent.Child("ed25519_test_vectors.txt")
+		  If Not f.Exists Then Return
+		  
+		  Dim tis As TextInputStream = TextInputStream.Open(f)
+		  Try
+		    Do Until tis.EOF
+		      Dim line As String = tis.ReadLine
+		      Dim skey, pkey As MemoryBlock
+		      skey = DecodeHex(NthField(line, ":", 1))
+		      pkey = DecodeHex(NthField(line, ":", 2))
+		      msg = DecodeHex(NthField(line, ":", 3))
+		      sig = DecodeHex(NthField(line, ":", 4))
+		      
+		      Dim k As libsodium.PKI.SigningKey
+		      k = k.Derive(skey)
+		      Assert(k.PublicKey = pkey)
+		      Assert(k.PrivateKey = skey)
+		      Assert(libsodium.PKI.VerifyData(msg, New libsodium.PKI.ForeignKey(k), sig))
+		    Loop
+		  Finally
+		    tis.Close
+		  End Try
 		End Sub
 	#tag EndMethod
 
