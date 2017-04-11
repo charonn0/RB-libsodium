@@ -62,6 +62,12 @@ Protected Module Testing
 		    Failures.Append(9)
 		  End Try
 		  
+		  Try
+		    TestSKIMAC()
+		  Catch
+		    Failures.Append(10)
+		  End Try
+		  
 		  Return UBound(Failures) = -1
 		End Function
 	#tag EndMethod
