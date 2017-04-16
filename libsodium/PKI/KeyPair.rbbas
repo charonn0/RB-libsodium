@@ -3,6 +3,7 @@ Protected Class KeyPair
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
 		  mPrivate = New libsodium.SKI.KeyContainer(PrivateKeyData)
+		  If PublicKeyData.Size < 0 Then Raise New SodiumException(ERR_SIZE_REQUIRED) ' can't pass a MemoryBlock of unknown size
 		  mPublic = PublicKeyData
 		End Sub
 	#tag EndMethod

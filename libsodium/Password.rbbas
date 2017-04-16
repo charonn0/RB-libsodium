@@ -37,6 +37,13 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		Function GenerateHash(HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive) As MemoryBlock
+		  ' This method computes a CPU-intensive and memory-hard salted hash (either Argon2 or scrypt) of the
+		  ' password. The resulting hash value is suitable for storage (e.g. in a database). Use the VerifyHash
+		  ' method to validate a password against a hash.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.GenerateHash
+		  
 		  Dim out As MemoryBlock
 		  Dim clearpw As MemoryBlock = Me.Value
 		  Dim memlimit, opslimit As UInt32
@@ -124,6 +131,9 @@ Inherits libsodium.SKI.KeyContainer
 		Function VerifyHash(HashValue As MemoryBlock, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As Boolean
 		  ' This method verifies that the HashValue is a valid hash for the password (as generated
 		  ' by Password.GenerateHash)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.VerifyHash
 		  
 		  Dim clearpw As MemoryBlock = Me.Value
 		  Select Case HashAlgorithm
