@@ -11,6 +11,9 @@ Inherits RuntimeException
 		  Case ERR_UNAVAILABLE
 		    Me.Message = "libsodium is not installed."
 		    
+		  Case ERR_FUNCTION_UNAVAILABLE
+		    Me.Message = "This version of libsodium does not export the requested function."
+		    
 		  Case ERR_PROTECT_FAILED
 		    Me.Message = "Unable to set the protection level for the specified memory range."
 		    
