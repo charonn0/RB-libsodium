@@ -373,7 +373,8 @@ Protected Module libsodium
 		  If Seed = Nil Then
 		    randombytes_buf(mb, mb.Size)
 		  Else
-		    If Not System.IsFunctionAvailable("randombytes_buf_deterministic", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
+		    If Not System.IsFunctionAvailable("randombytes_buf_deterministic", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		    CheckSize(Seed, randombytes_SEEDBYTES)
 		    randombytes_buf_deterministic(mb, mb.Size, Seed)
 		  End If
 		  Return mb
