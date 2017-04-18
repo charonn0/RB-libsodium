@@ -358,7 +358,7 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function RandomBytes(Count As UInt64, Optional Seed As MemoryBlock) As MemoryBlock
+		Protected Function RandomBytes(Count As UInt32, Optional Seed As MemoryBlock) As MemoryBlock
 		  ' Returns a MemoryBlock filled with the requested number of unpredictable bytes.
 		  '   On Win32, the RtlGenRandom() function is used
 		  '   On BSD, the arc4random() function is used
