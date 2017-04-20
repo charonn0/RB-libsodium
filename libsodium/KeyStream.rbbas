@@ -153,7 +153,7 @@ Protected Class KeyStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function RandomNonce(Type As libsodium.KeyStream.StreamType= libsodium.KeyStream.StreamType.XSalsa20) As MemoryBlock
+		 Shared Function RandomNonce(Type As libsodium.KeyStream.StreamType = libsodium.KeyStream.StreamType.XSalsa20) As MemoryBlock
 		  ' Returns unpredictable bytes that are suitable to be used as a Nonce for use with KeyStream.Process
 		  ' and KeyStream.DeriveKey
 		  '
