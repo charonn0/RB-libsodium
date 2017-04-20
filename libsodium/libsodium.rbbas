@@ -247,7 +247,39 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_chacha20 Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_chacha20_xor Lib "libsodium" (OutBuffer As Ptr, Message As Ptr, MsgSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Sub crypto_stream_keygen Lib "libsodium" (Buffer As Ptr)
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_salsa20 Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Sub crypto_stream_salsa20_keygen Lib "libsodium" (Buffer As Ptr)
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_salsa20_xor Lib "libsodium" (OutBuffer As Ptr, Message As Ptr, MsgSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_xchacha20 Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Sub crypto_stream_xchacha20_keygen Lib "libsodium" (Buffer As Ptr)
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_xchacha20_xor Lib "libsodium" (OutBuffer As Ptr, Message As Ptr, MsgSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
