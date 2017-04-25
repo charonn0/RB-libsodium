@@ -20,6 +20,7 @@ Inherits libsodium.PKI.KeyPair
 		Sub Constructor(FromSigningKey As libsodium.PKI.SigningKey)
 		  ' Converts the SigningKey(Ed25519) into an EncryptionKey(Curve25519), so that the same
 		  ' key pair can be used both for authenticated encryption and digital signatures.
+		  ' CAUTION: using the same key for both signing and encryption is not recommended.
 		  '
 		  ' See:
 		  ' https://download.libsodium.org/doc/advanced/ed25519-curve25519.html
