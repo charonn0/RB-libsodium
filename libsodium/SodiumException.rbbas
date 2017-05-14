@@ -71,6 +71,9 @@ Inherits RuntimeException
 		  Case ERR_SIZE_REQUIRED
 		    Me.Message = "The requested operation can not be performed on MemoryBlocks of unknown size."
 		    
+		  Case ERR_KEYTYPE_MISMATCH
+		    Me.Message = "The specified key is of a type that is not intended for the requested operation."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    
