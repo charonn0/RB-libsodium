@@ -11,6 +11,9 @@ Inherits RuntimeException
 		  Case ERR_UNAVAILABLE
 		    Me.Message = "libsodium is not installed."
 		    
+		  Case ERR_FUNCTION_UNAVAILABLE
+		    Me.Message = "This version of libsodium does not export the requested function."
+		    
 		  Case ERR_PROTECT_FAILED
 		    Me.Message = "Unable to set the protection level for the specified memory range."
 		    
@@ -67,6 +70,9 @@ Inherits RuntimeException
 		    
 		  Case ERR_SIZE_REQUIRED
 		    Me.Message = "The requested operation can not be performed on MemoryBlocks of unknown size."
+		    
+		  Case ERR_KEYTYPE_MISMATCH
+		    Me.Message = "The specified key is of a type that is not intended for the requested operation."
 		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."

@@ -247,7 +247,39 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_chacha20 Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_chacha20_xor Lib "libsodium" (OutBuffer As Ptr, Message As Ptr, MsgSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Sub crypto_stream_keygen Lib "libsodium" (Buffer As Ptr)
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_salsa20 Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Sub crypto_stream_salsa20_keygen Lib "libsodium" (Buffer As Ptr)
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_salsa20_xor Lib "libsodium" (OutBuffer As Ptr, Message As Ptr, MsgSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_xchacha20 Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Sub crypto_stream_xchacha20_keygen Lib "libsodium" (Buffer As Ptr)
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_stream_xchacha20_xor Lib "libsodium" (OutBuffer As Ptr, Message As Ptr, MsgSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -358,7 +390,7 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function RandomBytes(Count As UInt64) As MemoryBlock
+		Protected Function RandomBytes(Count As UInt32, Optional Seed As MemoryBlock) As MemoryBlock
 		  ' Returns a MemoryBlock filled with the requested number of unpredictable bytes.
 		  '   On Win32, the RtlGenRandom() function is used
 		  '   On BSD, the arc4random() function is used
@@ -370,13 +402,23 @@ Protected Module libsodium
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim mb As New MemoryBlock(Count)
-		  randombytes_buf(mb, mb.Size)
+		  If Seed = Nil Then
+		    randombytes_buf(mb, mb.Size)
+		  Else
+		    If Not System.IsFunctionAvailable("randombytes_buf_deterministic", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		    CheckSize(Seed, randombytes_SEEDBYTES)
+		    randombytes_buf_deterministic(mb, mb.Size, Seed)
+		  End If
 		  Return mb
 		End Function
 	#tag EndMethod
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Sub randombytes_buf Lib "libsodium" (Buffer As Ptr, BufferSize As UInt32)
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Sub randombytes_buf_deterministic Lib "libsodium" (Buffer As Ptr, BufferSize As UInt32, SeedData As Ptr)
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -589,6 +631,9 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_CONVERSION_FAILED, Type = Double, Dynamic = False, Default = \"-18", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_FUNCTION_UNAVAILABLE, Type = Double, Dynamic = False, Default = \"-23", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_IMPORT_ENCRYPTED, Type = Double, Dynamic = False, Default = \"-20", Scope = Protected
 	#tag EndConstant
 
@@ -605,6 +650,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_KEYGEN_FAILED, Type = Double, Dynamic = False, Default = \"-14", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_KEYTYPE_MISMATCH, Type = Double, Dynamic = False, Default = \"-24", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_LOCK_DENIED, Type = Double, Dynamic = False, Default = \"-9", Scope = Protected
@@ -641,6 +689,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_WRONG_HALF, Type = Double, Dynamic = False, Default = \"-21", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = randombytes_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
 

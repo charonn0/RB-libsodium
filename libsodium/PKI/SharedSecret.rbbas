@@ -117,6 +117,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Import
 		  
+		  If libsodium.Exporting.GetType(ExportedKey) <> libsodium.Exporting.ExportableType.SharedSecret Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  Dim secret As MemoryBlock = libsodium.Exporting.Import(ExportedKey, Passwd)
 		  If secret <> Nil Then Return New SharedSecret(secret)
 		End Function
