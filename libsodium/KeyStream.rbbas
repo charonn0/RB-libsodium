@@ -34,22 +34,22 @@ Protected Class KeyStream
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
 		  
-		  If Salt = Nil Then Salt = FromPassword.RandomSalt(HashAlgorithm)
-		  mType = NewStreamType
+		  Dim sz As Integer
 		  Select Case mType
 		  Case StreamType.ChaCha20
-		    Me.Constructor(FromPassword.DeriveKey(crypto_stream_chacha20_KEYBYTES, Salt, Limits, HashAlgorithm))
-		    
+		    sz = crypto_stream_chacha20_KEYBYTES
 		  Case StreamType.XChaCha20
-		    Me.Constructor(FromPassword.DeriveKey(crypto_stream_xchacha20_KEYBYTES, Salt, Limits, HashAlgorithm))
-		    
+		    sz = crypto_stream_xchacha20_KEYBYTES
 		  Case StreamType.Salsa20
-		    Me.Constructor(FromPassword.DeriveKey(crypto_stream_salsa20_KEYBYTES, Salt, Limits, HashAlgorithm))
-		    
+		    sz = crypto_stream_salsa20_KEYBYTES
 		  Case StreamType.XSalsa20
-		    Me.Constructor(FromPassword.DeriveKey(crypto_stream_KEYBYTES, Salt, Limits, HashAlgorithm))
-		    
+		    sz = crypto_stream_KEYBYTES
 		  End Select
+		  If sz = 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  
+		  If Salt = Nil Then Salt = FromPassword.RandomSalt(HashAlgorithm)
+		  mType = NewStreamType
+		  Me.Constructor(FromPassword.DeriveKey(sz, Salt, Limits, HashAlgorithm))
 		End Sub
 	#tag EndMethod
 
@@ -153,7 +153,7 @@ Protected Class KeyStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function RandomNonce(Type As libsodium.KeyStream.StreamType= libsodium.KeyStream.StreamType.XSalsa20) As MemoryBlock
+		 Shared Function RandomNonce(Type As libsodium.KeyStream.StreamType = libsodium.KeyStream.StreamType.XSalsa20) As MemoryBlock
 		  ' Returns unpredictable bytes that are suitable to be used as a Nonce for use with KeyStream.Process
 		  ' and KeyStream.DeriveKey
 		  '
