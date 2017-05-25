@@ -64,7 +64,7 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(Size As UInt64)
+		Sub Constructor(Size As UInt32)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mPtr = sodium_malloc(Size)
 		  If mPtr = Nil Then Raise New SodiumException(ERR_CANT_ALLOC)
