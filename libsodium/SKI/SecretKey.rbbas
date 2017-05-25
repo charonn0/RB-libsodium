@@ -28,7 +28,7 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		 Shared Function Derive(SecretKeyData As MemoryBlock) As libsodium.SKI.SecretKey
-		  ' Uses the PrivateKeyData as the SecretKey
+		  ' Uses the SecretKeyData as the SecretKey
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Derive
