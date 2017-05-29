@@ -28,7 +28,7 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		 Shared Function Derive(SecretKeyData As MemoryBlock) As libsodium.SKI.SecretKey
-		  ' Uses the PrivateKeyData as the SecretKey
+		  ' Uses the SecretKeyData as the SecretKey
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Derive
@@ -99,6 +99,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
 		  
+		  If libsodium.Exporting.GetType(ExportedKey) <> libsodium.Exporting.ExportableType.Secret Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  Dim sk As MemoryBlock = libsodium.Exporting.Import(ExportedKey, Passwd)
 		  If sk <> Nil Then Return New SecretKey(sk)
 		End Function

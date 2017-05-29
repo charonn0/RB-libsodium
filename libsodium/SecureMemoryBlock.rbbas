@@ -64,7 +64,7 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(Size As UInt64)
+		Sub Constructor(Size As UInt32)
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mPtr = sodium_malloc(Size)
 		  If mPtr = Nil Then Raise New SodiumException(ERR_CANT_ALLOC)
@@ -458,17 +458,15 @@ Class SecureMemoryBlock
 		
 		The allocated region is filled with 0xd0 bytes in order to help catch bugs due to initialized data.
 		
-		In addition, sodium_mlock() is called on the region to help avoid it being swapped to disk. On operating systems supporting 
-		MAP_NOCORE or MADV_DONTDUMP, memory allocated this way will also not be part of core dumps.
+		Set the AllowSwap property to False to tell the OS not to swap the underlying memory pages to disk. On operating systems supporting 
+		MAP_NOCORE or MADV_DONTDUMP, memory allocated this way will also not be part of core dumps. The OS limits the number of pages that 
+		can be excluded from swap, so don't over-do it.
 		
 		The memory address will not be aligned if the allocation size is not a multiple of the required alignment. For this reason, 
 		this class should not be used with packed or variable-length structures, unless the size given to the Constructor is rounded 
 		up in order to ensure proper alignment.
 		
 		Allocating 0 bytes is a valid operation, and returns a pointer that can be successfully destroyed.
-		
-		Set the AllowSwap property to False to tell the OS not to swap the underlying memory pages to disk. The OS limits the number
-		of pages that can be excluded from swap, so don't over-do it.
 		
 		Setting the ProtectionLevel property to ReadOnly or NoAccess will disallow any attempt to modify the memory. Setting it to
 		NoAccess will also disallow any attempt to read its contents. If the attempt is made by calling one of this class's methods 
