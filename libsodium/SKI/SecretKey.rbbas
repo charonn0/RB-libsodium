@@ -57,6 +57,24 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Export(SaveTo As FolderItem, EncryptWith As libsodium.PKI.EncryptionKey, StreamType As libsodium.KeyStream.StreamType = libsodium.KeyStream.StreamType.XSalsa20, OverWrite As Boolean = False) As Boolean
+		  ' Exports the SecretKey in a format that is understood by SecretKey.Import(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Export
+		  
+		  Try
+		    Dim bs As BinaryStream = BinaryStream.Create(SaveTo, OverWrite)
+		    bs.Write(Me.Export(EncryptWith, StreamType))
+		    bs.Close
+		  Catch Err As IOException
+		    Return False
+		  End Try
+		  Return True
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
 		  ' Exports the SecretKey in a format that is understood by SecretKey.Import
 		  '
@@ -64,6 +82,17 @@ Inherits libsodium.SKI.KeyContainer
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Export
 		  
 		  Return libsodium.Exporting.Export(Me.Value, libsodium.Exporting.ExportableType.Secret, Passwd)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function Export(EncryptWith As libsodium.PKI.EncryptionKey, StreamType As libsodium.KeyStream.StreamType = libsodium.KeyStream.StreamType.XSalsa20) As MemoryBlock
+		  ' Exports the SecretKey in a format that is understood by SecretKey.Import
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Export
+		  
+		  Return libsodium.Exporting.Export(Me.Value, libsodium.Exporting.ExportableType.Secret, EncryptWith, StreamType)
 		End Function
 	#tag EndMethod
 
@@ -93,6 +122,20 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As FolderItem, EncryptedWith As libsodium.PKI.EncryptionKey) As libsodium.SKI.SecretKey
+		  ' Import an SecretKey that was exported using SecretKey.Export(FolderItem)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
+		  
+		  Dim bs As BinaryStream = BinaryStream.Open(ExportedKey)
+		  Dim keydata As MemoryBlock = bs.Read(bs.Length)
+		  bs.Close
+		  Return Import(keydata, EncryptedWith)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		 Shared Function Import(ExportedKey As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.SKI.SecretKey
 		  ' Import an SecretKey that was exported using SecretKey.Export
 		  '
@@ -101,6 +144,19 @@ Inherits libsodium.SKI.KeyContainer
 		  
 		  If libsodium.Exporting.GetType(ExportedKey) <> libsodium.Exporting.ExportableType.Secret Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  Dim sk As MemoryBlock = libsodium.Exporting.Import(ExportedKey, Passwd)
+		  If sk <> Nil Then Return New SecretKey(sk)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function Import(ExportedKey As MemoryBlock, EncryptedWith As libsodium.PKI.EncryptionKey) As libsodium.SKI.SecretKey
+		  ' Import an SecretKey that was exported using SecretKey.Export
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
+		  
+		  If libsodium.Exporting.GetType(ExportedKey) <> libsodium.Exporting.ExportableType.Secret Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  Dim sk As MemoryBlock = libsodium.Exporting.Import(ExportedKey, EncryptedWith)
 		  If sk <> Nil Then Return New SecretKey(sk)
 		End Function
 	#tag EndMethod
