@@ -151,6 +151,42 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndMethod
 
 
+	#tag Note, Name = About this class
+		This class represents some user-supplied data, such as a password. It should not be used to
+		store actual passwords: store the user's input and then use the methods to generate a hash, 
+		verify a hash, or derive a key.
+		
+		For example, this is how you would store a password in a database:
+		
+		 Dim p As libsodium.Password = AskUserForPassword()
+		 StoreHashInDatabase(p.GenerateHash)
+		
+		and, to verify a password:
+		
+		 Dim p As libsodium.Password = AskUserForPassword()
+		 Dim h As String = GetPasswordHashFromDatabase() 
+		 If Not p.VerifyHash(h) Then MsgBox("Bad password")
+		
+		The DeriveKey method derives an arbitrarily long, high-entropy cryptographic key from 
+		a short, low-entropy string like a password. The EncryptionKey, SigningKey, and SecretKey
+		classes all have Constructor methods that accept a Password instance for this purpose.
+		
+		Hashing and key derivation are intentionally slow and memory-intensive. This is a security
+		measure to make it infeasible to generate large numbers of keys/hashes for a "rainbow table" 
+		attack. It is possible for these operations to fail if the OS refuses to satisfy the resource
+		requirements; you can control how resource-intensive an operation is by specifying the 
+		ResourceLimits parameter. Verifying a hash does not involve such measures.
+		
+		When deriving a key you must provide a randomly-selected salt value. If you will need to
+		re-generate the key in the future then the salt value must be stored somewhere. The salt
+		does not need to be kept secret, but it does need to be unique for each password.
+		
+		The GenerateHash method generates a random nonce for you; it's prepended to the return value.
+		For this reason you cannot directly compare password hash strings to one another. Use the 
+		VerifyHash method instead.
+	#tag EndNote
+
+
 	#tag Constant, Name = ALG_ARGON2, Type = Double, Dynamic = False, Default = \"0", Scope = Public
 	#tag EndConstant
 
