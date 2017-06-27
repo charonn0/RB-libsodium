@@ -78,9 +78,9 @@ Private Module Exporting
 		    output.Write(libsodium.EncodeHex(nonce))
 		    output.Write(EndOfLine.Windows)
 		    Select Case PBKDF_ALG
-		    Case Passwd.ALG_SCRYPT
-		      output.Write("#Alg=Argon2" + EndOfLine.Windows)
 		    Case Passwd.ALG_ARGON2
+		      output.Write("#Alg=Argon2" + EndOfLine.Windows)
+		    Case Passwd.ALG_SCRYPT
 		      output.Write("#Alg=scrypt" + EndOfLine.Windows)
 		    End Select
 		    Select Case Limits
