@@ -116,6 +116,8 @@ Class SecureMemoryBlock
 		      Me.ZeroFill()
 		    End If
 		  End If
+		  
+		Finally
 		  mPtr = Nil
 		  mSize = 0
 		End Sub

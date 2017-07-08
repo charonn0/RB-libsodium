@@ -80,7 +80,7 @@ Private Module Exporting
 		    Select Case PBKDF_ALG
 		    Case Passwd.ALG_ARGON2
 		      output.Write("#Alg=Argon2" + EndOfLine.Windows)
-		    Case Passwd.ALG_ARGON2
+		    Case Passwd.ALG_SCRYPT
 		      output.Write("#Alg=scrypt" + EndOfLine.Windows)
 		    End Select
 		    Select Case Limits
