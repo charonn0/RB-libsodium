@@ -137,7 +137,7 @@ Private Module Exporting
 		    End Select
 		  Next
 		  output.Close
-		  Return libsodium.DecodeHex(key.Trim)
+		  Return libsodium.DecodeHex(REALbasic.Trim(key))
 		End Function
 	#tag EndMethod
 
