@@ -137,7 +137,7 @@ Private Module Exporting
 		    End Select
 		  Next
 		  output.Close
-		  Return libsodium.DecodeHex(key.Trim)
+		  Return libsodium.DecodeHex(REALbasic.Trim(key))
 		End Function
 	#tag EndMethod
 
@@ -169,11 +169,11 @@ Private Module Exporting
 		          MetaData.Value("Limits") = ResourceLimits.Moderate
 		        Case "Sensitive"
 		          MetaData.Value("Limits") = ResourceLimits.Sensitive
-		        Else
-		          Dim n As String = NthField(s, "=", 1)
-		          s = Replace(s, n + "=", "")
-		          MetaData.Value(n) = s
 		        End Select
+		      Else
+		        Dim n As String = NthField(s, "=", 1)
+		        s = Replace(s, n + "=", "")
+		        MetaData.Value(n) = s
 		      End Select
 		    End If
 		  Next
