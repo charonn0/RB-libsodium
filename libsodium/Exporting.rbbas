@@ -299,7 +299,7 @@ Protected Module Exporting
 		    Dim n As MemoryBlock = Metadata.Value("Nonce")
 		    Dim s As MemoryBlock = Metadata.Value("Salt")
 		    Dim l As ResourceLimits = Metadata.Value("Limits")
-		    Dim a As Int32 = Metadata.Lookup("Alg", Passwd.ALG_ARGON2)
+		    Dim a As Int32 = Metadata.Lookup("Alg", PBKDF_ALG)
 		    
 		    Dim sk As New libsodium.SKI.SecretKey(Passwd, s, l, a)
 		    EncodedKey = libsodium.SKI.DecryptData(EncodedKey, sk, n)
