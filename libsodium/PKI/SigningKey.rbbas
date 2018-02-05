@@ -188,7 +188,7 @@ Inherits libsodium.PKI.KeyPair
 		  * libsodium.PKI.SignData: Sign a message.
 		  * libsodium.PKI.VerifyData: Verify a signed message.
 		
-		Signing is done using the Ed25519 digital signature algorithm.
+		Signing is done using the Ed25519 digital signature system.
 		
 		
 		To generate a brand new signing key use the .Generate() method, optionally

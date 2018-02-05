@@ -83,7 +83,11 @@ Class SecureMemoryBlock
 	#tag Method, Flags = &h0
 		Sub CString(Offset As UInt64, Assigns NewString As CString)
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
-		  If Offset + NewString.LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  #If RBVersion > 2014.02 Then
+		    If Offset + CType(NewString, String).LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  #else
+		    If Offset + NewString.LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  #Endif
 		  Dim mb As MemoryBlock = mPtr
 		  mb.CString(Offset) = NewString
 		End Sub
@@ -116,6 +120,8 @@ Class SecureMemoryBlock
 		      Me.ZeroFill()
 		    End If
 		  End If
+		  
+		Finally
 		  mPtr = Nil
 		  mSize = 0
 		End Sub
@@ -242,7 +248,7 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherMB As String) As Int32
-		  If libsodium.StrComp(Me.StringValue(0, Me.LenB), OtherMB) Then Return 0
+		  If libsodium.StrComp(Me.StringValue(0, Me.Size), OtherMB) Then Return 0
 		  If OtherMB.LenB < Me.Size Then Return 1
 		  Return -1
 		  
@@ -274,7 +280,11 @@ Class SecureMemoryBlock
 	#tag Method, Flags = &h0
 		Sub PString(Offset As UInt64, Assigns NewString As PString)
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
-		  If Offset + NewString.LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  #If RBVersion > 2014.02 Then
+		    If Offset + CType(NewString, String).LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  #else
+		    If Offset + NewString.LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  #Endif
 		  Dim mb As MemoryBlock = mPtr
 		  mb.PString(Offset) = NewString
 		End Sub
@@ -416,7 +426,11 @@ Class SecureMemoryBlock
 	#tag Method, Flags = &h0
 		Sub WString(Offset As UInt64, Assigns NewString As WString)
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
-		  If Offset + NewString.LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  #If RBVersion > 2014.02 Then
+		    If Offset + CType(NewString, String).LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  #else
+		    If Offset + NewString.LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
+		  #Endif
 		  Dim mb As MemoryBlock = mPtr
 		  mb.WString(Offset) = NewString
 		End Sub

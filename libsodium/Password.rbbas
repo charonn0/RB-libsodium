@@ -136,19 +136,56 @@ Inherits libsodium.SKI.KeyContainer
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.VerifyHash
 		  
 		  Dim clearpw As MemoryBlock = Me.Value
+		  Dim hsh As New MemoryBlock(HashValue.Size)
+		  hsh.StringValue(0, hsh.Size) = HashValue.StringValue(0, HashValue.Size)
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
-		    If HashValue.Size <= crypto_pwhash_STRBYTES Then HashValue.Size = crypto_pwhash_STRBYTES Else CheckSize(HashValue, crypto_pwhash_STRBYTES)
-		    Return crypto_pwhash_str_verify(HashValue, clearpw, clearpw.Size) = 0
+		    If hsh.Size <= crypto_pwhash_STRBYTES Then hsh.Size = crypto_pwhash_STRBYTES Else CheckSize(hsh, crypto_pwhash_STRBYTES)
+		    Return crypto_pwhash_str_verify(hsh, clearpw, clearpw.Size) = 0
 		    
 		  Case ALG_SCRYPT
-		    HashValue = HashValue + Chr(0)
-		    CheckSize(HashValue, crypto_pwhash_scryptsalsa208sha256_STRBYTES)
-		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw, clearpw.Size) = 0
+		    If hsh.Size <= crypto_pwhash_scryptsalsa208sha256_STRBYTES Then hsh.Size = crypto_pwhash_scryptsalsa208sha256_STRBYTES Else CheckSize(hsh, crypto_pwhash_scryptsalsa208sha256_STRBYTES)
+		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(hsh, clearpw, clearpw.Size) = 0
 		  End Select
 		  
 		End Function
 	#tag EndMethod
+
+
+	#tag Note, Name = About this class
+		This class represents some user-supplied data, such as a password. It should not be used to
+		store actual passwords: store the user's input and then use the methods to generate a hash, 
+		verify a hash, or derive a key.
+		
+		For example, this is how you would store a password in a database:
+		
+		 Dim p As libsodium.Password = AskUserForPassword()
+		 StoreHashInDatabase(p.GenerateHash)
+		
+		and, to verify a password:
+		
+		 Dim p As libsodium.Password = AskUserForPassword()
+		 Dim h As String = GetPasswordHashFromDatabase() 
+		 If Not p.VerifyHash(h) Then MsgBox("Bad password")
+		
+		The DeriveKey method derives an arbitrarily long, high-entropy cryptographic key from 
+		a short, low-entropy string like a password. The EncryptionKey, SigningKey, and SecretKey
+		classes all have Constructor methods that accept a Password instance for this purpose.
+		
+		Hashing and key derivation are intentionally slow and memory-intensive. This is a security
+		measure to make it infeasible to generate large numbers of keys/hashes for a "rainbow table" 
+		attack. It is possible for these operations to fail if the OS refuses to satisfy the resource
+		requirements; you can control how resource-intensive an operation is by specifying the 
+		ResourceLimits parameter. Verifying a hash does not involve such measures.
+		
+		When deriving a key you must provide a randomly-selected salt value. If you will need to
+		re-generate the key in the future then the salt value must be stored somewhere. The salt
+		does not need to be kept secret, but it does need to be unique for each password.
+		
+		The GenerateHash method generates a random nonce for you; it's prepended to the return value.
+		For this reason you cannot directly compare password hash strings to one another. Use the 
+		VerifyHash method instead.
+	#tag EndNote
 
 
 	#tag Constant, Name = ALG_ARGON2, Type = Double, Dynamic = False, Default = \"0", Scope = Public
