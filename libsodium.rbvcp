@@ -23,6 +23,7 @@ Class=EncryptionKey;libsodium/PKI/EncryptionKey.rbbas;&h626097FF;&h1F9A4FFF;fals
 FileTypeSet=SodiumFileTypes;SodiumFileTypes.rbbas;&hA6E5FFF;&h0;false
 Folder=GUI;GUI;&h4E236FFF;&h0;false
 Window=PasswordDialog;GUI/PasswordDialog.rbfrm;&h38F47FF;&h4E236FFF;false
+Window=PKIKeyGenDialog;GUI/PKIKeyGenDialog.rbfrm;&h26BEFFF;&h4E236FFF;false
 MajorVersion=1
 MinorVersion=0
 SubVersion=0
