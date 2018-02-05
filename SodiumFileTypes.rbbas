@@ -44,4 +44,13 @@
 		Name=Signed Message
 	#tag EndFileType
 
+	#tag FileType
+		CodeName=SecretKey
+		Extension=.stk
+		Flags=&h0
+		MacCreator=
+		MacType=
+		Name=SecretKey
+	#tag EndFileType
+
 #tag EndFileTypeSet
