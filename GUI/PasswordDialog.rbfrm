@@ -8,7 +8,7 @@ Begin Window PasswordDialog
    FullScreen      =   False
    HasBackColor    =   False
    Height          =   1.03e+2
-   ImplicitInstance=   True
+   ImplicitInstance=   False
    LiveResize      =   False
    MacProcID       =   0
    MaxHeight       =   32000
@@ -51,7 +51,7 @@ Begin Window PasswordDialog
       Mask            =   ""
       Password        =   True
       ReadOnly        =   ""
-      Scope           =   0
+      Scope           =   2
       TabIndex        =   0
       TabPanelIndex   =   0
       TabStop         =   True
@@ -84,7 +84,7 @@ Begin Window PasswordDialog
       LockRight       =   ""
       LockTop         =   True
       Multiline       =   ""
-      Scope           =   0
+      Scope           =   2
       Selectable      =   False
       TabIndex        =   1
       TabPanelIndex   =   0
@@ -119,7 +119,7 @@ Begin Window PasswordDialog
       LockLeft        =   True
       LockRight       =   ""
       LockTop         =   True
-      Scope           =   0
+      Scope           =   2
       TabIndex        =   2
       TabPanelIndex   =   0
       TabStop         =   True
@@ -150,7 +150,7 @@ Begin Window PasswordDialog
       LockLeft        =   True
       LockRight       =   ""
       LockTop         =   True
-      Scope           =   0
+      Scope           =   2
       TabIndex        =   3
       TabPanelIndex   =   0
       TabStop         =   True
@@ -168,7 +168,7 @@ End
 #tag WindowCode
 	#tag Method, Flags = &h0
 		Function GetPassword(InitialPassword As libsodium.Password = Nil, ParentWindow As Window = Nil) As libsodium.Password
-		  If InitialPassword <> Nil Then 
+		  If InitialPassword <> Nil Then
 		    mPasswd = InitialPassword
 		  Else
 		    mPasswd = ""
@@ -221,7 +221,7 @@ End
 #tag Events OKBtn
 	#tag Event
 		Sub Action()
-		  If PasswordField.Text <> "" Then 
+		  If PasswordField.Text <> "" Then
 		    mPasswd = PasswordField.Text
 		  Else
 		    mPasswd = Nil
