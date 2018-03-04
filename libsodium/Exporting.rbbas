@@ -13,11 +13,7 @@ Protected Module Exporting
 		  ' and returns the raw binary data of the message. If the message contains an embedded nonce then
 		  ' the Nonce parameter will be modified to point to the nonce value.
 		  
-		  Dim Prefix, Suffix As String
 		  Dim t As ExportableType = GetType(EncodedMessage)
-		  Prefix = GetPrefix(t)
-		  Suffix = GetSuffix(t)
-		  
 		  Dim metadata As Dictionary = GetMetaData(EncodedMessage)
 		  EncodedMessage = GetKeyData(EncodedMessage, t)
 		  NonceValue = metadata.Lookup("Nonce", Nil)
