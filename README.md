@@ -19,6 +19,7 @@ This example generates and validates a password hash that is suitable to be stor
 * Public-key [message signatures](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SignData)
 * Fast generic or keyed hashing using [BLAKE2b](https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHash), [SHA512](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SHA512), or [SHA256](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SHA256)
 * [Secured memory](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock) allocations
+* Import and export keys, messages, hashes, etc. with optional password protection.
 
 ## Synopsis
 RB-libsodium is designed to make it as hard as possible to write bad crypto code. For example signing keys can't be used to perform encryption, so methods that need a signing key will require an instance of the [SigningKey](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey) class as a parameter; attempting to pass an [EncryptionKey](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey) will generate a compiler error. 
