@@ -288,8 +288,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
-		  ' Encodes ASCII hexadecimal to Binary. On error, returns Nil. IgnoredChars
-		  ' is an optional string of characters to skip when interpreting the HexData
+		  ' Decodes Base64 to Binary. On error, returns Nil. IgnoredChars is an optional 
+		  ' string of characters to skip when interpreting the HexData
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.DecodeHex
