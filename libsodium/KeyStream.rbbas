@@ -1,32 +1,7 @@
 #tag Class
 Protected Class KeyStream
 	#tag Method, Flags = &h0
-		Sub Constructor(NewStreamType As libsodium.KeyStream.StreamType = libsodium.KeyStream.StreamType.XSalsa20)
-		  ' Generates a random key stream.
-		  '
-		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
-		  
-		  Dim sz As Integer
-		  Select Case NewStreamType
-		  Case StreamType.ChaCha20
-		    sz = crypto_stream_chacha20_KEYBYTES
-		  Case StreamType.XChaCha20
-		    sz = crypto_stream_xchacha20_KEYBYTES
-		  Case StreamType.Salsa20
-		    sz = crypto_stream_salsa20_KEYBYTES
-		  Case StreamType.XSalsa20
-		    sz = crypto_stream_KEYBYTES
-		  End Select
-		  
-		  If sz = 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
-		  mType = NewStreamType
-		  Me.Constructor(RandomBytes(sz))
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Sub Constructor(FromPassword As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2, NewStreamType As libsodium.KeyStream.StreamType = libsodium.KeyStream.StreamType.XSalsa20)
+		Sub Constructor(FromPassword As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2, NewStreamType As libsodium.StreamType = libsodium.StreamType.XSalsa20)
 		  ' Generates a key stream by deriving it from a salted hash of the password. The operation is
 		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
 		  ' parameters will produce the same output both times.
@@ -54,7 +29,7 @@ Protected Class KeyStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(KeyData As libsodium.PKI.ForeignKey, NewStreamType As libsodium.KeyStream.StreamType = libsodium.KeyStream.StreamType.XSalsa20)
+		Sub Constructor(KeyData As libsodium.PKI.ForeignKey, NewStreamType As libsodium.StreamType = libsodium.StreamType.XSalsa20)
 		  ' Uses the KeyData as the key for the key stream.
 		  '
 		  ' See:
@@ -62,6 +37,31 @@ Protected Class KeyStream
 		  
 		  mType = NewStreamType
 		  Me.Constructor(KeyData.Value)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Constructor(NewStreamType As libsodium.StreamType = libsodium.StreamType.XSalsa20)
+		  ' Generates a random key stream.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Constructor
+		  
+		  Dim sz As Integer
+		  Select Case NewStreamType
+		  Case StreamType.ChaCha20
+		    sz = crypto_stream_chacha20_KEYBYTES
+		  Case StreamType.XChaCha20
+		    sz = crypto_stream_xchacha20_KEYBYTES
+		  Case StreamType.Salsa20
+		    sz = crypto_stream_salsa20_KEYBYTES
+		  Case StreamType.XSalsa20
+		    sz = crypto_stream_KEYBYTES
+		  End Select
+		  
+		  If sz = 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  mType = NewStreamType
+		  Me.Constructor(RandomBytes(sz))
 		End Sub
 	#tag EndMethod
 
@@ -153,7 +153,7 @@ Protected Class KeyStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function RandomNonce(Type As libsodium.KeyStream.StreamType = libsodium.KeyStream.StreamType.XSalsa20) As MemoryBlock
+		 Shared Function RandomNonce(Type As libsodium.StreamType = libsodium.StreamType.XSalsa20) As MemoryBlock
 		  ' Returns unpredictable bytes that are suitable to be used as a Nonce for use with KeyStream.Process
 		  ' and KeyStream.DeriveKey
 		  '
@@ -177,7 +177,7 @@ Protected Class KeyStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Type() As libsodium.KeyStream.StreamType
+		Function Type() As libsodium.StreamType
 		  Return mType
 		End Function
 	#tag EndMethod
@@ -207,7 +207,7 @@ Protected Class KeyStream
 	#tag EndProperty
 
 	#tag Property, Flags = &h1
-		Protected mType As libsodium.KeyStream.StreamType = libsodium.KeyStream.StreamType.XSalsa20
+		Protected mType As libsodium.StreamType = libsodium.StreamType.XSalsa20
 	#tag EndProperty
 
 
@@ -234,14 +234,6 @@ Protected Class KeyStream
 
 	#tag Constant, Name = crypto_stream_xchacha20_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
 	#tag EndConstant
-
-
-	#tag Enum, Name = StreamType, Type = Integer, Flags = &h0
-		ChaCha20
-		  XChaCha20
-		  Salsa20
-		XSalsa20
-	#tag EndEnum
 
 
 	#tag ViewBehavior

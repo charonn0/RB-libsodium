@@ -713,6 +713,13 @@ Protected Module libsodium
 		Interactive
 	#tag EndEnum
 
+	#tag Enum, Name = StreamType, Type = Integer, Flags = &h1
+		ChaCha20
+		  XChaCha20
+		  Salsa20
+		XSalsa20
+	#tag EndEnum
+
 
 	#tag ViewBehavior
 		#tag ViewProperty
