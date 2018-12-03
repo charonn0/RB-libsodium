@@ -287,6 +287,26 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
+		Protected Function DecodeBase64(Data As MemoryBlock, IgnoredChars As String = "", Type As libsodium.Base64Variant = libsodium.Base64Variant.Original) As MemoryBlock
+		  ' Decodes Base64 to Binary. On error, returns Nil. IgnoredChars is an optional string 
+		  ' of characters to skip when interpreting the Data
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.DecodeBase64
+		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  Data = ReplaceLineEndings(Data, "")
+		  Dim output As New MemoryBlock(Data.Size)
+		  Dim end64 As Ptr
+		  Dim ign As MemoryBlock = IgnoredChars + Chr(0)
+		  Dim sz As UInt32 = output.Size
+		  If sodium_base642bin(output, output.Size, Data, Data.Size, ign, sz, end64, Type) = 0 Then
+		    Return output.StringValue(0, sz)
+		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
 		  ' Decodes Base64 to Binary. On error, returns Nil. IgnoredChars is an optional 
 		  ' string of characters to skip when interpreting the HexData
@@ -302,6 +322,20 @@ Protected Module libsodium
 		  If sodium_hex2bin(output, output.Size, HexData, HexData.Size, ign, sz, endhex) = 0 Then
 		    Return output.StringValue(0, sz)
 		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function EncodeBase64(BinaryData As MemoryBlock, Type As libsodium.Base64Variant = libsodium.Base64Variant.Original) As MemoryBlock
+		  ' Encodes the BinaryData as Base64
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.EncodeBase64
+		  
+		  If Not System.IsFunctionAvailable("sodium_bin2base64", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  Dim output As New MemoryBlock(sodium_base64_encoded_len(BinaryData.Size, Type))
+		  If sodium_bin2base64(output, output.Size, BinaryData, BinaryData.Size, Type) <> Nil Then Return output.CString(0)
+		  
 		End Function
 	#tag EndMethod
 
@@ -517,6 +551,18 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_base642bin Lib "libsodium" (BinBuffer As Ptr, BinBufferMaxLength As UInt32, Output As Ptr, OutputLength As UInt32, IgnoreChars As Ptr, ByRef BinBufferLength As UInt32, ByRef OutputEnd As Ptr, Flag As Base64Variant) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_base64_encoded_len Lib "libsodium" (BinLength As UInt32, Type As Base64Variant) As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_bin2base64 Lib "libsodium" (Output As Ptr, MaxLength As UInt32, Buffer As Ptr, BufferLength As UInt32, Flag As Base64Variant) As Ptr
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function sodium_bin2hex Lib "libsodium" (HexBuffer As Ptr, HexBufferLength As UInt32, BinBuffer As Ptr, BinBufferLength As UInt32) As Ptr
 	#tag EndExternalMethod
 
@@ -694,6 +740,13 @@ Protected Module libsodium
 	#tag Constant, Name = randombytes_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
+
+	#tag Enum, Name = Base64Variant, Type = Integer, Flags = &h1
+		Original=1
+		  NoPadding=3
+		  URLSafe=5
+		URLSafeNoPadding=7
+	#tag EndEnum
 
 	#tag Enum, Name = HashType, Type = Integer, Flags = &h1
 		Generic
