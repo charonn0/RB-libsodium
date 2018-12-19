@@ -16,6 +16,22 @@ Protected Module SKI
 		Private Soft Declare Function crypto_secretbox_open_easy Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SecretKey As Ptr) As Int32
 	#tag EndExternalMethod
 
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_init_pull Lib "libsodium" (State As Ptr, Header As Ptr, Key As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_init_push Lib "libsodium" (State As Ptr, Header As Ptr, Key As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_pull Lib "libsodium" (State As Ptr, Buffer As Ptr, BufferSize As UInt32, ByRef Tag As UInt32, CipherText As Ptr, CipherTextSize As UInt32, AdditionalData As Ptr, AdditionalDataSize As UInt32) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_push Lib "libsodium" (State As Ptr, Buffer As Ptr, ByRef BufferLength As UInt32, Message As Ptr, MessageLength As UInt32, AdditionalData As Ptr, AdditionalDataLength As UInt32, Tag As UInt32) As Int32
+	#tag EndExternalMethod
+
 	#tag Method, Flags = &h1
 		Protected Function DecryptData(CipherText As MemoryBlock, Key As libsodium.SKI.SecretKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Decrypts the CipherText using the XSalsa20 stream cipher with the specified Key and Nonce. A
@@ -119,6 +135,15 @@ Protected Module SKI
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_secretbox_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_secretstream_xchacha20poly1305_HEADERBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_chacha20_ietf_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_stream_chacha20_ietf_NONCEBYTES, Type = Double, Dynamic = False, Default = \"12", Scope = Private
 	#tag EndConstant
 
 
