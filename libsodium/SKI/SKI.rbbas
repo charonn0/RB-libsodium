@@ -29,7 +29,7 @@ Protected Module SKI
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_push Lib "libsodium" (State As Ptr, Buffer As Ptr, ByRef BufferLength As UInt32, Message As Ptr, MessageLength As UInt32, AdditionalData As Ptr, AdditionalDataLength As UInt32, Tag As UInt32) As Int32
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_push Lib "libsodium" (State As Ptr, Buffer As Ptr, ByRef BufferLength As UInt64, Message As Ptr, MessageLength As UInt64, AdditionalData As Ptr, AdditionalDataLength As UInt64, Tag As UInt32) As Int32
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
@@ -135,6 +135,9 @@ Protected Module SKI
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_secretbox_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = crypto_secretstream_xchacha20poly1305_ABYTES, Type = Double, Dynamic = False, Default = \"17", Scope = Private
 	#tag EndConstant
 
 	#tag Constant, Name = crypto_secretstream_xchacha20poly1305_HEADERBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private

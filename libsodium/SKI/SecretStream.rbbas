@@ -99,13 +99,12 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h1
 		Protected Sub Write(Text As String, AdditionalData As MemoryBlock, Tag As UInt32)
-		  Dim sz As UInt32 = Text.LenB
-		  Dim adsz As UInt32
-		  If AdditionalData <> Nil Then
-		    adsz = AdditionalData.Size
-		    sz = sz + adsz
-		  End If
-		  Dim buffer As New MemoryBlock(sz)
+		  Dim sz As UInt64 = Text.LenB
+		  Dim adsz As UInt64
+		  If AdditionalData = Nil Then AdditionalData = ""
+		  adsz = AdditionalData.Size
+		  sz = sz + adsz
+		  Dim buffer As New MemoryBlock(sz + crypto_secretstream_xchacha20poly1305_ABYTES)
 		  Dim txt As MemoryBlock = Text
 		  mWriteError = crypto_secretstream_xchacha20poly1305_push(mState, buffer, sz, txt, txt.Size, AdditionalData, adsz, Tag)
 		  If buffer.Size <> sz Then buffer.Size = sz
