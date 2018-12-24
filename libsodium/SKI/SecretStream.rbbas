@@ -169,7 +169,7 @@ Implements Readable,Writeable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Read(Count As Integer, encoding As TextEncoding = Nil) As String
+		Function Read(Count As Integer, encoding As TextEncoding = Nil) As String Implements Readable.Read
 		  // Part of the Readable interface.
 		  Dim ad As New MemoryBlock(0)
 		  Dim tag As UInt8
@@ -192,7 +192,7 @@ Implements Readable,Writeable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Write(text As String)
+		Sub Write(text As String) Implements Writeable.Write
 		  // Part of the Writeable interface.
 		  
 		  Me.Write(text, Nil, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE)
