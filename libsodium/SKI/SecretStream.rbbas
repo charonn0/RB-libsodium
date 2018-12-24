@@ -5,6 +5,8 @@ Implements Readable,Writeable
 		Sub Close()
 		  If mOutput <> Nil Then
 		    Me.Write("", Nil, crypto_secretstream_xchacha20poly1305_TAG_FINAL)
+		    mOutput.Flush
+		    If mData <> Nil And mData.Size <> mDataSize Then mData.Size = mDataSize
 		  End If
 		  If mInput <> Nil Then
 		    #pragma Warning "Fixme"
