@@ -92,6 +92,23 @@ Implements Readable,Writeable
 		  If Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_pull", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
 		  Dim state As New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
 		  Dim header As MemoryBlock = InputStream.Read(crypto_secretstream_xchacha20poly1305_HEADERBYTES)
+		Function Header() As MemoryBlock
+		  Return mHeader
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function IsReadable() As Boolean
+		  Return mInput <> Nil
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function IsWriteable() As Boolean
+		  Return mOutput <> Nil
+		End Function
+	#tag EndMethod
+
 		  
 		  If crypto_secretstream_xchacha20poly1305_init_pull(state, header, Key.Value) <> 0 Then Raise New SodiumException(ERR_INIT_FAILED)
 		  Return New SecretStream(InputStream, state, header)
