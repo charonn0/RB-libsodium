@@ -74,6 +74,9 @@ Inherits RuntimeException
 		  Case ERR_KEYTYPE_MISMATCH
 		    Me.Message = "The specified key is of a type that is not intended for the requested operation."
 		    
+		  Case ERR_PARAMETER_CONFLICT
+		    Me.Message = "One or more parameters are mutually contradictory."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    

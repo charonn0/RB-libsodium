@@ -713,6 +713,9 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_OUT_OF_RANGE, Type = Double, Dynamic = False, Default = \"-17", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_PARAMETER_CONFLICT, Type = Double, Dynamic = False, Default = \"-25", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_PROTECT_FAILED, Type = Double, Dynamic = False, Default = \"-4", Scope = Protected
 	#tag EndConstant
 
