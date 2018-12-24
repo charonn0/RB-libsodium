@@ -65,7 +65,18 @@ Implements Readable,Writeable
 		Function EOF() As Boolean
 		  // Part of the Readable interface.
 		  
+		  Return mEOF Or (mInput <> Nil And mInput.EOF)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Function ExportDecryptionHeader(Optional Passwd As libsodium.Password) As MemoryBlock
+		  ' Exports the SecretKey in a format that is understood by SecretKey.Import
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.ExportDecryptionHeader
 		  
+		  Return libsodium.Exporting.Export(mState, libsodium.Exporting.ExportableType.StateHeader, Passwd)
 		End Function
 	#tag EndMethod
 
