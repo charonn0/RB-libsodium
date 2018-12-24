@@ -423,6 +423,26 @@ Protected Module libsodium
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		Function IsZero(Extends mb As MemoryBlock, Offset As Int32 = 0, Length As Int32 = - 1) As Boolean
+		  ' This method returns True if the SecureMemoryBlock contains only zeros. It returns False
+		  ' if non-zero bits are found. Execution time is constant for a given length.
+		  
+		  If mb = Nil Then Return True
+		  If Offset < 0 Or mb.Size < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  Dim p As Ptr = mb
+		  If Length < 0 Then Length = mb.Size
+		  If Offset + Length > mb.Size Then Raise New SodiumException(ERR_OUT_OF_RANGE)
+		  If Offset > 0 Then
+		    p = Ptr(Integer(p) + Offset)
+		  Else
+		    p = mb
+		  End If
+		  
+		  Return sodium_is_zero(p, Length) = 1
+		End Function
+	#tag EndMethod
+
 	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt32, Optional Seed As MemoryBlock) As MemoryBlock
 		  ' Returns a MemoryBlock filled with the requested number of unpredictable bytes.
