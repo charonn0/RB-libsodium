@@ -88,10 +88,15 @@ Implements Readable,Writeable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Open(Key As libsodium.SKI.SecretKey, InputStream As Readable) As libsodium.SKI.SecretStream
-		  If Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_pull", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
-		  Dim state As New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
-		  Dim header As MemoryBlock = InputStream.Read(crypto_secretstream_xchacha20poly1305_HEADERBYTES)
+		 Shared Function GenerateKey() As libsodium.SKI.KeyContainer
+		  Dim k As New MemoryBlock(crypto_secretstream_xchacha20poly1305_KEYBYTES)
+		  crypto_secretstream_xchacha20poly1305_keygen(k)
+		  If k.IsZero Then Raise New SodiumException(ERR_KEYGEN_FAILED)
+		  Return New KeyContainer(k)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Header() As MemoryBlock
 		  Return mHeader
 		End Function
@@ -152,6 +157,12 @@ Implements Readable,Writeable
 		  
 		  Return mReadError <> 0
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Rekey()
+		  If mState <> Nil Then crypto_secretstream_xchacha20poly1305_rekey(mState)
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
