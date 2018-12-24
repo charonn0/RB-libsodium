@@ -14,30 +14,50 @@ Implements Readable,Writeable
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Sub Constructor(State As MemoryBlock, Header As MemoryBlock, Output As Writeable)
-		  mState = State
-		  mHeader = Header
-		  mOutput = Output
+	#tag Method, Flags = &h0
+		Sub Constructor(Buffer As MemoryBlock, Key As libsodium.SKI.KeyContainer, DecryptHeader As MemoryBlock = Nil)
+		  CheckSize(Key.Value, crypto_secretstream_xchacha20poly1305_KEYBYTES)
+		  If DecryptHeader <> Nil Then CheckSize(DecryptHeader, crypto_secretstream_xchacha20poly1305_HEADERBYTES)
+		  Select Case True
+		  Case Buffer.Size > 0 And DecryptHeader <> Nil ' readable
+		    Me.Constructor(New BinaryStream(Buffer), Key.Value, DecryptHeader)
+		  Case Buffer.Size = 0 And DecryptHeader = Nil ' writeable
+		    Me.Constructor(New BinaryStream(Buffer), Key.Value)
+		  Case Buffer.Size < 0
+		    Raise New SodiumException(ERR_SIZE_REQUIRED)
+		  Case Buffer.Size > 0 And DecryptHeader <> Nil
+		    Raise New SodiumException(ERR_PARAMETER_CONFLICT)
+		  End Select
+		  mData = Buffer
+		  mDataSize = 0
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h1
-		Protected Sub Constructor(InputStream As Readable, State As MemoryBlock, Header As MemoryBlock)
-		  mState = State
+	#tag Method, Flags = &h21
+		Private Sub Constructor(InputStream As Readable, Key As MemoryBlock, Header As MemoryBlock)
+		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_pull", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		  CheckSize(Header, crypto_secretstream_xchacha20poly1305_HEADERBYTES)
+		  mState = New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
 		  mHeader = Header
+		  If crypto_secretstream_xchacha20poly1305_init_pull(mState, mHeader, Key) <> 0 Then Raise New SodiumException(ERR_INIT_FAILED)
 		  mInput = InputStream
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub Constructor(OutputStream As Writeable, Key As MemoryBlock)
+		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_push", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		  mState = New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
+		  mHeader = New MemoryBlock(crypto_secretstream_xchacha20poly1305_HEADERBYTES)
+		  
+		  If crypto_secretstream_xchacha20poly1305_init_push(mState, mHeader, Key) <> 0 Then Raise New SodiumException(ERR_INIT_FAILED)
+		  mOutput = OutputStream
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		 Shared Function Create(Key As libsodium.SKI.SecretKey, OutputStream As Writeable) As libsodium.SKI.SecretStream
-		  If Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_push", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
-		  Dim state As New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
-		  Dim header As New MemoryBlock(crypto_secretstream_xchacha20poly1305_HEADERBYTES)
-		  
-		  If crypto_secretstream_xchacha20poly1305_init_push(state, header, Key.Value) <> 0 Then Raise New SodiumException(ERR_INIT_FAILED)
-		  Return New SecretStream(state, header, OutputStream)
+		  Return New SecretStream(OutputStream, Key.Value)
 		End Function
 	#tag EndMethod
 
@@ -110,6 +130,7 @@ Implements Readable,Writeable
 		  Dim txt As MemoryBlock = Text
 		  mWriteError = crypto_secretstream_xchacha20poly1305_push(mState, buffer, sz, txt, txt.Size, AdditionalData, adsz, Tag)
 		  If buffer.Size <> sz Then buffer.Size = sz
+		  mDataSize = mDataSize + buffer.Size
 		  If Not Me.WriteError Then mOutput.Write(buffer)
 		End Sub
 	#tag EndMethod
@@ -122,6 +143,14 @@ Implements Readable,Writeable
 		End Function
 	#tag EndMethod
 
+
+	#tag Property, Flags = &h21
+		Private mData As MemoryBlock
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private mDataSize As UInt32
+	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private mEOF As Boolean
