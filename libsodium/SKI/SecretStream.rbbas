@@ -56,7 +56,7 @@ Implements Readable,Writeable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Create(Key As libsodium.SKI.SecretKey, OutputStream As Writeable) As libsodium.SKI.SecretStream
+		 Shared Function Create(Key As libsodium.SKI.KeyContainer, OutputStream As Writeable) As libsodium.SKI.SecretStream
 		  Return New SecretStream(OutputStream, Key.Value)
 		End Function
 	#tag EndMethod
@@ -115,7 +115,16 @@ Implements Readable,Writeable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Open(Key As libsodium.SKI.SecretKey, InputStream As Readable, DecryptHeader As MemoryBlock) As libsodium.SKI.SecretStream
+		 Shared Function Open(Key As libsodium.SKI.KeyContainer, InputStream As Readable, DecryptHeader As FolderItem, HeaderPassword As libsodium.Password = Nil) As libsodium.SKI.SecretStream
+		  Dim bs As BinaryStream = BinaryStream.Open(DecryptHeader)
+		  Dim metadata As Dictionary
+		  Dim header As MemoryBlock = libsodium.Exporting.Import(bs.Read(bs.Length), metadata, HeaderPassword)
+		  Return New SecretStream(InputStream, Key.Value, header)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		 Shared Function Open(Key As libsodium.SKI.KeyContainer, InputStream As Readable, DecryptHeader As MemoryBlock) As libsodium.SKI.SecretStream
 		  Return New SecretStream(InputStream, Key.Value, DecryptHeader)
 		End Function
 	#tag EndMethod
