@@ -109,25 +109,40 @@ Implements Readable,Writeable
 		End Function
 	#tag EndMethod
 
+	#tag Method, Flags = &h0
+		 Shared Function Open(Key As libsodium.SKI.SecretKey, InputStream As Readable, DecryptHeader As MemoryBlock) As libsodium.SKI.SecretStream
+		  Return New SecretStream(InputStream, Key.Value, DecryptHeader)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function Read(Count As Integer, AdditionalData As MemoryBlock, ByRef Tag As UInt8) As String
+		  Dim cipher As MemoryBlock = mInput.Read(Count + crypto_secretstream_xchacha20poly1305_ABYTES)
+		  Dim buffer As New MemoryBlock(Count)
+		  Dim buffersize As UInt64 = buffer.Size
+		  Dim ad As Ptr
+		  Dim adsz As UInt64
+		  If AdditionalData <> Nil Then
+		    ad = AdditionalData
+		    adsz = AdditionalData.Size
+		  End If
 		  
-		  If crypto_secretstream_xchacha20poly1305_init_pull(state, header, Key.Value) <> 0 Then Raise New SodiumException(ERR_INIT_FAILED)
-		  Return New SecretStream(InputStream, state, header)
+		  mReadError = crypto_secretstream_xchacha20poly1305_pull(mState, buffer, buffersize, tag, cipher, cipher.Size, ad, adsz)
+		  If mReadError = 0 Then
+		    mEOF = (tag = crypto_secretstream_xchacha20poly1305_TAG_FINAL)
+		    buffer.Size = buffersize
+		    Return buffer
+		  End If
+		  Break
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function Read(Count As Integer, encoding As TextEncoding = Nil) As String
 		  // Part of the Readable interface.
-		  
-		  Dim buffer As New MemoryBlock(Count)
-		  Dim cipher As MemoryBlock = mInput.Read(Count)
-		  Dim buffersize As UInt32 = buffer.Size
-		  Dim tag As UInt32
-		  If crypto_secretstream_xchacha20poly1305_pull(mState, buffer, buffersize, tag, cipher, cipher.Size, Nil, 0) <> 0 Then Raise New IOException
-		  mEOF = (tag = crypto_secretstream_xchacha20poly1305_TAG_FINAL)
-		  buffer.Size = buffersize
-		  Return DefineEncoding(buffer, encoding)
-		  
+		  Dim ad As New MemoryBlock(0)
+		  Dim tag As UInt8
+		  Return DefineEncoding(Me.Read(Count, ad, tag), encoding)
 		End Function
 	#tag EndMethod
 
@@ -135,7 +150,7 @@ Implements Readable,Writeable
 		Function ReadError() As Boolean
 		  // Part of the Readable interface.
 		  
-		  
+		  Return mReadError <> 0
 		End Function
 	#tag EndMethod
 
@@ -151,12 +166,15 @@ Implements Readable,Writeable
 		Protected Sub Write(Text As String, AdditionalData As MemoryBlock, Tag As UInt32)
 		  Dim sz As UInt64 = Text.LenB
 		  Dim adsz As UInt64
-		  If AdditionalData = Nil Then AdditionalData = ""
-		  adsz = AdditionalData.Size
+		  Dim ad As Ptr
+		  If AdditionalData <> Nil Then
+		    adsz = AdditionalData.Size
+		    ad = AdditionalData
+		  End If
 		  sz = sz + adsz
 		  Dim buffer As New MemoryBlock(sz + crypto_secretstream_xchacha20poly1305_ABYTES)
 		  Dim txt As MemoryBlock = Text
-		  mWriteError = crypto_secretstream_xchacha20poly1305_push(mState, buffer, sz, txt, txt.Size, AdditionalData, adsz, Tag)
+		  mWriteError = crypto_secretstream_xchacha20poly1305_push(mState, buffer, sz, txt, txt.Size, ad, adsz, Tag)
 		  If buffer.Size <> sz Then buffer.Size = sz
 		  mDataSize = mDataSize + buffer.Size
 		  If Not Me.WriteError Then mOutput.Write(buffer)
@@ -194,6 +212,10 @@ Implements Readable,Writeable
 
 	#tag Property, Flags = &h21
 		Private mOutput As Writeable
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private mReadError As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
