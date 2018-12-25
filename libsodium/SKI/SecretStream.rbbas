@@ -153,8 +153,8 @@ Implements Readable,Writeable
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function Read(Count As Integer, AdditionalData As MemoryBlock, ByRef Tag As UInt8) As String
+	#tag Method, Flags = &h1
+		Protected Function Read(Count As Integer, AdditionalData As MemoryBlock, ByRef Tag As UInt8) As String
 		  Dim cipher As MemoryBlock = mInput.Read(Count + crypto_secretstream_xchacha20poly1305_ABYTES)
 		  Dim buffer As New MemoryBlock(cipher.Size - crypto_secretstream_xchacha20poly1305_ABYTES)
 		  Dim buffersize As UInt64 = buffer.Size
@@ -183,8 +183,8 @@ Implements Readable,Writeable
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function Read(Count As Integer, ByRef Tag As UInt8) As String
+	#tag Method, Flags = &h1
+		Protected Function Read(Count As Integer, ByRef Tag As UInt8) As String
 		  Dim ad As New MemoryBlock(0)
 		  Return Me.Read(Count, ad, Tag)
 		End Function
@@ -218,8 +218,8 @@ Implements Readable,Writeable
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub Write(Text As String, AdditionalData As MemoryBlock, Tag As UInt8)
+	#tag Method, Flags = &h1
+		Protected Sub Write(Text As String, AdditionalData As MemoryBlock, Tag As UInt8)
 		  Dim sz As UInt64 = Text.LenB
 		  Dim adsz As UInt64
 		  Dim ad As Ptr
@@ -237,8 +237,8 @@ Implements Readable,Writeable
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub Write(Text As String, Tag As UInt8)
+	#tag Method, Flags = &h1
+		Protected Sub Write(Text As String, Tag As UInt8)
 		  Me.Write(Text, Nil, Tag)
 		End Sub
 	#tag EndMethod
