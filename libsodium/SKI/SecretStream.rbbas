@@ -4,7 +4,6 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Sub Close()
 		  If mOutput <> Nil Then
-		    Me.Write("", Nil, crypto_secretstream_xchacha20poly1305_TAG_FINAL)
 		    mOutput.Flush
 		    If mData <> Nil And mData.Size <> mDataSize Then mData.Size = mDataSize
 		  End If
@@ -101,7 +100,7 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Sub Flush()
 		  // Part of the Writeable interface.
-		  Me.Write("", Nil, crypto_secretstream_xchacha20poly1305_TAG_PUSH)
+		  If mOutput <> Nil Then mOutput.Flush
 		End Sub
 	#tag EndMethod
 
@@ -157,7 +156,7 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Function Read(Count As Integer, AdditionalData As MemoryBlock, ByRef Tag As UInt8) As String
 		  Dim cipher As MemoryBlock = mInput.Read(Count + crypto_secretstream_xchacha20poly1305_ABYTES)
-		  Dim buffer As New MemoryBlock(Count)
+		  Dim buffer As New MemoryBlock(cipher.Size - crypto_secretstream_xchacha20poly1305_ABYTES)
 		  Dim buffersize As UInt64 = buffer.Size
 		  Dim ad As Ptr
 		  Dim adsz As UInt64
@@ -250,6 +249,12 @@ Implements Readable,Writeable
 		  
 		  Return mWriteError <> 0
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub WriteFinal(Text As String, AdditionalData As MemoryBlock)
+		  Me.Write(Text, AdditionalData, crypto_secretstream_xchacha20poly1305_TAG_PUSH)
+		End Sub
 	#tag EndMethod
 
 
