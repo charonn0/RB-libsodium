@@ -112,6 +112,7 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function GenerateKey() As libsodium.SKI.KeyContainer
+		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_keygen", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
 		  Dim k As New MemoryBlock(crypto_secretstream_xchacha20poly1305_KEYBYTES)
 		  crypto_secretstream_xchacha20poly1305_keygen(k)
 		  If k.IsZero Then Raise New SodiumException(ERR_KEYGEN_FAILED)
