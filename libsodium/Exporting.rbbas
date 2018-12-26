@@ -1,6 +1,13 @@
 #tag Module
 Protected Module Exporting
 	#tag Method, Flags = &h1
+		Protected Sub AssertType(KeyData As MemoryBlock, ExpectedType As libsodium.Exporting.ExportableType)
+		  If GetType(KeyData) <> ExpectedType Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function DecodeMessage(BinaryMessage As MemoryBlock) As MemoryBlock
 		  Dim n As MemoryBlock
 		  Return DecodeMessage(BinaryMessage, n)
