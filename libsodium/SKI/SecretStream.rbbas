@@ -64,7 +64,7 @@ Implements Readable,Writeable
 		Function EOF() As Boolean
 		  // Part of the Readable interface.
 		  
-		  Return mEOF Or (mInput <> Nil And mInput.EOF)
+		  Return mEOF Or (mInput <> Nil And mInput.EOF) Or mReadError <> 0
 		End Function
 	#tag EndMethod
 
