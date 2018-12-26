@@ -429,6 +429,7 @@ Protected Module libsodium
 		  ' if non-zero bits are found. Execution time is constant for a given length.
 		  
 		  If mb = Nil Then Return True
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If Offset < 0 Or mb.Size < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
 		  Dim p As Ptr = mb
 		  If Length < 0 Then Length = mb.Size
