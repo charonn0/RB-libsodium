@@ -7,9 +7,9 @@ Implements Readable,Writeable
 		    mOutput.Flush
 		    If mData <> Nil And mData.Size <> mDataSize Then mData.Size = mDataSize
 		  End If
-		  If mInput <> Nil Then
-		    #pragma Warning "Fixme"
-		  End If
+		  mInput = Nil
+		  mOutput = Nil
+		  mData = Nil
 		End Sub
 	#tag EndMethod
 
