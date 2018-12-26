@@ -425,7 +425,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h0
 		Function IsZero(Extends mb As MemoryBlock, Offset As Int32 = 0, Length As Int32 = - 1) As Boolean
-		  ' This method returns True if the SecureMemoryBlock contains only zeros. It returns False
+		  ' This method returns True if the MemoryBlock contains only zeros. It returns False
 		  ' if non-zero bits are found. Execution time is constant for a given length.
 		  
 		  If mb = Nil Then Return True
