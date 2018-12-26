@@ -61,6 +61,12 @@ Implements Readable,Writeable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function DecryptionHeader() As MemoryBlock
+		  Return mHeader
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function EOF() As Boolean
 		  // Part of the Readable interface.
 		  
@@ -110,12 +116,6 @@ Implements Readable,Writeable
 		  crypto_secretstream_xchacha20poly1305_keygen(k)
 		  If k.IsZero Then Raise New SodiumException(ERR_KEYGEN_FAILED)
 		  Return New KeyContainer(k)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function Header() As MemoryBlock
-		  Return mHeader
 		End Function
 	#tag EndMethod
 
