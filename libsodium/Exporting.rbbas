@@ -219,6 +219,9 @@ Protected Module Exporting
 		  Case ExportableType.HMAC
 		    Return HMACPrefix
 		    
+		  Case ExportableType.StateHeader
+		    Return StateHeaderPrefix
+		    
 		  Else
 		    Return UnknownPrefix
 		    
@@ -253,6 +256,9 @@ Protected Module Exporting
 		  Case ExportableType.HMAC
 		    Return HMACSuffix
 		    
+		  Case ExportableType.StateHeader
+		    Return StateHeaderSuffix
+		    
 		  Else
 		    Return UnknownSuffix
 		  End Select
@@ -262,7 +268,7 @@ Protected Module Exporting
 	#tag Method, Flags = &h1
 		Protected Function GetType(EncodedKey As MemoryBlock) As libsodium.Exporting.ExportableType
 		  Static Prefixes() As String = Array(EncryptionPrivatePrefix, EncryptionPublicPrefix, _
-		  SigningPrivatePrefix, SigningPublicPrefix, SalsaPrefix, SharedPrefix, SignaturePrefix, HMACPrefix)
+		  SigningPrivatePrefix, SigningPublicPrefix, SalsaPrefix, SharedPrefix, SignaturePrefix, HMACPrefix, StateHeaderPrefix)
 		  Dim ExportedKey As MemoryBlock = ReplaceLineEndings(EncodedKey, EndOfLine.Windows)
 		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
 		  For i As Integer = 0 To UBound(lines)
@@ -283,6 +289,8 @@ Protected Module Exporting
 		      Return ExportableType.Signature
 		    Case 7 'MAC
 		      Return ExportableType.HMAC
+		    Case 8 ' decryption header
+		      Return ExportableType.StateHeader
 		    End Select
 		  Next
 		  Return ExportableType.Unknown
@@ -388,6 +396,12 @@ Protected Module Exporting
 	#tag Constant, Name = SigningPublicSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519 PUBLIC KEY BLOCK-----", Scope = Private
 	#tag EndConstant
 
+	#tag Constant, Name = StateHeaderPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN STATE HEADER-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = StateHeaderSuffix, Type = String, Dynamic = False, Default = \"-----END STATE HEADER-----", Scope = Private
+	#tag EndConstant
+
 	#tag Constant, Name = UnknownPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN DATA BLOCK-----", Scope = Private
 	#tag EndConstant
 
@@ -404,7 +418,8 @@ Protected Module Exporting
 		  SharedSecret
 		  Unknown
 		  Signature
-		HMAC
+		  HMAC
+		StateHeader
 	#tag EndEnum
 
 
