@@ -86,6 +86,12 @@ Protected Module Testing
 		    Failures.Append(13)
 		  End Try
 		  
+		  Try
+		    TestSecretStream()
+		  Catch
+		    Failures.Append(14)
+		  End Try
+		  
 		  Return UBound(Failures) = -1
 		End Function
 	#tag EndMethod
@@ -456,6 +462,41 @@ Protected Module Testing
 		  Finally
 		    tis.Close
 		  End Try
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub TestSecretStream()
+		  Dim k As libsodium.SKI.SecretKey
+		  k = k.Generate
+		  Dim mb As New MemoryBlock(0)
+		  Dim stream As New libsodium.SKI.SecretStream(mb, k)
+		  Dim additional As New MemoryBlock(16)
+		  Dim m1 As String = "Hello, "
+		  Dim m2 As String = "world!"
+		  Dim m3 As String = "Goobye, "
+		  Dim m4 As String = "cruel world!"
+		  
+		  stream.Write(m1, additional)
+		  additional = libsodium.IncrementNonce(additional)
+		  stream.Write(m2, additional)
+		  additional = libsodium.IncrementNonce(additional)
+		  stream.Write(m3, additional)
+		  additional = libsodium.IncrementNonce(additional)
+		  stream.Write(m4, additional)
+		  
+		  stream.Close
+		  
+		  stream = New libsodium.SKI.SecretStream(mb, k, stream.DecryptionHeader)
+		  additional = New MemoryBlock(16)
+		  Assert(stream.Read(m1.LenB, additional) = m1)
+		  additional = libsodium.IncrementNonce(additional)
+		  Assert(stream.Read(m2.LenB, additional) = m2)
+		  additional = libsodium.IncrementNonce(additional)
+		  Assert(stream.Read(m3.LenB, additional) = m3)
+		  additional = libsodium.IncrementNonce(additional)
+		  Assert(stream.Read(m4.LenB, additional) = m4)
+		  stream.Close
 		End Sub
 	#tag EndMethod
 
