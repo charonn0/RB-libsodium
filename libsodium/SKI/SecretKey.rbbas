@@ -10,11 +10,10 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Constructor
 		  
-		  mPasswdSalt = Salt
 		  If Salt = Nil Then Salt = FromPassword.RandomSalt(HashAlgorithm)
 		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, Salt, Limits, HashAlgorithm)
 		  Me.Constructor(key)
-		  
+		  mPasswdSalt = Salt
 		End Sub
 	#tag EndMethod
 
@@ -100,7 +99,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
 		  
-		  If libsodium.Exporting.GetType(ExportedKey) <> libsodium.Exporting.ExportableType.Secret Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  libsodium.Exporting.AssertType(ExportedKey, libsodium.Exporting.ExportableType.Secret)
 		  Dim sk As MemoryBlock = libsodium.Exporting.Import(ExportedKey, Passwd)
 		  If sk <> Nil Then Return New SecretKey(sk)
 		End Function
