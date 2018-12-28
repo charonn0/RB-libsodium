@@ -307,12 +307,6 @@ Implements Readable,Writeable
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Sub WriteFinal(Text As String, AdditionalData As MemoryBlock)
-		  Me.Write(Text, AdditionalData, crypto_secretstream_xchacha20poly1305_TAG_PUSH)
-		End Sub
-	#tag EndMethod
-
 
 	#tag Property, Flags = &h21
 		Private mData As MemoryBlock
