@@ -3,6 +3,11 @@ Protected Class SecretStream
 Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Sub Close()
+		  ' Close the stream
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Close
+		  
 		  If mOutput <> Nil Then
 		    mOutput.Flush
 		    If mData <> Nil And mData.Size <> mDataSize Then mData.Size = mDataSize
@@ -15,6 +20,12 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		Sub Constructor(Buffer As MemoryBlock, Key As libsodium.SKI.KeyContainer, DecryptHeader As MemoryBlock = Nil)
+		  ' Constructs an in-memory SecretStream. If the Buffer size is zero then an encryption stream is created,
+		  ' otherwise a decryption stream is created. Decryption requires the original decryption header.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Constructor
+		  
 		  CheckSize(Key.Value, crypto_secretstream_xchacha20poly1305_KEYBYTES)
 		  If DecryptHeader <> Nil Then CheckSize(DecryptHeader, crypto_secretstream_xchacha20poly1305_HEADERBYTES)
 		  Select Case True
@@ -34,6 +45,8 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h21
 		Private Sub Constructor(InputStream As Readable, Key As MemoryBlock, Header As MemoryBlock)
+		  ' Construct a decryption stream from the InputStream, Key, and Header parameters.
+		  
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_pull", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
 		  CheckSize(Header, crypto_secretstream_xchacha20poly1305_HEADERBYTES)
 		  mState = New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
@@ -45,6 +58,8 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h21
 		Private Sub Constructor(OutputStream As Writeable, Key As MemoryBlock)
+		  ' Construct a new encryption stream using the specified key.
+		  
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_push", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
 		  mState = New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
 		  mHeader = New MemoryBlock(crypto_secretstream_xchacha20poly1305_HEADERBYTES)
@@ -62,6 +77,11 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		Function DecryptionHeader() As MemoryBlock
+		  ' Returns the header that will be required to decrypt the stream
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.DecryptionHeader
+		  
 		  Return mHeader
 		End Function
 	#tag EndMethod
@@ -69,6 +89,9 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Function EOF() As Boolean
 		  // Part of the Readable interface.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.EOF
 		  
 		  Return mEOF Or (mInput <> Nil And mInput.EOF) Or mReadError <> 0
 		End Function
@@ -106,6 +129,10 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Sub Flush()
 		  // Part of the Writeable interface.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Flush
+		  
 		  If mOutput <> Nil Then mOutput.Flush
 		End Sub
 	#tag EndMethod
@@ -122,12 +149,22 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		Function IsReadable() As Boolean
+		  ' Returns True if the stream is in decryption mode.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.IsReadable
+		  
 		  Return mInput <> Nil
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function IsWriteable() As Boolean
+		  ' Returns True if the stream is in encryption mode.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.IsWriteable
+		  
 		  Return mOutput <> Nil
 		End Function
 	#tag EndMethod
@@ -149,6 +186,13 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		Function Read(Count As Integer, AdditionalData As MemoryBlock) As String
+		  ' Reads the specified number of encrypted bytes. If the bytes were successfully decrypted and 
+		  ' authenticated then the decrypted bytes are returned. AdditionalData is extra data that was
+		  ' used by the encryptor when computing the authentication code.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Read
+		  
 		  Dim tag As UInt8
 		  Return Me.Read(Count, AdditionalData, tag)
 		End Function
@@ -201,6 +245,11 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		Sub Rekey()
+		  ' Explicitly rekeys the stream. Ordinarily done automatically.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Rekey
+		  
 		  If mState <> Nil Then crypto_secretstream_xchacha20poly1305_rekey(mState)
 		End Sub
 	#tag EndMethod
@@ -215,6 +264,12 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		Sub Write(Text As String, AdditionalData As MemoryBlock)
+		  ' Encrypts the text and computes an authentication code based on the Text and the AdditionalData
+		  ' and writes the encrypted bytes and the authentication code to the output stream.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Write
+		  
 		  Me.Write(Text, AdditionalData, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE)
 		End Sub
 	#tag EndMethod
