@@ -99,7 +99,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
 		  
-		  If libsodium.Exporting.GetType(ExportedKey) <> libsodium.Exporting.ExportableType.Secret Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  libsodium.Exporting.AssertType(ExportedKey, libsodium.Exporting.ExportableType.Secret)
 		  Dim sk As MemoryBlock = libsodium.Exporting.Import(ExportedKey, Passwd)
 		  If sk <> Nil Then Return New SecretKey(sk)
 		End Function

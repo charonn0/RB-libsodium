@@ -187,7 +187,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Import
 		  
-		  If libsodium.Exporting.GetType(ExportedKey) <> libsodium.Exporting.ExportableType.CryptPrivate Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  libsodium.Exporting.AssertType(ExportedKey, libsodium.Exporting.ExportableType.CryptPrivate)
 		  Dim sk As MemoryBlock = libsodium.Exporting.Import(ExportedKey, Passwd)
 		  If sk <> Nil Then Return Derive(sk)
 		End Function
