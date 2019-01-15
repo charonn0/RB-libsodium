@@ -1,6 +1,19 @@
 #tag Class
 Protected Class SecretKey
 Inherits libsodium.SKI.KeyContainer
+	#tag Method, Flags = &h1000
+		Sub Constructor(StreamData As libsodium.KeyStream, Optional Nonce As MemoryBlock)
+		  ' Generates a key by deriving it from the KeyStream+Nonce. The operation is deterministic, such
+		  ' that calling this method twice with the same parameters will produce the same output both times.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Constructor
+		  
+		  If Nonce = Nil Then Nonce = StreamData.RandomNonce(StreamData.Type)
+		  Me.Constructor(StreamData.DeriveKey(crypto_secretbox_KEYBYTES, Nonce))
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub Constructor(FromPassword As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
 		  ' Generates a secret key by deriving it from a salted hash of the password. The operation is
