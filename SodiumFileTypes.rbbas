@@ -53,4 +53,13 @@
 		Name=SecretKey
 	#tag EndFileType
 
+	#tag FileType
+		CodeName=SharedKey
+		Extension=.shk
+		Flags=&h0
+		MacCreator=
+		MacType=
+		Name=SharedKey
+	#tag EndFileType
+
 #tag EndFileTypeSet
