@@ -2,7 +2,10 @@
 Protected Module Exporting
 	#tag Method, Flags = &h1
 		Protected Sub AssertType(KeyData As MemoryBlock, ExpectedType As libsodium.Exporting.ExportableType)
-		  If GetType(KeyData) <> ExpectedType Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  Dim detect As ExportableType = GetType(KeyData)
+		  If Not IsValidFormat(KeyData, detect) Then Raise New SodiumException(ERR_IMPORT_INVALID)
+		  If detect <> ExpectedType Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  
 		  
 		End Sub
 	#tag EndMethod
@@ -329,6 +332,19 @@ Protected Module Exporting
 		  
 		  Dim metadata As Dictionary
 		  Return Import(EncodedKey, metadata, Passwd)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Function IsValidFormat(EncodedKey As MemoryBlock, DetectedFormat As ExportableType) As Boolean
+		  EncodedKey = ReplaceLineEndings(EncodedKey, EndOfLine.Windows).Trim
+		  Dim lines() As String = SplitB(EncodedKey, EndOfLine.Windows)
+		  If UBound(lines) < 2 Then Return False
+		  If lines(lines.Ubound) = "" Then Return False
+		  Return lines(lines.Ubound) = GetSuffix(DetectedFormat)
+		  
+		Exception
+		  Return False
 		End Function
 	#tag EndMethod
 

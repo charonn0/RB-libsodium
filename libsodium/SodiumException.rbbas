@@ -77,6 +77,9 @@ Inherits RuntimeException
 		  Case ERR_PARAMETER_CONFLICT
 		    Me.Message = "One or more parameters are mutually contradictory."
 		    
+		  Case ERR_IMPORT_INVALID
+		    Me.Message = "The data do not conform to the export format."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    

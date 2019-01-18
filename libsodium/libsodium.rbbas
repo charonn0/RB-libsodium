@@ -704,6 +704,9 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_IMPORT_ENCRYPTED, Type = Double, Dynamic = False, Default = \"-20", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_IMPORT_INVALID, Type = Double, Dynamic = False, Default = \"-26", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_IMPORT_PASSWORD, Type = Double, Dynamic = False, Default = \"-19", Scope = Protected
 	#tag EndConstant
 
