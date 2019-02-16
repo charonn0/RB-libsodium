@@ -76,17 +76,6 @@ Implements Readable,Writeable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function DecryptionHeader() As MemoryBlock
-		  ' Returns the header that will be required to decrypt the stream
-		  '
-		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.DecryptionHeader
-		  
-		  Return mHeader
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Function EOF() As Boolean
 		  // Part of the Readable interface.
 		  '
@@ -307,6 +296,20 @@ Implements Readable,Writeable
 		End Function
 	#tag EndMethod
 
+
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  ' Returns the header that will be required to decrypt the stream
+			  '
+			  ' See:
+			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.DecryptionHeader
+			  
+			  Return mHeader
+			End Get
+		#tag EndGetter
+		DecryptionHeader As MemoryBlock
+	#tag EndComputedProperty
 
 	#tag Property, Flags = &h21
 		Private mData As MemoryBlock
