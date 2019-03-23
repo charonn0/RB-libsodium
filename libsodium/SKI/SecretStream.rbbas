@@ -26,8 +26,6 @@ Implements Readable,Writeable
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Constructor
 		  
-		  CheckSize(Key.Value, crypto_secretstream_xchacha20poly1305_KEYBYTES)
-		  If DecryptHeader <> Nil Then CheckSize(DecryptHeader, crypto_secretstream_xchacha20poly1305_HEADERBYTES)
 		  Select Case True
 		  Case Buffer.Size > 0 And DecryptHeader <> Nil ' readable
 		    Me.Constructor(New BinaryStream(Buffer), Key.Value, DecryptHeader)
@@ -49,6 +47,7 @@ Implements Readable,Writeable
 		  
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_pull", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
 		  CheckSize(Header, crypto_secretstream_xchacha20poly1305_HEADERBYTES)
+		  CheckSize(Key, crypto_secretstream_xchacha20poly1305_KEYBYTES)
 		  mState = New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
 		  mHeader = Header
 		  If crypto_secretstream_xchacha20poly1305_init_pull(mState, mHeader, Key) <> 0 Then Raise New SodiumException(ERR_INIT_FAILED)
@@ -61,6 +60,7 @@ Implements Readable,Writeable
 		  ' Construct a new encryption stream using the specified key.
 		  
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_push", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		  CheckSize(Key, crypto_secretstream_xchacha20poly1305_KEYBYTES)
 		  mState = New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
 		  mHeader = New MemoryBlock(crypto_secretstream_xchacha20poly1305_HEADERBYTES)
 		  
