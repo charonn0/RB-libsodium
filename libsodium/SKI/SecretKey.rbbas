@@ -146,7 +146,7 @@ Inherits libsodium.SKI.KeyContainer
 
 
 	#tag Note, Name = Usage
-		This class contains a symmetric key for use with secret key encryption and message authentication. Encryption, 
+		This class contains a key for use with symmetric encryption and message authentication. Encryption, 
 		decryption, and MAC generation/validation use the same key, so it must be kept secret at all times.
 		
 		You may use a SecretKey with these utility methods:
