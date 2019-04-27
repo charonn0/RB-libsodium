@@ -75,7 +75,7 @@ Inherits RuntimeException
 		    Me.Message = "The specified key is of a type that is not intended for the requested operation."
 		    
 		  Case ERR_PARAMETER_CONFLICT
-		    Me.Message = "One or more parameters are mutually contradictory."
+		    Me.Message = "Two or more parameters are mutually contradictory."
 		    
 		  Case ERR_IMPORT_INVALID
 		    Me.Message = "The data do not conform to the export format."
