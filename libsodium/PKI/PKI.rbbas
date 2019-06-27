@@ -155,6 +155,7 @@ Protected Module PKI
 		  CheckSize(Nonce, crypto_box_NONCEBYTES)
 		  CheckSize(RecipientPublicKey.Value, crypto_box_PUBLICKEYBYTES)
 		  CheckSize(SenderPrivateKey.PrivateKey, crypto_box_SECRETKEYBYTES)
+		  If RecipientPublicKey.Type <> ForeignKey.KeyType.Encryption Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
 		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey.Value, SenderPrivateKey.PrivateKey) = 0 Then
@@ -188,6 +189,8 @@ Protected Module PKI
 		  ' ephemeral private key. On error returns Nil.
 		  '
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/sealed_boxes.html
+		  
+		  If RecipientPublicKey.Type <> ForeignKey.KeyType.Encryption Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_PUBLICKEYBYTES + crypto_box_MACBYTES)
 		  If crypto_box_seal(buffer, ClearText, ClearText.Size, RecipientPublicKey.Value) = 0 Then
@@ -250,6 +253,8 @@ Protected Module PKI
 		  
 		  
 		  CheckSize(SignerPublicKey.Value, crypto_sign_PUBLICKEYBYTES)
+		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  
 		  If Left(SignedMessage, 5) = "-----" Then SignedMessage = libsodium.Exporting.Import(SignedMessage)
 		  Dim tmp As New MemoryBlock(SignedMessage.Size - crypto_sign_BYTES)
 		  Dim sz As UInt64 = tmp.Size
@@ -271,6 +276,7 @@ Protected Module PKI
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.VerifyData
 		  
 		  
+		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  CheckSize(SignerPublicKey.Value, crypto_sign_PUBLICKEYBYTES)
 		  If Left(DetachedSignature, 5) = "-----" Then DetachedSignature = libsodium.Exporting.Import(DetachedSignature)
 		  Return crypto_sign_verify_detached(DetachedSignature, SignedMessage, SignedMessage.Size, SignerPublicKey.Value) = 0
