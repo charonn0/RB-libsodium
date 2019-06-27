@@ -19,12 +19,15 @@ Implements Readable,Writeable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(Buffer As MemoryBlock, Key As libsodium.SKI.KeyContainer, DecryptHeader As MemoryBlock = Nil)
+		Sub Constructor(Buffer As MemoryBlock, Key As libsodium.SKI.KeyContainer, DecryptHeader As MemoryBlock = Nil, HeaderPassword As libsodium.Password = Nil)
 		  ' Constructs an in-memory SecretStream. If the Buffer size is zero then an encryption stream is created,
 		  ' otherwise a decryption stream is created. Decryption requires the original decryption header.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Constructor
+		  
+		  Dim metadata As Dictionary
+		  If DecryptHeader.StringValue(0, 5) = "-----" Then DecryptHeader = libsodium.Exporting.Import(DecryptHeader, metadata, HeaderPassword)
 		  
 		  Select Case True
 		  Case Buffer.Size > 0 And DecryptHeader <> Nil ' readable
@@ -46,6 +49,7 @@ Implements Readable,Writeable
 		  ' Construct a decryption stream from the InputStream, Key, and Header parameters.
 		  
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_pull", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		  If Left(Header, 5) = "-----" Then Header = libsodium.Exporting.DecodeMessage(Header)
 		  CheckSize(Header, crypto_secretstream_xchacha20poly1305_HEADERBYTES)
 		  CheckSize(Key, crypto_secretstream_xchacha20poly1305_KEYBYTES)
 		  mState = New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
@@ -162,13 +166,16 @@ Implements Readable,Writeable
 		 Shared Function Open(Key As libsodium.SKI.KeyContainer, InputStream As Readable, DecryptHeader As FolderItem, HeaderPassword As libsodium.Password = Nil) As libsodium.SKI.SecretStream
 		  Dim bs As BinaryStream = BinaryStream.Open(DecryptHeader)
 		  Dim metadata As Dictionary
-		  Dim header As MemoryBlock = libsodium.Exporting.Import(bs.Read(bs.Length), metadata, HeaderPassword)
+		  Dim header As MemoryBlock = bs.Read(bs.Length)
+		  If header.StringValue(0, 5) = "-----" Then header = libsodium.Exporting.Import(header, metadata, HeaderPassword)
 		  Return New SecretStream(InputStream, Key.Value, header)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Open(Key As libsodium.SKI.KeyContainer, InputStream As Readable, DecryptHeader As MemoryBlock) As libsodium.SKI.SecretStream
+		 Shared Function Open(Key As libsodium.SKI.KeyContainer, InputStream As Readable, DecryptHeader As MemoryBlock, HeaderPassword As libsodium.Password = Nil) As libsodium.SKI.SecretStream
+		  Dim metadata As Dictionary
+		  If DecryptHeader.StringValue(0, 5) = "-----" Then DecryptHeader = libsodium.Exporting.Import(DecryptHeader, metadata, HeaderPassword)
 		  Return New SecretStream(InputStream, Key.Value, DecryptHeader)
 		End Function
 	#tag EndMethod
