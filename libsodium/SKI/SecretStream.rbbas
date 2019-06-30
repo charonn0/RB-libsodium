@@ -31,7 +31,9 @@ Implements Readable,Writeable
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Constructor
 		  
 		  Dim metadata As Dictionary
-		  If DecryptHeader.StringValue(0, 5) = "-----" Then DecryptHeader = libsodium.Exporting.Import(DecryptHeader, metadata, HeaderPassword)
+		  If DecryptHeader <> Nil And DecryptHeader.StringValue(0, 5) = "-----" Then
+		    DecryptHeader = libsodium.Exporting.Import(DecryptHeader, metadata, HeaderPassword)
+		  End If
 		  
 		  Select Case True
 		  Case Buffer.Size > 0 And DecryptHeader <> Nil ' readable
