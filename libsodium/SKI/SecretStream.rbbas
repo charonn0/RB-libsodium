@@ -332,6 +332,7 @@ Implements Readable,Writeable
 		#tag EndGetter
 		#tag Setter
 			Set
+			  value = Max(value, 1024 * 16)
 			  mBlockSize = value
 			End Set
 		#tag EndSetter
