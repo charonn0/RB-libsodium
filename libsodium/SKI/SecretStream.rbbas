@@ -9,6 +9,10 @@ Implements Readable,Writeable
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Close
 		  
 		  If mOutput <> Nil Then
+		    If mWriteBuffer.LenB > 0 Then
+		      Me.Write(mWriteBuffer, Nil, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE)
+		      mDataSize = mDataSize + mWriteBuffer.LenB
+		    End If
 		    mOutput.Flush
 		    If mData <> Nil And mData.Size <> mDataSize Then mData.Size = mDataSize
 		  End If
@@ -218,9 +222,17 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Function Read(Count As Integer, encoding As TextEncoding = Nil) As String Implements Readable.Read
 		  // Part of the Readable interface.
-		  Dim ad As New MemoryBlock(0)
-		  Dim tag As UInt8
-		  Return DefineEncoding(Me.Read(Count, ad, tag), encoding)
+		  
+		  Do Until Count <= mReadBuffer.LenB
+		    Dim ad As New MemoryBlock(0)
+		    Dim tag As UInt8
+		    mReadBuffer = mReadBuffer + Me.Read(mBlockSize, ad, tag)
+		  Loop Until mInput.EOF Or mInput.ReadError
+		  
+		  Dim data As String = LeftB(mReadBuffer, Count)
+		  Dim sz As Integer = Max(mReadBuffer.LenB - Count, 0)
+		  mReadBuffer = RightB(mReadBuffer, sz)
+		  Return DefineEncoding(data, encoding)
 		End Function
 	#tag EndMethod
 
@@ -254,7 +266,13 @@ Implements Readable,Writeable
 		Sub Write(text As String) Implements Writeable.Write
 		  // Part of the Writeable interface.
 		  
-		  Me.Write(text, Nil, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE)
+		  mWriteBuffer = mWriteBuffer + text
+		  Do Until mWriteBuffer.LenB <= mBlockSize
+		    Dim data As String = LeftB(mWriteBuffer, mBlockSize)
+		    mWriteBuffer = RightB(mWriteBuffer, mWriteBuffer.LenB - mBlockSize)
+		    Me.Write(data, Nil, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE)
+		  Loop
+		  
 		End Sub
 	#tag EndMethod
 
@@ -307,6 +325,20 @@ Implements Readable,Writeable
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
+			  return mBlockSize
+			End Get
+		#tag EndGetter
+		#tag Setter
+			Set
+			  mBlockSize = value
+			End Set
+		#tag EndSetter
+		BlockSize As Int32
+	#tag EndComputedProperty
+
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
 			  ' Returns the header that will be required to decrypt the stream
 			  '
 			  ' See:
@@ -317,6 +349,10 @@ Implements Readable,Writeable
 		#tag EndGetter
 		DecryptionHeader As MemoryBlock
 	#tag EndComputedProperty
+
+	#tag Property, Flags = &h21
+		Private mBlockSize As Int32 = &hFFFF
+	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private mData As MemoryBlock
@@ -343,11 +379,19 @@ Implements Readable,Writeable
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
+		Private mReadBuffer As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
 		Private mReadError As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private mState As MemoryBlock
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private mWriteBuffer As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
