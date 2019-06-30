@@ -269,7 +269,7 @@ Implements Readable,Writeable
 		  // Part of the Writeable interface.
 		  
 		  mWriteBuffer = mWriteBuffer + text
-		  Do Until mWriteBuffer.LenB <= mBlockSize
+		  Do Until mWriteBuffer.LenB < mBlockSize
 		    Dim data As String = LeftB(mWriteBuffer, mBlockSize)
 		    mWriteBuffer = RightB(mWriteBuffer, mWriteBuffer.LenB - mBlockSize)
 		    Me.Write(data, Nil, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE)
