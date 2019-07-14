@@ -92,7 +92,7 @@ Implements Readable,Writeable
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.EOF
 		  
-		  Return mEOF Or (mInput <> Nil And mInput.EOF) Or mReadError <> 0
+		  Return mEOF Or ((mInput <> Nil And mInput.EOF) And mReadError <> 0 And mReadBuffer.LenB = 0)
 		End Function
 	#tag EndMethod
 
@@ -203,6 +203,7 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h1
 		Protected Function Read(Count As Integer, AdditionalData As MemoryBlock, ByRef Tag As UInt8) As String
 		  Dim cipher As MemoryBlock = mInput.Read(Count + crypto_secretstream_xchacha20poly1305_ABYTES)
+		  If cipher.Size = 0 Then mEOF = mInput.EOF
 		  Dim buffer As New MemoryBlock(cipher.Size - crypto_secretstream_xchacha20poly1305_ABYTES)
 		  Dim buffersize As UInt64 = buffer.Size
 		  Dim ad As Ptr
@@ -217,7 +218,7 @@ Implements Readable,Writeable
 		    mEOF = (tag = crypto_secretstream_xchacha20poly1305_TAG_FINAL) Or (buffersize = 0)
 		    Return buffer
 		  End If
-		  Break
+		  If Not mEOF Then Raise New IOException
 		End Function
 	#tag EndMethod
 
@@ -229,7 +230,7 @@ Implements Readable,Writeable
 		    Dim ad As New MemoryBlock(0)
 		    Dim tag As UInt8
 		    mReadBuffer = mReadBuffer + Me.Read(mBlockSize, ad, tag)
-		  Loop Until mInput.EOF Or mInput.ReadError
+		  Loop Until Me.EOF
 		  
 		  Dim data As String = LeftB(mReadBuffer, Count)
 		  Dim sz As Integer = Max(mReadBuffer.LenB - Count, 0)
