@@ -35,6 +35,8 @@ Implements Readable,Writeable
 		    DecryptHeader = libsodium.Exporting.Import(DecryptHeader, metadata, HeaderPassword)
 		  End If
 		  
+		  If Key IsA libsodium.Password Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  
 		  Select Case True
 		  Case Buffer.Size > 0 And DecryptHeader <> Nil ' readable
 		    Me.Constructor(New BinaryStream(Buffer), Key.Value, DecryptHeader)
@@ -81,6 +83,7 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function Create(Key As libsodium.SKI.KeyContainer, OutputStream As Writeable) As libsodium.SKI.SecretStream
+		  If Key IsA libsodium.Password Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  Return New SecretStream(OutputStream, Key.Value)
 		End Function
 	#tag EndMethod
@@ -170,6 +173,7 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function Open(Key As libsodium.SKI.KeyContainer, InputStream As Readable, DecryptHeader As FolderItem, HeaderPassword As libsodium.Password = Nil) As libsodium.SKI.SecretStream
+		  If Key IsA libsodium.Password Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  Dim bs As BinaryStream = BinaryStream.Open(DecryptHeader)
 		  Dim metadata As Dictionary
 		  Dim header As MemoryBlock = bs.Read(bs.Length)
@@ -180,6 +184,7 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function Open(Key As libsodium.SKI.KeyContainer, InputStream As Readable, DecryptHeader As MemoryBlock, HeaderPassword As libsodium.Password = Nil) As libsodium.SKI.SecretStream
+		  If Key IsA libsodium.Password Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  Dim metadata As Dictionary
 		  If DecryptHeader.StringValue(0, 5) = "-----" Then DecryptHeader = libsodium.Exporting.Import(DecryptHeader, metadata, HeaderPassword)
 		  Return New SecretStream(InputStream, Key.Value, DecryptHeader)
