@@ -10,8 +10,18 @@ Implements Readable,Writeable
 		  
 		  If mOutput <> Nil Then
 		    If mWriteBuffer.LenB > 0 Then
-		      Me.Write(mWriteBuffer, Nil, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE)
 		      mDataSize = mDataSize + mWriteBuffer.LenB
+		      Do Until mWriteBuffer.LenB = 0
+		        Dim data As String = LeftB(mWriteBuffer, mBlockSize)
+		        mWriteBuffer = RightB(mWriteBuffer, mWriteBuffer.LenB - mBlockSize)
+		        Dim tag As UInt8
+		        If mWriteBuffer.LenB > 0 Then
+		          tag = crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+		        Else
+		          tag = crypto_secretstream_xchacha20poly1305_TAG_FINAL
+		        End If
+		        Me.Write(data, Nil, tag)
+		      Loop
 		    End If
 		    mOutput.Flush
 		    If mData <> Nil And mData.Size <> mDataSize Then mData.Size = mDataSize
