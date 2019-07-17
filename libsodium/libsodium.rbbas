@@ -689,10 +689,9 @@ Protected Module libsodium
 		Protected Sub UnpadData(ByRef Data As MemoryBlock, BlockSize As UInt32)
 		  If Not IsAvailable() Or Not System.IsFunctionAvailable("sodium_unpad", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If Data.Size = -1 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
-		  Dim buffsz As UInt32
-		  Dim buffer As Ptr = Data
-		  If sodium_unpad(buffsz, buffer, Data.Size, BlockSize) <> 0 Then Raise New SodiumException(ERR_PADDING)
-		  Data.Size = buffsz
+		  Dim unpadsz As UInt32
+		  If sodium_unpad(unpadsz, Data, Data.Size, BlockSize) <> 0 Then Raise New SodiumException(ERR_PADDING)
+		  Data.Size = unpadsz
 		End Sub
 	#tag EndMethod
 
