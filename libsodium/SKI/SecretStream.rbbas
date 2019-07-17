@@ -12,7 +12,7 @@ Implements Readable,Writeable
 		    If mWriteBuffer.LenB > 0 Then
 		      mDataSize = mDataSize + mWriteBuffer.LenB
 		      Do Until mWriteBuffer.LenB = 0
-		        Dim data As String = LeftB(mWriteBuffer, mBlockSize)
+		        Dim data As MemoryBlock = LeftB(mWriteBuffer, mBlockSize)
 		        mWriteBuffer = RightB(mWriteBuffer, mWriteBuffer.LenB - mBlockSize)
 		        Dim tag As UInt8
 		        If mWriteBuffer.LenB > 0 Then
@@ -20,6 +20,7 @@ Implements Readable,Writeable
 		        Else
 		          tag = crypto_secretstream_xchacha20poly1305_TAG_FINAL
 		        End If
+		        libsodium.PadData(data, mBlockSize)
 		        Me.Write(data, Nil, tag)
 		      Loop
 		    End If
@@ -231,6 +232,9 @@ Implements Readable,Writeable
 		  mReadError = crypto_secretstream_xchacha20poly1305_pull(mState, buffer, buffersize, tag, cipher, cipher.Size, ad, adsz)
 		  If mReadError = 0 Then
 		    mEOF = (tag = crypto_secretstream_xchacha20poly1305_TAG_FINAL) Or (buffersize = 0)
+		    If mEOF And buffersize > 0 Then
+		      libsodium.UnpadData(buffer, mBlockSize)
+		    End If
 		    Return buffer
 		  End If
 		  If Not mEOF Then Raise New IOException
