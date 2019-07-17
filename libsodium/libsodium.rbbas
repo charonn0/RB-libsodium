@@ -449,10 +449,10 @@ Protected Module libsodium
 		  If Not IsAvailable() Or Not System.IsFunctionAvailable("sodium_pad", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If Data.Size = -1 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
 		  Dim origsz As UInt32 = Data.Size
-		  Dim buffsz As UInt32
+		  Dim padsz As UInt32
 		  Data.Size = Data.Size + ((Data.Size Mod BlockSize) * 4) + BlockSize
-		  If sodium_pad(buffsz, Data, origsz, BlockSize, Data.Size) <> 0 Then Raise New SodiumException(ERR_PADDING)
-		  Data.Size = buffsz
+		  If sodium_pad(padsz, Data, origsz, BlockSize, Data.Size) <> 0 Then Raise New SodiumException(ERR_PADDING)
+		  Data.Size = padsz
 		End Sub
 	#tag EndMethod
 
