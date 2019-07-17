@@ -232,9 +232,7 @@ Implements Readable,Writeable
 		  mReadError = crypto_secretstream_xchacha20poly1305_pull(mState, buffer, buffersize, tag, cipher, cipher.Size, ad, adsz)
 		  If mReadError = 0 Then
 		    mEOF = (tag = crypto_secretstream_xchacha20poly1305_TAG_FINAL) Or (buffersize = 0)
-		    If mEOF And buffersize > 0 Then
-		      libsodium.UnpadData(buffer, mBlockSize)
-		    End If
+		    If mEOF And buffersize > 0 Then libsodium.UnpadData(buffer, mBlockSize)
 		    Return buffer
 		  End If
 		  If Not mEOF Then Raise New IOException
