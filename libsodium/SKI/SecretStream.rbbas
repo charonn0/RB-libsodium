@@ -14,14 +14,12 @@ Implements Readable,Writeable
 		      Do Until mWriteBuffer.LenB = 0
 		        Dim data As MemoryBlock = LeftB(mWriteBuffer, mBlockSize)
 		        mWriteBuffer = RightB(mWriteBuffer, mWriteBuffer.LenB - mBlockSize)
-		        Dim tag As UInt8
-		        If mWriteBuffer.LenB > 0 Then
-		          tag = crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
-		        Else
+		        Dim tag As UInt8 = crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+		        If data.Size < mBlockSize Then
+		          libsodium.PadData(data, mBlockSize)
 		          tag = crypto_secretstream_xchacha20poly1305_TAG_FINAL
 		        End If
-		        libsodium.PadData(data, mBlockSize)
-		        Me.Write(data, Nil, tag)
+		        Me.Write(data, tag)
 		      Loop
 		    End If
 		    mOutput.Flush
