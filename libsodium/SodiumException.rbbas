@@ -80,6 +80,9 @@ Inherits RuntimeException
 		  Case ERR_IMPORT_INVALID
 		    Me.Message = "The data do not conform to the export format."
 		    
+		  Case ERR_PADDING
+		    Me.Message = "Error while padding or unpadding data."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    

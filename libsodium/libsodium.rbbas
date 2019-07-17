@@ -445,6 +445,18 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Sub PadData(ByRef Data As MemoryBlock, BlockSize As UInt32)
+		  If Not IsAvailable() Or Not System.IsFunctionAvailable("sodium_pad", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If Data.Size = -1 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
+		  Dim origsz As UInt32 = Data.Size
+		  Dim buffsz As UInt32
+		  Data.Size = Data.Size + ((Data.Size Mod BlockSize) * 4) + BlockSize
+		  If sodium_pad(buffsz, Data, origsz, BlockSize, Data.Size) <> 0 Then Raise New SodiumException(ERR_PADDING)
+		  Data.Size = buffsz
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function RandomBytes(Count As UInt32, Optional Seed As MemoryBlock) As MemoryBlock
 		  ' Returns a MemoryBlock filled with the requested number of unpredictable bytes.
 		  '   On Win32, the RtlGenRandom() function is used
@@ -643,6 +655,14 @@ Protected Module libsodium
 		Private Soft Declare Function sodium_munlock Lib "libsodium" (Address As Ptr, Length As UInt32) As Int32
 	#tag EndExternalMethod
 
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_pad Lib "libsodium" (ByRef BufferSize As UInt32, Buffer As Ptr, UnpaddedSize As UInt32, BlockSize As UInt32, MaxBufferSize As UInt32) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function sodium_unpad Lib "libsodium" (ByRef BufferSize As UInt32, Buffer As Ptr, UnpaddedSize As UInt32, BlockSize As UInt32) As Int32
+	#tag EndExternalMethod
+
 	#tag Method, Flags = &h1
 		Protected Function StrComp(String1 As String, String2 As String) As Boolean
 		  ' Performs a constant-time binary comparison of the strings, and returns True if they are identical.
@@ -663,6 +683,17 @@ Protected Module libsodium
 		  
 		  Return sodium_memcmp(mb1, mb2, sz) = 0
 		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub UnpadData(ByRef Data As MemoryBlock, BlockSize As UInt32)
+		  If Not IsAvailable() Or Not System.IsFunctionAvailable("sodium_unpad", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If Data.Size = -1 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
+		  Dim buffsz As UInt32
+		  Dim buffer As Ptr = Data
+		  If sodium_unpad(buffsz, buffer, Data.Size, BlockSize) <> 0 Then Raise New SodiumException(ERR_PADDING)
+		  Data.Size = buffsz
+		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
@@ -735,6 +766,9 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_OUT_OF_RANGE, Type = Double, Dynamic = False, Default = \"-17", Scope = Protected
+	#tag EndConstant
+
+	#tag Constant, Name = ERR_PADDING, Type = Double, Dynamic = False, Default = \"-27", Scope = Protected
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_PARAMETER_CONFLICT, Type = Double, Dynamic = False, Default = \"-25", Scope = Protected
