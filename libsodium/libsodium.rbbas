@@ -450,7 +450,7 @@ Protected Module libsodium
 		  If Data.Size = -1 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
 		  Dim origsz As UInt32 = Data.Size
 		  Dim padsz As UInt32
-		  Data.Size = Data.Size + ((Data.Size Mod BlockSize) * 4) + BlockSize
+		  Data.Size = Data.Size + (Data.Size Mod BlockSize) + BlockSize
 		  If sodium_pad(padsz, Data, origsz, BlockSize, Data.Size) <> 0 Then Raise New SodiumException(ERR_PADDING)
 		  Data.Size = padsz
 		End Sub
