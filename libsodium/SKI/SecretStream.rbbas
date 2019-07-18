@@ -9,6 +9,19 @@ Implements Readable,Writeable
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Close
 		  
 		  If mOutput <> Nil Then
+		    If mWriteBuffer.LenB > 0 Then
+		      mDataSize = mDataSize + mWriteBuffer.LenB
+		      Do Until mWriteBuffer.LenB = 0
+		        Dim data As MemoryBlock = LeftB(mWriteBuffer, mBlockSize)
+		        mWriteBuffer = RightB(mWriteBuffer, mWriteBuffer.LenB - mBlockSize)
+		        Dim tag As UInt8 = crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+		        If data.Size < mBlockSize Then
+		          libsodium.PadData(data, mBlockSize)
+		          tag = crypto_secretstream_xchacha20poly1305_TAG_FINAL
+		        End If
+		        Me.Write(data, tag)
+		      Loop
+		    End If
 		    mOutput.Flush
 		    If mData <> Nil And mData.Size <> mDataSize Then mData.Size = mDataSize
 		  End If
@@ -19,15 +32,20 @@ Implements Readable,Writeable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(Buffer As MemoryBlock, Key As libsodium.SKI.KeyContainer, DecryptHeader As MemoryBlock = Nil)
+		Sub Constructor(Buffer As MemoryBlock, Key As libsodium.SKI.KeyContainer, DecryptHeader As MemoryBlock = Nil, HeaderPassword As libsodium.Password = Nil)
 		  ' Constructs an in-memory SecretStream. If the Buffer size is zero then an encryption stream is created,
 		  ' otherwise a decryption stream is created. Decryption requires the original decryption header.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Constructor
 		  
-		  CheckSize(Key.Value, crypto_secretstream_xchacha20poly1305_KEYBYTES)
-		  If DecryptHeader <> Nil Then CheckSize(DecryptHeader, crypto_secretstream_xchacha20poly1305_HEADERBYTES)
+		  Dim metadata As Dictionary
+		  If DecryptHeader <> Nil And DecryptHeader.StringValue(0, 5) = "-----" Then
+		    DecryptHeader = libsodium.Exporting.Import(DecryptHeader, metadata, HeaderPassword)
+		  End If
+		  
+		  If Key IsA libsodium.Password Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  
 		  Select Case True
 		  Case Buffer.Size > 0 And DecryptHeader <> Nil ' readable
 		    Me.Constructor(New BinaryStream(Buffer), Key.Value, DecryptHeader)
@@ -48,7 +66,9 @@ Implements Readable,Writeable
 		  ' Construct a decryption stream from the InputStream, Key, and Header parameters.
 		  
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_pull", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		  If Left(Header, 5) = "-----" Then Header = libsodium.Exporting.DecodeMessage(Header)
 		  CheckSize(Header, crypto_secretstream_xchacha20poly1305_HEADERBYTES)
+		  CheckSize(Key, crypto_secretstream_xchacha20poly1305_KEYBYTES)
 		  mState = New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
 		  mHeader = Header
 		  If crypto_secretstream_xchacha20poly1305_init_pull(mState, mHeader, Key) <> 0 Then Raise New SodiumException(ERR_INIT_FAILED)
@@ -61,6 +81,7 @@ Implements Readable,Writeable
 		  ' Construct a new encryption stream using the specified key.
 		  
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_push", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		  CheckSize(Key, crypto_secretstream_xchacha20poly1305_KEYBYTES)
 		  mState = New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
 		  mHeader = New MemoryBlock(crypto_secretstream_xchacha20poly1305_HEADERBYTES)
 		  
@@ -71,18 +92,8 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function Create(Key As libsodium.SKI.KeyContainer, OutputStream As Writeable) As libsodium.SKI.SecretStream
+		  If Key IsA libsodium.Password Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  Return New SecretStream(OutputStream, Key.Value)
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
-		Function DecryptionHeader() As MemoryBlock
-		  ' Returns the header that will be required to decrypt the stream
-		  '
-		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.DecryptionHeader
-		  
-		  Return mHeader
 		End Function
 	#tag EndMethod
 
@@ -93,7 +104,7 @@ Implements Readable,Writeable
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.EOF
 		  
-		  Return mEOF Or (mInput <> Nil And mInput.EOF) Or mReadError <> 0
+		  Return mEOF Or ((mInput <> Nil And mInput.EOF) And mReadError <> 0 And mReadBuffer.LenB = 0)
 		End Function
 	#tag EndMethod
 
@@ -171,15 +182,20 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function Open(Key As libsodium.SKI.KeyContainer, InputStream As Readable, DecryptHeader As FolderItem, HeaderPassword As libsodium.Password = Nil) As libsodium.SKI.SecretStream
+		  If Key IsA libsodium.Password Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  Dim bs As BinaryStream = BinaryStream.Open(DecryptHeader)
 		  Dim metadata As Dictionary
-		  Dim header As MemoryBlock = libsodium.Exporting.Import(bs.Read(bs.Length), metadata, HeaderPassword)
+		  Dim header As MemoryBlock = bs.Read(bs.Length)
+		  If header.StringValue(0, 5) = "-----" Then header = libsodium.Exporting.Import(header, metadata, HeaderPassword)
 		  Return New SecretStream(InputStream, Key.Value, header)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		 Shared Function Open(Key As libsodium.SKI.KeyContainer, InputStream As Readable, DecryptHeader As MemoryBlock) As libsodium.SKI.SecretStream
+		 Shared Function Open(Key As libsodium.SKI.KeyContainer, InputStream As Readable, DecryptHeader As MemoryBlock, HeaderPassword As libsodium.Password = Nil) As libsodium.SKI.SecretStream
+		  If Key IsA libsodium.Password Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  Dim metadata As Dictionary
+		  If DecryptHeader.StringValue(0, 5) = "-----" Then DecryptHeader = libsodium.Exporting.Import(DecryptHeader, metadata, HeaderPassword)
 		  Return New SecretStream(InputStream, Key.Value, DecryptHeader)
 		End Function
 	#tag EndMethod
@@ -201,6 +217,7 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h1
 		Protected Function Read(Count As Integer, AdditionalData As MemoryBlock, ByRef Tag As UInt8) As String
 		  Dim cipher As MemoryBlock = mInput.Read(Count + crypto_secretstream_xchacha20poly1305_ABYTES)
+		  If cipher.Size = 0 Then mEOF = mInput.EOF
 		  Dim buffer As New MemoryBlock(cipher.Size - crypto_secretstream_xchacha20poly1305_ABYTES)
 		  Dim buffersize As UInt64 = buffer.Size
 		  Dim ad As Ptr
@@ -213,18 +230,27 @@ Implements Readable,Writeable
 		  mReadError = crypto_secretstream_xchacha20poly1305_pull(mState, buffer, buffersize, tag, cipher, cipher.Size, ad, adsz)
 		  If mReadError = 0 Then
 		    mEOF = (tag = crypto_secretstream_xchacha20poly1305_TAG_FINAL) Or (buffersize = 0)
+		    If mEOF And buffersize > 0 Then libsodium.UnpadData(buffer, mBlockSize)
 		    Return buffer
 		  End If
-		  Break
+		  If Not mEOF Then Raise New IOException
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function Read(Count As Integer, encoding As TextEncoding = Nil) As String Implements Readable.Read
 		  // Part of the Readable interface.
-		  Dim ad As New MemoryBlock(0)
-		  Dim tag As UInt8
-		  Return DefineEncoding(Me.Read(Count, ad, tag), encoding)
+		  
+		  Do Until Count <= mReadBuffer.LenB
+		    Dim ad As New MemoryBlock(0)
+		    Dim tag As UInt8
+		    mReadBuffer = mReadBuffer + Me.Read(mBlockSize, ad, tag)
+		  Loop Until Me.EOF
+		  
+		  Dim data As String = LeftB(mReadBuffer, Count)
+		  Dim sz As Integer = Max(mReadBuffer.LenB - Count, 0)
+		  mReadBuffer = RightB(mReadBuffer, sz)
+		  Return DefineEncoding(data, encoding)
 		End Function
 	#tag EndMethod
 
@@ -258,7 +284,13 @@ Implements Readable,Writeable
 		Sub Write(text As String) Implements Writeable.Write
 		  // Part of the Writeable interface.
 		  
-		  Me.Write(text, Nil, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE)
+		  mWriteBuffer = mWriteBuffer + text
+		  Do Until mWriteBuffer.LenB < mBlockSize
+		    Dim data As String = LeftB(mWriteBuffer, mBlockSize)
+		    mWriteBuffer = RightB(mWriteBuffer, mWriteBuffer.LenB - mBlockSize)
+		    Me.Write(data, Nil, crypto_secretstream_xchacha20poly1305_TAG_MESSAGE)
+		  Loop
+		  
 		End Sub
 	#tag EndMethod
 
@@ -308,6 +340,39 @@ Implements Readable,Writeable
 	#tag EndMethod
 
 
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  return mBlockSize
+			End Get
+		#tag EndGetter
+		#tag Setter
+			Set
+			  value = Max(value, 1024 * 16)
+			  mBlockSize = value
+			End Set
+		#tag EndSetter
+		BlockSize As Int32
+	#tag EndComputedProperty
+
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  ' Returns the header that will be required to decrypt the stream
+			  '
+			  ' See:
+			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.DecryptionHeader
+			  
+			  Return mHeader
+			End Get
+		#tag EndGetter
+		DecryptionHeader As MemoryBlock
+	#tag EndComputedProperty
+
+	#tag Property, Flags = &h21
+		Private mBlockSize As Int32 = &hFFFF
+	#tag EndProperty
+
 	#tag Property, Flags = &h21
 		Private mData As MemoryBlock
 	#tag EndProperty
@@ -333,11 +398,19 @@ Implements Readable,Writeable
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
+		Private mReadBuffer As String
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
 		Private mReadError As Integer
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private mState As MemoryBlock
+	#tag EndProperty
+
+	#tag Property, Flags = &h21
+		Private mWriteBuffer As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h21

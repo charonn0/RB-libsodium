@@ -1,6 +1,6 @@
 BSD 3-Clause License
 
-Copyright (c) 2016-18, Andrew Lambert
+Copyright (c) 2016-19, Andrew Lambert
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
