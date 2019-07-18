@@ -477,6 +477,7 @@ Protected Module Testing
 		  Dim m3 As String = "Goobye, "
 		  Dim m4 As String = "cruel world!"
 		  
+		  ' authenticated encryption with additional data
 		  stream.Write(m1, additional)
 		  additional = libsodium.IncrementNonce(additional)
 		  stream.Write(m2, additional)
@@ -496,6 +497,24 @@ Protected Module Testing
 		  Assert(stream.Read(m3.LenB, additional) = m3)
 		  additional = libsodium.IncrementNonce(additional)
 		  Assert(stream.Read(m4.LenB, additional) = m4)
+		  stream.Close
+		  
+		  ' authenticated encryption only
+		  mb = New MemoryBlock(0)
+		  stream = New libsodium.SKI.SecretStream(mb, k)
+		  
+		  stream.Write(m1)
+		  stream.Write(m2)
+		  stream.Write(m3)
+		  stream.Write(m4)
+		  
+		  stream.Close
+		  
+		  stream = New libsodium.SKI.SecretStream(mb, k, stream.DecryptionHeader)
+		  Assert(stream.Read(m1.LenB) = m1)
+		  Assert(stream.Read(m2.LenB)= m2)
+		  Assert(stream.Read(m3.LenB) = m3)
+		  Assert(stream.Read(m4.LenB) = m4)
 		  stream.Close
 		End Sub
 	#tag EndMethod
