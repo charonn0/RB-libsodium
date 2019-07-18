@@ -104,7 +104,7 @@ Implements Readable,Writeable
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.EOF
 		  
-		  Return mEOF Or ((mInput <> Nil And mInput.EOF) And mReadError <> 0 And mReadBuffer.LenB = 0)
+		  Return (mEOF Or (mInput <> Nil And mInput.EOF)) And mReadBuffer.LenB = 0 
 		End Function
 	#tag EndMethod
 
@@ -241,11 +241,11 @@ Implements Readable,Writeable
 		Function Read(Count As Integer, encoding As TextEncoding = Nil) As String Implements Readable.Read
 		  // Part of the Readable interface.
 		  
-		  Do Until Count <= mReadBuffer.LenB
+		  Do Until Count <= mReadBuffer.LenB Or mInput.EOF Or mEOF
 		    Dim ad As New MemoryBlock(0)
 		    Dim tag As UInt8
 		    mReadBuffer = mReadBuffer + Me.Read(mBlockSize, ad, tag)
-		  Loop Until Me.EOF
+		  Loop
 		  
 		  Dim data As String = LeftB(mReadBuffer, Count)
 		  Dim sz As Integer = Max(mReadBuffer.LenB - Count, 0)
