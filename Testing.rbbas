@@ -338,7 +338,7 @@ Protected Module Testing
 		  If nonce = Nil Then nonce = recipkey.RandomNonce
 		  
 		  Dim msg1 As String = "This is a test message."
-		  Dim crypted As String = libsodium.PKI.EncryptData(msg1, recipkey.PublicKey, senderkey, nonce)
+		  Dim crypted As String = libsodium.PKI.EncryptData(msg1, New libsodium.PKI.ForeignKey(recipkey), senderkey, nonce)
 		  Dim msg2 As String = libsodium.PKI.DecryptData(crypted, senderkey.PublicKey, recipkey, nonce)
 		  
 		  Assert(msg1 = msg2)
@@ -354,7 +354,7 @@ Protected Module Testing
 		  For i As Integer = 0 To 10
 		    n = libsodium.IncrementNonce(n)
 		    Assert(n <> nonce)
-		    Dim m As MemoryBlock = libsodium.PKI.EncryptData(msg1, recipkey.PublicKey, senderkey, n)
+		    Dim m As MemoryBlock = libsodium.PKI.EncryptData(msg1, New libsodium.PKI.ForeignKey(recipkey), senderkey, n)
 		    Assert(m <> Nil)
 		    msgs.Append(m)
 		  Next
@@ -363,7 +363,7 @@ Protected Module Testing
 		  For i As Integer = 0 To UBound(msgs)
 		    n = libsodium.IncrementNonce(n)
 		    Assert(n <> nonce)
-		    Assert(libsodium.PKI.DecryptData(msgs(i), senderkey.PublicKey, recipkey, n) = msg1)
+		    Assert(libsodium.PKI.DecryptData(msgs(i), New libsodium.PKI.ForeignKey(senderkey), recipkey, n) = msg1)
 		  Next
 		End Sub
 	#tag EndMethod
@@ -423,7 +423,7 @@ Protected Module Testing
 		  recipkey = recipkey.Generate(recipkey.RandomSeed)
 		  
 		  Dim msg1 As String = "This is a test message."
-		  Dim sealed As String = libsodium.PKI.SealData(msg1, recipkey.PublicKey)
+		  Dim sealed As String = libsodium.PKI.SealData(msg1, New libsodium.PKI.ForeignKey(recipkey))
 		  Dim msg2 As String = libsodium.PKI.UnsealData(sealed, recipkey)
 		  
 		  Assert(msg1 = msg2)
@@ -437,7 +437,7 @@ Protected Module Testing
 		  senderkey = senderkey.Import(TestSigningKey, TestPasswordValue)
 		  Dim msg As MemoryBlock = "This is a test message."
 		  Dim sig As MemoryBlock = libsodium.PKI.SignData(msg, senderkey)
-		  Assert(libsodium.PKI.VerifyData(sig, senderkey.PublicKey) <> Nil)
+		  Assert(libsodium.PKI.VerifyData(sig, New libsodium.PKI.ForeignKey(senderkey)) <> Nil)
 		  
 		  //These test vectors are from http://ed25519.cr.yp.to/python/sign.input
 		  Dim f As FolderItem = App.ExecutableFile.Parent.Child("ed25519_test_vectors.txt")
