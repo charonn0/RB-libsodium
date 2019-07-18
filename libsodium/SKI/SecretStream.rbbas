@@ -233,7 +233,7 @@ Implements Readable,Writeable
 		    If mEOF And buffersize > 0 Then libsodium.UnpadData(buffer, mBlockSize)
 		    Return buffer
 		  End If
-		  If Not mEOF Then Raise New IOException
+		  If Not mEOF Then Raise New SodiumException(ERR_DECRYPT_FAIL)
 		End Function
 	#tag EndMethod
 
