@@ -22,7 +22,6 @@ Implements Readable,Writeable
 		        Me.Write(data, tag)
 		      Loop
 		    End If
-		    mOutput.Flush
 		    If mData <> Nil And mData.Size <> mDataSize Then mData.Size = mDataSize
 		  End If
 		  mInput = Nil
