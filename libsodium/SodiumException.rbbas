@@ -83,6 +83,9 @@ Inherits RuntimeException
 		  Case ERR_PADDING
 		    Me.Message = "Error while padding or unpadding data."
 		    
+		  Case ERR_DECRYPT_FAIL
+		    Me.Message = "Decryption or authentication failed."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    

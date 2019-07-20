@@ -728,6 +728,9 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_CONVERSION_FAILED, Type = Double, Dynamic = False, Default = \"-18", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_DECRYPT_FAIL, Type = Double, Dynamic = False, Default = \"-28", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_FUNCTION_UNAVAILABLE, Type = Double, Dynamic = False, Default = \"-23", Scope = Protected
 	#tag EndConstant
 
