@@ -10,7 +10,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Constructor
 		  
 		  If Nonce = Nil Then Nonce = StreamData.RandomNonce(StreamData.Type)
-		  Me.Constructor(StreamData.DeriveKey(crypto_secretbox_KEYBYTES, Nonce))
+		  Me.Constructor(StreamData.DeriveKey(crypto_secretbox_keybytes, Nonce))
 		End Sub
 	#tag EndMethod
 
@@ -24,7 +24,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Constructor
 		  
 		  If Salt = Nil Then Salt = FromPassword.RandomSalt(HashAlgorithm)
-		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_KEYBYTES, Salt, Limits, HashAlgorithm)
+		  Dim key As MemoryBlock = FromPassword.DeriveKey(crypto_secretbox_keybytes, Salt, Limits, HashAlgorithm)
 		  Me.Constructor(key)
 		  mPasswdSalt = Salt
 		End Sub
@@ -32,7 +32,7 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(KeyData As MemoryBlock)
-		  CheckSize(KeyData, crypto_secretbox_KEYBYTES)
+		  CheckSize(KeyData, crypto_secretbox_keybytes)
 		  // Calling the overridden superclass constructor.
 		  // Constructor(KeyData As MemoryBlock) -- From KeyContainer
 		  Super.Constructor(KeyData)
@@ -87,7 +87,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Generate
 		  
-		  Return New libsodium.SKI.SecretKey(RandomBytes(crypto_secretbox_KEYBYTES))
+		  Return New libsodium.SKI.SecretKey(RandomBytes(crypto_secretbox_keybytes))
 		End Function
 	#tag EndMethod
 
@@ -132,7 +132,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.RandomNonce
 		  
-		  Return RandomBytes(crypto_secretbox_NONCEBYTES)
+		  Return RandomBytes(crypto_secretbox_noncebytes)
 		End Function
 	#tag EndMethod
 

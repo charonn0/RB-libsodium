@@ -82,10 +82,10 @@ Protected Class ForeignKey
 		  Select Case extype
 		  Case libsodium.Exporting.ExportableType.SignPublic
 		    typ = KeyType.Signature
-		    CheckSize(key, crypto_sign_PUBLICKEYBYTES)
+		    CheckSize(key, crypto_sign_publickeybytes)
 		  Case libsodium.Exporting.ExportableType.CryptPublic
 		    typ = KeyType.Encryption
-		    CheckSize(key, crypto_box_PUBLICKEYBYTES)
+		    CheckSize(key, crypto_box_publickeybytes)
 		  Case libsodium.Exporting.ExportableType.Secret
 		    typ = KeyType.Generic
 		  Case libsodium.Exporting.ExportableType.CryptPrivate, libsodium.Exporting.ExportableType.SignPrivate

@@ -10,7 +10,7 @@ Protected Class KeyContainer
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If KeyData.Size < 0 Then Raise New SodiumException(ERR_SIZE_REQUIRED) ' can't pass a MemoryBlock of unknown size
-		  If RuntimeKey = Nil Then RuntimeKey = RandomBytes(crypto_secretbox_KEYBYTES)
+		  If RuntimeKey = Nil Then RuntimeKey = RandomBytes(crypto_secretbox_keybytes)
 		  mSessionNonce = libsodium.SKI.SecretKey.RandomNonce
 		  mKeyData = libsodium.SKI.EncryptData(KeyData, RuntimeKey, mSessionNonce)
 		  mKeyData.AllowSwap = False

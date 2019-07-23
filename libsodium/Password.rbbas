@@ -17,14 +17,14 @@ Inherits libsodium.SKI.KeyContainer
 		  
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
-		    CheckSize(Salt, crypto_pwhash_SALTBYTES)
-		    If crypto_pwhash(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit, 1) = -1 Then ' Fixme: use crypto_pwhash_alg_default
+		    CheckSize(Salt, crypto_pwhash_saltbytes)
+		    If crypto_pwhash(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit, crypto_pwhash_alg_argon2i13) = -1 Then
 		      HashAlgorithm = get_errno
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
 		    
 		  Case ALG_SCRYPT
-		    CheckSize(Salt, crypto_pwhash_scryptsalsa208sha256_SALTBYTES)
+		    CheckSize(Salt, crypto_pwhash_scryptsalsa208sha256_saltbytes)
 		    If crypto_pwhash_scryptsalsa208sha256(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit) = -1 Then
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
@@ -51,12 +51,12 @@ Inherits libsodium.SKI.KeyContainer
 		  
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
-		    out = New MemoryBlock(crypto_pwhash_STRBYTES)
+		    out = New MemoryBlock(crypto_pwhash_strbytes)
 		    If crypto_pwhash_argon2i_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
 		  Case ALG_SCRYPT
-		    out = New MemoryBlock(crypto_pwhash_scryptsalsa208sha256_STRBYTES)
+		    out = New MemoryBlock(crypto_pwhash_scryptsalsa208sha256_strbytes)
 		    If crypto_pwhash_scryptsalsa208sha256_str(out, clearpw, clearpw.Size, OpsLimit, MemLimit) = -1 Then
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
@@ -120,9 +120,9 @@ Inherits libsodium.SKI.KeyContainer
 		  ' Returns unpredictable bytes that are suitable to be used as a salt for Password.DeriveKey
 		  
 		  If HashAlgorithm = ALG_ARGON2 Then
-		    Return RandomBytes(crypto_pwhash_SALTBYTES)
+		    Return RandomBytes(crypto_pwhash_saltbytes)
 		  Else
-		    Return RandomBytes(crypto_pwhash_scryptsalsa208sha256_SALTBYTES)
+		    Return RandomBytes(crypto_pwhash_scryptsalsa208sha256_saltbytes)
 		  End If
 		End Function
 	#tag EndMethod
@@ -136,17 +136,19 @@ Inherits libsodium.SKI.KeyContainer
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.VerifyHash
 		  
 		  Dim clearpw As MemoryBlock = Me.Value
-		  Dim hsh As New MemoryBlock(HashValue.Size)
-		  hsh.StringValue(0, hsh.Size) = HashValue.StringValue(0, HashValue.Size)
+		  Dim orgsz As Integer = HashValue.Size
+		  Dim OK As Boolean
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
-		    If hsh.Size <= crypto_pwhash_STRBYTES Then hsh.Size = crypto_pwhash_STRBYTES Else CheckSize(hsh, crypto_pwhash_STRBYTES)
-		    Return crypto_pwhash_str_verify(hsh, clearpw, clearpw.Size) = 0
+		    If HashValue.Size <= crypto_pwhash_strbytes Then HashValue.Size = crypto_pwhash_strbytes Else CheckSize(HashValue, crypto_pwhash_strbytes)
+		    OK = (crypto_pwhash_str_verify(HashValue, clearpw, clearpw.Size) = 0)
 		    
 		  Case ALG_SCRYPT
-		    If hsh.Size <= crypto_pwhash_scryptsalsa208sha256_STRBYTES Then hsh.Size = crypto_pwhash_scryptsalsa208sha256_STRBYTES Else CheckSize(hsh, crypto_pwhash_scryptsalsa208sha256_STRBYTES)
-		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(hsh, clearpw, clearpw.Size) = 0
+		    If HashValue.Size <= crypto_pwhash_scryptsalsa208sha256_strbytes Then HashValue.Size = crypto_pwhash_scryptsalsa208sha256_strbytes Else CheckSize(HashValue, crypto_pwhash_scryptsalsa208sha256_strbytes)
+		    OK = (crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw, clearpw.Size) = 0)
 		  End Select
+		  If HashValue.Size <> orgsz Then HashValue.Size = orgsz
+		  Return OK
 		  
 		End Function
 	#tag EndMethod
@@ -192,21 +194,6 @@ Inherits libsodium.SKI.KeyContainer
 	#tag EndConstant
 
 	#tag Constant, Name = ALG_SCRYPT, Type = Double, Dynamic = False, Default = \"1", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_pwhash_ALG_DEFAULT, Type = Double, Dynamic = False, Default = \"ALG_ARGON2", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_pwhash_SALTBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_pwhash_scryptsalsa208sha256_SALTBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_pwhash_scryptsalsa208sha256_STRBYTES, Type = Double, Dynamic = False, Default = \"102", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_pwhash_STRBYTES, Type = Double, Dynamic = False, Default = \"128", Scope = Protected
 	#tag EndConstant
 
 

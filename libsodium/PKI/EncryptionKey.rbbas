@@ -10,7 +10,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
 		  
 		  If Nonce = Nil Then Nonce = StreamData.RandomNonce(StreamData.Type)
-		  Me.Constructor(StreamData.DeriveKey(crypto_box_SECRETKEYBYTES, Nonce))
+		  Me.Constructor(StreamData.DeriveKey(crypto_box_secretkeybytes, Nonce))
 		End Sub
 	#tag EndMethod
 
@@ -24,7 +24,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
 		  
 		  If Salt = Nil Then Salt = PasswordData.RandomSalt(HashAlgorithm)
-		  Me.Constructor(PasswordData.DeriveKey(crypto_box_SECRETKEYBYTES, Salt, Limits, HashAlgorithm))
+		  Me.Constructor(PasswordData.DeriveKey(crypto_box_secretkeybytes, Salt, Limits, HashAlgorithm))
 		  mPasswdSalt = Salt
 		End Sub
 	#tag EndMethod
@@ -39,8 +39,8 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://download.libsodium.org/doc/advanced/ed25519-curve25519.html
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Constructor
 		  
-		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
-		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
+		  Dim priv As New MemoryBlock(crypto_box_secretkeybytes)
+		  Dim pub As New MemoryBlock(crypto_box_publickeybytes)
 		  
 		  ' try to convert the public key. This might fail, but it's not fatal since
 		  ' the public key can be derived from the private key
@@ -53,7 +53,7 @@ Inherits libsodium.PKI.KeyPair
 		    Raise New SodiumException(ERR_CONVERSION_FAILED)
 		  End If
 		  
-		  If pub <> Nil Then 
+		  If pub <> Nil Then
 		    Me.Constructor(priv, pub) ' store the converted keys
 		  Else
 		    Me.Constructor(priv) ' derive the public key
@@ -63,8 +63,8 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock)
-		  ' Given a user's private key this method computes their public key using X25519, a 
-		  ' state-of-the-art Elliptic Curve Diffie-Hellman (ECDH) function suitable for a wide 
+		  ' Given a user's private key this method computes their public key using X25519, a
+		  ' state-of-the-art Elliptic Curve Diffie-Hellman (ECDH) function suitable for a wide
 		  ' variety of applications.
 		  '
 		  ' See:
@@ -73,9 +73,9 @@ Inherits libsodium.PKI.KeyPair
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
-		  CheckSize(PrivateKeyData, crypto_scalarmult_BYTES)
+		  CheckSize(PrivateKeyData, crypto_scalarmult_bytes)
 		  
-		  Dim pub As New MemoryBlock(crypto_scalarmult_BYTES)
+		  Dim pub As New MemoryBlock(crypto_scalarmult_bytes)
 		  If crypto_scalarmult_base(pub, PrivateKeyData) = 0 Then
 		    Me.Constructor(PrivateKeyData, pub)
 		  Else
@@ -86,8 +86,8 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
-		  CheckSize(PrivateKeyData, crypto_box_SECRETKEYBYTES)
-		  CheckSize(PublicKeyData, crypto_box_PUBLICKEYBYTES)
+		  CheckSize(PrivateKeyData, crypto_box_secretkeybytes)
+		  CheckSize(PublicKeyData, crypto_box_publickeybytes)
 		  
 		  // Calling the overridden superclass constructor.
 		  // Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock) -- From KeyPair
@@ -153,12 +153,12 @@ Inherits libsodium.PKI.KeyPair
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
-		  Dim pub As New MemoryBlock(crypto_box_PUBLICKEYBYTES)
-		  Dim priv As New MemoryBlock(crypto_box_SECRETKEYBYTES)
+		  Dim pub As New MemoryBlock(crypto_box_publickeybytes)
+		  Dim priv As New MemoryBlock(crypto_box_secretkeybytes)
 		  If SeedData = Nil Then
 		    If crypto_box_keypair(pub, priv) = -1 Then Return Nil
 		  Else
-		    CheckSize(SeedData, crypto_box_SEEDBYTES)
+		    CheckSize(SeedData, crypto_box_seedbytes)
 		    If crypto_box_seed_keypair(pub, priv, SeedData) = -1 Then Return Nil
 		  End If
 		  Return New EncryptionKey(priv, pub)
@@ -195,10 +195,10 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherKey As libsodium.PKI.EncryptionKey) As Integer
-		  ' This method overloads the comparison operator (=) allowing direct comparisons between 
-		  ' instances of EncryptionKey. The comparison operation itself is a constant-time binary 
+		  ' This method overloads the comparison operator (=) allowing direct comparisons between
+		  ' instances of EncryptionKey. The comparison operation itself is a constant-time binary
 		  ' comparison of the private key halves of both key pairs; the public halves are not compared.
-		  ' 
+		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Operator_Compare
 		  
@@ -214,7 +214,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomNonce
 		  
-		  Return RandomBytes(crypto_box_NONCEBYTES)
+		  Return RandomBytes(crypto_box_noncebytes)
 		End Function
 	#tag EndMethod
 
@@ -225,7 +225,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.RandomSeed
 		  
-		  Return RandomBytes(crypto_box_SEEDBYTES)
+		  Return RandomBytes(crypto_box_seedbytes)
 		End Function
 	#tag EndMethod
 

@@ -12,9 +12,9 @@ Inherits libsodium.SKI.KeyContainer
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Constructor
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  CheckSize(RecipientPublicKey.Value, crypto_box_PUBLICKEYBYTES)
+		  CheckSize(RecipientPublicKey.Value, crypto_box_publickeybytes)
 		  
-		  Dim buffer As New MemoryBlock(crypto_box_BEFORENMBYTES)
+		  Dim buffer As New MemoryBlock(crypto_box_beforenmbytes)
 		  If crypto_box_beforenm(buffer, RecipientPublicKey.Value, SenderPrivateKey.PrivateKey) <> 0 Then
 		    Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		  End If
@@ -24,7 +24,7 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(SharedKey As MemoryBlock)
-		  CheckSize(SharedKey, crypto_box_BEFORENMBYTES)
+		  CheckSize(SharedKey, crypto_box_beforenmbytes)
 		  // Calling the overridden superclass constructor.
 		  // Constructor(KeyData As MemoryBlock) -- From KeyContainer
 		  Super.Constructor(SharedKey)
@@ -36,12 +36,12 @@ Inherits libsodium.SKI.KeyContainer
 		  ' WARNING: THIS IS (PROBABLY) NOT THE METHOD YOU'RE LOOKING FOR. You probably
 		  ' want Constructor(TheirPublicKey, YourPrivateKey)
 		  '
-		  ' This method computes a shared secret (NOT a key) given a SenderPrivateKey and 
-		  ' RecipientPublicKey. The return value represents the X coordinate of a point on 
-		  ' the curve. As a result, the number of possible keys is limited to the group 
-		  ' size (≈2^252), and the key distribution is not uniform. 
+		  ' This method computes a shared secret (NOT a key) given a SenderPrivateKey and
+		  ' RecipientPublicKey. The return value represents the X coordinate of a point on
+		  ' the curve. As a result, the number of possible keys is limited to the group
+		  ' size (≈2^252), and the key distribution is not uniform.
 		  '
-		  ' For this reason, instead of directly using the return value as a shared key, 
+		  ' For this reason, instead of directly using the return value as a shared key,
 		  ' it is recommended to use:
 		  '
 		  '    GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
@@ -52,9 +52,9 @@ Inherits libsodium.SKI.KeyContainer
 		  ' https://download.libsodium.org/doc/advanced/scalar_multiplication.html
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.DeriveSharedSecret
 		  
-		  CheckSize(RecipientPublicKey, crypto_scalarmult_BYTES)
+		  CheckSize(RecipientPublicKey, crypto_scalarmult_bytes)
 		  
-		  Dim buffer As New MemoryBlock(crypto_scalarmult_BYTES)
+		  Dim buffer As New MemoryBlock(crypto_scalarmult_bytes)
 		  If crypto_scalarmult(buffer, SenderPrivateKey.PrivateKey, RecipientPublicKey) = 0 Then
 		    Return buffer
 		  End If

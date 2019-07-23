@@ -5,6 +5,10 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_beforenmbytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_box_detached Lib "libsodium" (Buffer As Ptr, MAC As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
@@ -25,6 +29,14 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_macbytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_noncebytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_box_open_detached_afternm Lib "libsodium" (Buffer As Ptr, Message As Ptr, MAC As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
 	#tag EndExternalMethod
 
@@ -37,11 +49,23 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_publickeybytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_box_seal Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_box_seal_open Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr, PrivateKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_secretkeybytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_box_seedbytes Lib "libsodium" () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -57,7 +81,15 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_scalarmult_bytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_sign Lib "libsodium" (Buffer As Ptr, ByRef BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_bytes Lib "libsodium" () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -89,6 +121,18 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_publickeybytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_secretkeybytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_seedbytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_sign_seed_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr, SeedData As Ptr) As Int32
 	#tag EndExternalMethod
 
@@ -111,10 +155,10 @@ Protected Module PKI
 		      CipherText = libsodium.Exporting.DecodeMessage(CipherText)
 		    End If
 		  End If
-		  CheckSize(Nonce, crypto_box_NONCEBYTES)
-		  CheckSize(SenderPublicKey.Value, crypto_box_PUBLICKEYBYTES)
+		  CheckSize(Nonce, crypto_box_noncebytes)
+		  CheckSize(SenderPublicKey.Value, crypto_box_publickeybytes)
 		  
-		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
+		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_macbytes)
 		  If crypto_box_open_easy(Buffer, CipherText, CipherText.Size, Nonce, SenderPublicKey.Value, RecipientPrivateKey.PrivateKey) = 0 Then
 		    Return buffer
 		  End If
@@ -135,9 +179,9 @@ Protected Module PKI
 		      CipherText = libsodium.Exporting.DecodeMessage(CipherText)
 		    End If
 		  End If
-		  CheckSize(Nonce, crypto_box_NONCEBYTES)
+		  CheckSize(Nonce, crypto_box_noncebytes)
 		  
-		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_MACBYTES)
+		  Dim buffer As New MemoryBlock(CipherText.Size - crypto_box_macbytes)
 		  If crypto_box_open_easy_afternm(Buffer, CipherText, CipherText.Size, Nonce, SharedKey.Value) = 0 Then
 		    Return buffer
 		  End If
@@ -152,12 +196,12 @@ Protected Module PKI
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
 		  If Nonce = Nil And Exportable Then Nonce = SenderPrivateKey.RandomNonce
-		  CheckSize(Nonce, crypto_box_NONCEBYTES)
-		  CheckSize(RecipientPublicKey.Value, crypto_box_PUBLICKEYBYTES)
-		  CheckSize(SenderPrivateKey.PrivateKey, crypto_box_SECRETKEYBYTES)
+		  CheckSize(Nonce, crypto_box_noncebytes)
+		  CheckSize(RecipientPublicKey.Value, crypto_box_publickeybytes)
+		  CheckSize(SenderPrivateKey.PrivateKey, crypto_box_secretkeybytes)
 		  If RecipientPublicKey.Type <> ForeignKey.KeyType.Encryption Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  
-		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
+		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_macbytes)
 		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey.Value, SenderPrivateKey.PrivateKey) = 0 Then
 		    If Exportable Then buffer = libsodium.Exporting.EncodeMessage(buffer, Nonce)
 		    Return buffer
@@ -173,9 +217,9 @@ Protected Module PKI
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html
 		  
 		  If Nonce = Nil And Exportable Then Nonce = SharedKey.RandomNonce
-		  CheckSize(Nonce, crypto_box_NONCEBYTES)
+		  CheckSize(Nonce, crypto_box_noncebytes)
 		  
-		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_MACBYTES)
+		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_macbytes)
 		  If crypto_box_easy_afternm(buffer, ClearText, ClearText.Size, Nonce, SharedKey.Value) = 0 Then
 		    If Exportable Then buffer = libsodium.Exporting.EncodeMessage(buffer, Nonce)
 		    Return buffer
@@ -192,7 +236,7 @@ Protected Module PKI
 		  
 		  If RecipientPublicKey.Type <> ForeignKey.KeyType.Encryption Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  
-		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_PUBLICKEYBYTES + crypto_box_MACBYTES)
+		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_publickeybytes + crypto_box_macbytes)
 		  If crypto_box_seal(buffer, ClearText, ClearText.Size, RecipientPublicKey.Value) = 0 Then
 		    If Exportable Then buffer = libsodium.Exporting.EncodeMessage(buffer)
 		    Return buffer
@@ -207,16 +251,16 @@ Protected Module PKI
 		  ' both are returned.
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/public-key_signatures.html
 		  
-		  CheckSize(SenderKey.PrivateKey, crypto_sign_SECRETKEYBYTES)
+		  CheckSize(SenderKey.PrivateKey, crypto_sign_secretkeybytes)
 		  
 		  Dim signature As MemoryBlock
 		  Dim siglen As UInt64
 		  If Not Detached Then
-		    signature = New MemoryBlock(Message.Size + crypto_sign_BYTES)
+		    signature = New MemoryBlock(Message.Size + crypto_sign_bytes)
 		    siglen = signature.Size
 		    If crypto_sign(signature, siglen, Message, Message.Size, SenderKey.PrivateKey) <> 0 Then Return Nil
 		  Else
-		    signature = New MemoryBlock(crypto_sign_BYTES)
+		    signature = New MemoryBlock(crypto_sign_bytes)
 		    If crypto_sign_detached(signature, siglen, Message, Message.Size, SenderKey.PrivateKey) <> 0 Then Return Nil
 		  End If
 		  
@@ -235,7 +279,7 @@ Protected Module PKI
 		  ' See: https://download.libsodium.org/doc/public-key_cryptography/sealed_boxes.html
 		  
 		  If Left(SealedBox, 5) = "-----" Then SealedBox = libsodium.Exporting.DecodeMessage(SealedBox)
-		  Dim buffer As New MemoryBlock(SealedBox.Size - crypto_box_PUBLICKEYBYTES - crypto_box_MACBYTES)
+		  Dim buffer As New MemoryBlock(SealedBox.Size - crypto_box_publickeybytes - crypto_box_macbytes)
 		  If crypto_box_seal_open(Buffer, SealedBox, SealedBox.Size, RecipientPrivateKey.Publickey, RecipientPrivateKey.PrivateKey) = 0 Then
 		    Return buffer
 		  End If
@@ -252,11 +296,11 @@ Protected Module PKI
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.VerifyData
 		  
 		  
-		  CheckSize(SignerPublicKey.Value, crypto_sign_PUBLICKEYBYTES)
+		  CheckSize(SignerPublicKey.Value, crypto_sign_publickeybytes)
 		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  
 		  If Left(SignedMessage, 5) = "-----" Then SignedMessage = libsodium.Exporting.Import(SignedMessage)
-		  Dim tmp As New MemoryBlock(SignedMessage.Size - crypto_sign_BYTES)
+		  Dim tmp As New MemoryBlock(SignedMessage.Size - crypto_sign_bytes)
 		  Dim sz As UInt64 = tmp.Size
 		  If crypto_sign_open(tmp, sz, SignedMessage, SignedMessage.Size, SignerPublicKey.Value) = 0 Then
 		    tmp.Size = sz
@@ -277,46 +321,12 @@ Protected Module PKI
 		  
 		  
 		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
-		  CheckSize(SignerPublicKey.Value, crypto_sign_PUBLICKEYBYTES)
+		  CheckSize(SignerPublicKey.Value, crypto_sign_publickeybytes)
 		  If Left(DetachedSignature, 5) = "-----" Then DetachedSignature = libsodium.Exporting.Import(DetachedSignature)
 		  Return crypto_sign_verify_detached(DetachedSignature, SignedMessage, SignedMessage.Size, SignerPublicKey.Value) = 0
 		  
 		End Function
 	#tag EndMethod
-
-
-	#tag Constant, Name = crypto_box_BEFORENMBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_MACBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_PUBLICKEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_SECRETKEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_box_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_scalarmult_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_BYTES, Type = Double, Dynamic = False, Default = \"64", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_PUBLICKEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_SECRETKEYBYTES, Type = Double, Dynamic = False, Default = \"64", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_sign_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
 
 
 	#tag ViewBehavior

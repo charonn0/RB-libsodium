@@ -12,13 +12,13 @@ Protected Class KeyStream
 		  Dim sz As Integer
 		  Select Case mType
 		  Case StreamType.ChaCha20
-		    sz = crypto_stream_chacha20_KEYBYTES
+		    sz = crypto_stream_chacha20_keybytes
 		  Case StreamType.XChaCha20
-		    sz = crypto_stream_xchacha20_KEYBYTES
+		    sz = crypto_stream_xchacha20_keybytes
 		  Case StreamType.Salsa20
-		    sz = crypto_stream_salsa20_KEYBYTES
+		    sz = crypto_stream_salsa20_keybytes
 		  Case StreamType.XSalsa20
-		    sz = crypto_stream_KEYBYTES
+		    sz = crypto_stream_keybytes
 		  End Select
 		  If sz = 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
 		  
@@ -50,13 +50,13 @@ Protected Class KeyStream
 		  Dim sz As Integer
 		  Select Case NewStreamType
 		  Case StreamType.ChaCha20
-		    sz = crypto_stream_chacha20_KEYBYTES
+		    sz = crypto_stream_chacha20_keybytes
 		  Case StreamType.XChaCha20
-		    sz = crypto_stream_xchacha20_KEYBYTES
+		    sz = crypto_stream_xchacha20_keybytes
 		  Case StreamType.Salsa20
-		    sz = crypto_stream_salsa20_KEYBYTES
+		    sz = crypto_stream_salsa20_keybytes
 		  Case StreamType.XSalsa20
-		    sz = crypto_stream_KEYBYTES
+		    sz = crypto_stream_keybytes
 		  End Select
 		  
 		  If sz = 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
@@ -70,13 +70,13 @@ Protected Class KeyStream
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Select Case mType
 		  Case StreamType.ChaCha20
-		    CheckSize(KeyData, crypto_stream_chacha20_KEYBYTES)
+		    CheckSize(KeyData, crypto_stream_chacha20_keybytes)
 		  Case StreamType.XChaCha20
-		    CheckSize(KeyData, crypto_stream_xchacha20_KEYBYTES)
+		    CheckSize(KeyData, crypto_stream_xchacha20_keybytes)
 		  Case StreamType.Salsa20
-		    CheckSize(KeyData, crypto_stream_salsa20_KEYBYTES)
+		    CheckSize(KeyData, crypto_stream_salsa20_keybytes)
 		  Case StreamType.XSalsa20
-		    CheckSize(KeyData, crypto_stream_KEYBYTES)
+		    CheckSize(KeyData, crypto_stream_keybytes)
 		  End Select
 		  
 		  mKey = New libsodium.SKI.KeyContainer(KeyData)
@@ -97,19 +97,19 @@ Protected Class KeyStream
 		  Dim mb As New MemoryBlock(Size)
 		  Select Case Type
 		  Case StreamType.ChaCha20
-		    CheckSize(Nonce, crypto_stream_chacha20_NONCEBYTES)
+		    CheckSize(Nonce, crypto_stream_chacha20_noncebytes)
 		    If crypto_stream_chacha20(mb, mb.Size, Nonce, mKey.Value) <> 0 Then mb = Nil
 		    
 		  Case StreamType.XChaCha20
-		    CheckSize(Nonce, crypto_stream_xchacha20_NONCEBYTES)
+		    CheckSize(Nonce, crypto_stream_xchacha20_noncebytes)
 		    If crypto_stream_xchacha20(mb, mb.Size, Nonce, mKey.Value) <> 0 Then mb = Nil
 		    
 		  Case StreamType.Salsa20
-		    CheckSize(Nonce, crypto_stream_salsa20_NONCEBYTES)
+		    CheckSize(Nonce, crypto_stream_salsa20_noncebytes)
 		    If crypto_stream_salsa20(mb, mb.Size, Nonce, mKey.Value) <> 0 Then mb = Nil
 		    
 		  Case StreamType.XSalsa20
-		    CheckSize(Nonce, crypto_stream_NONCEBYTES)
+		    CheckSize(Nonce, crypto_stream_noncebytes)
 		    If crypto_stream(mb, mb.Size, Nonce, mKey.Value) <> 0 Then mb = Nil
 		    
 		  End Select
@@ -131,19 +131,19 @@ Protected Class KeyStream
 		  Dim output As New MemoryBlock(Data.Size)
 		  Select Case Type
 		  Case StreamType.ChaCha20
-		    CheckSize(Nonce, crypto_stream_chacha20_NONCEBYTES)
+		    CheckSize(Nonce, crypto_stream_chacha20_noncebytes)
 		    If crypto_stream_chacha20_xor(output, Data, Data.Size, Nonce, mKey.Value) <> 0 Then output = Nil
 		    
 		  Case StreamType.XChaCha20
-		    CheckSize(Nonce, crypto_stream_xchacha20_NONCEBYTES)
+		    CheckSize(Nonce, crypto_stream_xchacha20_noncebytes)
 		    If crypto_stream_xchacha20_xor(output, Data, Data.Size, Nonce, mKey.Value) <> 0 Then output = Nil
 		    
 		  Case StreamType.Salsa20
-		    CheckSize(Nonce, crypto_stream_salsa20_NONCEBYTES)
+		    CheckSize(Nonce, crypto_stream_salsa20_noncebytes)
 		    If crypto_stream_salsa20_xor(output, Data, Data.Size, Nonce, mKey.Value) <> 0 Then output = Nil
 		    
 		  Case StreamType.XSalsa20
-		    CheckSize(Nonce, crypto_stream_NONCEBYTES)
+		    CheckSize(Nonce, crypto_stream_noncebytes)
 		    If crypto_stream_xor(output, Data, Data.Size, Nonce, mKey.Value) <> 0 Then output = Nil
 		    
 		  End Select
@@ -163,13 +163,13 @@ Protected Class KeyStream
 		  Dim sz As Integer
 		  Select Case Type
 		  Case StreamType.ChaCha20
-		    sz = crypto_stream_chacha20_NONCEBYTES
+		    sz = crypto_stream_chacha20_noncebytes
 		  Case StreamType.XChaCha20
-		    sz = crypto_stream_xchacha20_NONCEBYTES
+		    sz = crypto_stream_xchacha20_noncebytes
 		  Case StreamType.Salsa20
-		    sz = crypto_stream_salsa20_NONCEBYTES
+		    sz = crypto_stream_salsa20_noncebytes
 		  Case StreamType.XSalsa20
-		    sz = crypto_stream_NONCEBYTES
+		    sz = crypto_stream_noncebytes
 		  End Select
 		  
 		  Return RandomBytes(sz)
@@ -209,31 +209,6 @@ Protected Class KeyStream
 	#tag Property, Flags = &h1
 		Protected mType As libsodium.StreamType = libsodium.StreamType.XSalsa20
 	#tag EndProperty
-
-
-	#tag Constant, Name = crypto_stream_chacha20_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_stream_chacha20_NONCEBYTES, Type = Double, Dynamic = False, Default = \"8", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_stream_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_stream_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_stream_salsa20_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_stream_salsa20_NONCEBYTES, Type = Double, Dynamic = False, Default = \"8", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_stream_xchacha20_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_stream_xchacha20_NONCEBYTES, Type = Double, Dynamic = False, Default = \"24", Scope = Private
-	#tag EndConstant
 
 
 	#tag ViewBehavior

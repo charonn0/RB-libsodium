@@ -66,9 +66,10 @@ Implements Readable,Writeable
 		  
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_pull", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
 		  If Left(Header, 5) = "-----" Then Header = libsodium.Exporting.DecodeMessage(Header)
-		  CheckSize(Header, crypto_secretstream_xchacha20poly1305_HEADERBYTES)
-		  CheckSize(Key, crypto_secretstream_xchacha20poly1305_KEYBYTES)
-		  mState = New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
+		  CheckSize(Header, crypto_secretstream_xchacha20poly1305_headerbytes)
+		  CheckSize(Key, crypto_secretstream_xchacha20poly1305_keybytes)
+		  
+		  mState = New MemoryBlock(crypto_secretstream_xchacha20poly1305_statebytes)
 		  mHeader = Header
 		  If crypto_secretstream_xchacha20poly1305_init_pull(mState, mHeader, Key) <> 0 Then Raise New SodiumException(ERR_INIT_FAILED)
 		  mInput = InputStream
@@ -80,10 +81,10 @@ Implements Readable,Writeable
 		  ' Construct a new encryption stream using the specified key.
 		  
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_push", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
-		  CheckSize(Key, crypto_secretstream_xchacha20poly1305_KEYBYTES)
-		  mState = New MemoryBlock(crypto_stream_chacha20_ietf_KEYBYTES + crypto_stream_chacha20_ietf_NONCEBYTES + 8)
-		  mHeader = New MemoryBlock(crypto_secretstream_xchacha20poly1305_HEADERBYTES)
+		  CheckSize(Key, crypto_secretstream_xchacha20poly1305_keybytes)
 		  
+		  mState = New MemoryBlock(crypto_secretstream_xchacha20poly1305_statebytes)
+		  mHeader = New MemoryBlock(crypto_secretstream_xchacha20poly1305_headerbytes)
 		  If crypto_secretstream_xchacha20poly1305_init_push(mState, mHeader, Key) <> 0 Then Raise New SodiumException(ERR_INIT_FAILED)
 		  mOutput = OutputStream
 		End Sub
@@ -150,7 +151,7 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		 Shared Function GenerateKey() As libsodium.SKI.KeyContainer
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_keygen", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
-		  Dim k As New MemoryBlock(crypto_secretstream_xchacha20poly1305_KEYBYTES)
+		  Dim k As New MemoryBlock(crypto_secretstream_xchacha20poly1305_keybytes)
 		  crypto_secretstream_xchacha20poly1305_keygen(k)
 		  If k.IsZero Then Raise New SodiumException(ERR_KEYGEN_FAILED)
 		  Return New KeyContainer(k)
@@ -215,9 +216,14 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h1
 		Protected Function Read(Count As Integer, AdditionalData As MemoryBlock, ByRef Tag As UInt8) As String
-		  Dim cipher As MemoryBlock = mInput.Read(Count + crypto_secretstream_xchacha20poly1305_ABYTES)
+		  ' This method reads an encrypted block+authentication code from the stream, and validates
+		  ' the block and the AdditionalData against the authentication code. If the block+AdditionalData
+		  ' are authentic then the Tag parameter is set to the accompanying message tag (one of the
+		  ' crypto_secretstream_xchacha20poly1305_TAG_* constants) and the decrypted block is returned.
+		  
+		  Dim cipher As MemoryBlock = mInput.Read(Count + crypto_secretstream_xchacha20poly1305_abytes)
 		  If cipher.Size = 0 Then mEOF = mInput.EOF
-		  Dim buffer As New MemoryBlock(cipher.Size - crypto_secretstream_xchacha20poly1305_ABYTES)
+		  Dim buffer As New MemoryBlock(cipher.Size - crypto_secretstream_xchacha20poly1305_abytes)
 		  Dim buffersize As UInt64 = buffer.Size
 		  Dim ad As Ptr
 		  Dim adsz As UInt64
@@ -315,7 +321,7 @@ Implements Readable,Writeable
 		    ad = AdditionalData
 		  End If
 		  sz = sz + adsz
-		  Dim buffer As New MemoryBlock(sz + crypto_secretstream_xchacha20poly1305_ABYTES)
+		  Dim buffer As New MemoryBlock(sz + crypto_secretstream_xchacha20poly1305_abytes)
 		  Dim txt As MemoryBlock = Text
 		  mWriteError = crypto_secretstream_xchacha20poly1305_push(mState, buffer, sz, txt, txt.Size, ad, adsz, Tag)
 		  If buffer.Size <> sz Then buffer.Size = sz

@@ -76,6 +76,50 @@ Protected Class GenericHashDigest
 		End Sub
 	#tag EndMethod
 
+	#tag Method, Flags = &h21
+		Private Sub InitBlake2b()
+		  mState = New MemoryBlock(crypto_generichash_statebytes())
+		  
+		  If mKey <> Nil Then
+		    mLastError = crypto_generichash_init(mState, mKey, mKey.Size, mHashSize)
+		  Else
+		    mLastError = crypto_generichash_init(mState, Nil, 0, mHashSize)
+		  End If
+		  
+		  mOutput = Nil
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub InitSHA256()
+		  If mKey <> Nil Then
+		    If Not System.IsFunctionAvailable("crypto_auth_hmacsha256_init", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
+		    mState = New MemoryBlock(crypto_auth_hmacsha256_statebytes())
+		    mLastError = crypto_auth_hmacsha256_init(mState, mKey, mKey.Size)
+		  Else
+		    mState = New MemoryBlock(crypto_hash_sha256_statebytes())
+		    mLastError = crypto_hash_sha256_init(mState)
+		  End If
+		  
+		  mOutput = Nil
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub InitSHA512()
+		  If mKey <> Nil Then
+		    If Not System.IsFunctionAvailable("crypto_auth_hmacsha512_init", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
+		    mState = New MemoryBlock(crypto_auth_hmacsha512_statebytes())
+		    mLastError = crypto_auth_hmacsha512_init(mState, mKey, mKey.Size)
+		  Else
+		    mState = New MemoryBlock(crypto_hash_sha512_statebytes())
+		    mLastError = crypto_hash_sha512_init(mState)
+		  End If
+		  
+		  mOutput = Nil
+		End Sub
+	#tag EndMethod
+
 	#tag Method, Flags = &h0
 		Sub Process(NewData As MemoryBlock)
 		  ' Processes the NewData into a running hash.
@@ -87,13 +131,41 @@ Protected Class GenericHashDigest
 		  If NewData.Size < 0 Then Raise New SodiumException(ERR_SIZE_REQUIRED) ' can't pass a MemoryBlock of unknown size
 		  Select Case mType
 		  Case HashType.Generic
-		    mLastError = crypto_generichash_update(mState, NewData, NewData.Size)
+		    ProcessBlake2b(NewData)
 		  Case HashType.SHA256
-		    mLastError = crypto_hash_sha256_update(mState, NewData, NewData.Size)
+		    ProcessSHA256(NewData)
 		  Case HashType.SHA512
-		    mLastError = crypto_hash_sha512_update(mState, NewData, NewData.Size)
+		    ProcessSHA512(NewData)
 		  End Select
 		  
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub ProcessBlake2b(NewData As MemoryBlock)
+		  mLastError = crypto_generichash_update(mState, NewData, NewData.Size)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub ProcessSHA256(NewData As MemoryBlock)
+		  If mKey = Nil Then
+		    mLastError = crypto_hash_sha256_update(mState, NewData, NewData.Size)
+		  Else
+		    mLastError = crypto_auth_hmacsha256_update(mState, NewData, NewData.Size)
+		  End If
+		  
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub ProcessSHA512(NewData As MemoryBlock)
+		  If mKey = Nil Then
+		    mLastError = crypto_hash_sha512_update(mState, NewData, NewData.Size)
+		  Else
+		    mLastError = crypto_auth_hmacsha512_update(mState, NewData, NewData.Size)
+		  End If
 		  
 		End Sub
 	#tag EndMethod
@@ -129,39 +201,15 @@ Protected Class GenericHashDigest
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Reset
 		  
-		  Dim sz As UInt32
 		  Select Case mType
 		  Case HashType.Generic
-		    sz = crypto_generichash_statebytes()
+		    InitBlake2b()
 		  Case HashType.SHA256
-		    sz = crypto_hash_sha256_statebytes()
+		    InitSHA256()
 		  Case HashType.SHA512
-		    sz = crypto_hash_sha512_statebytes()
+		    InitSHA512()
 		  End Select
 		  
-		  mState = New MemoryBlock(sz)
-		  
-		  If mKey <> Nil Then
-		    Select Case mType
-		    Case HashType.Generic
-		      mLastError = crypto_generichash_init(mState, mKey, mKey.Size, mHashSize)
-		    Case HashType.SHA256
-		      mLastError = crypto_hash_sha256_init(mState, mKey, mKey.Size)
-		    Case HashType.SHA512
-		      mLastError = crypto_hash_sha512_init(mState, mKey, mKey.Size)
-		    End Select
-		  Else
-		    Select Case mType
-		    Case HashType.Generic
-		      mLastError = crypto_generichash_init(mState, Nil, 0, mHashSize)
-		    Case HashType.SHA256
-		      mLastError = crypto_hash_sha256_init(mState)
-		    Case HashType.SHA512
-		      mLastError = crypto_hash_sha512_init(mState)
-		    End Select
-		  End If
-		  
-		  mOutput = Nil
 		End Sub
 	#tag EndMethod
 
@@ -180,16 +228,28 @@ Protected Class GenericHashDigest
 		  ' See: 
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Value
 		  
-		  If mOutput <> Nil Then Return mOutput
+		  If mOutput <> Nil Or mState = Nil Then Return mOutput
 		  mOutput = New MemoryBlock(mHashSize)
 		  Select Case mType
 		  Case HashType.Generic
 		    mLastError = crypto_generichash_final(mState, mOutput, mOutput.Size)
+		    
 		  Case HashType.SHA256
-		    mLastError = crypto_hash_sha256_final(mState, mOutput)
+		    If mKey = Nil Then
+		      mLastError = crypto_hash_sha256_final(mState, mOutput)
+		    Else
+		      mLastError = crypto_auth_hmacsha256_final(mState, mOutput)
+		    End If
+		    
 		  Case HashType.SHA512
-		    mLastError = crypto_hash_sha512_final(mState, mOutput)
+		    If mKey = Nil Then
+		      mLastError = crypto_hash_sha512_final(mState, mOutput)
+		    Else
+		      mLastError = crypto_auth_hmacsha512_final(mState, mOutput)
+		    End If
+		    
 		  End Select
+		  
 		  mState = Nil
 		  Return mOutput
 		  
