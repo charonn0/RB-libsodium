@@ -196,9 +196,6 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Constant, Name = ALG_SCRYPT, Type = Double, Dynamic = False, Default = \"1", Scope = Public
 	#tag EndConstant
 
-	#tag Constant, Name = crypto_pwhash_ALG_DEFAULT, Type = Double, Dynamic = False, Default = \"ALG_ARGON2", Scope = Protected
-	#tag EndConstant
-
 
 	#tag ViewBehavior
 		#tag ViewProperty
