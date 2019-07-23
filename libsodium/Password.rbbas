@@ -136,17 +136,19 @@ Inherits libsodium.SKI.KeyContainer
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.VerifyHash
 		  
 		  Dim clearpw As MemoryBlock = Me.Value
-		  Dim hsh As New MemoryBlock(HashValue.Size)
-		  hsh.StringValue(0, hsh.Size) = HashValue.StringValue(0, HashValue.Size)
+		  Dim orgsz As Integer = HashValue.Size
+		  Dim OK As Boolean
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
-		    If hsh.Size <= crypto_pwhash_strbytes Then hsh.Size = crypto_pwhash_strbytes Else CheckSize(hsh, crypto_pwhash_strbytes)
-		    Return crypto_pwhash_str_verify(hsh, clearpw, clearpw.Size) = 0
+		    If HashValue.Size <= crypto_pwhash_strbytes Then HashValue.Size = crypto_pwhash_strbytes Else CheckSize(HashValue, crypto_pwhash_strbytes)
+		    OK = (crypto_pwhash_str_verify(HashValue, clearpw, clearpw.Size) = 0)
 		    
 		  Case ALG_SCRYPT
-		    If hsh.Size <= crypto_pwhash_scryptsalsa208sha256_strbytes Then hsh.Size = crypto_pwhash_scryptsalsa208sha256_strbytes Else CheckSize(hsh, crypto_pwhash_scryptsalsa208sha256_strbytes)
-		    Return crypto_pwhash_scryptsalsa208sha256_str_verify(hsh, clearpw, clearpw.Size) = 0
+		    If HashValue.Size <= crypto_pwhash_scryptsalsa208sha256_strbytes Then HashValue.Size = crypto_pwhash_scryptsalsa208sha256_strbytes Else CheckSize(HashValue, crypto_pwhash_scryptsalsa208sha256_strbytes)
+		    OK = (crypto_pwhash_scryptsalsa208sha256_str_verify(HashValue, clearpw, clearpw.Size) = 0)
 		  End Select
+		  If HashValue.Size <> orgsz Then HashValue.Size = orgsz
+		  Return OK
 		  
 		End Function
 	#tag EndMethod
