@@ -267,6 +267,14 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_shorthash_bytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_shorthash_keybytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_stream Lib "libsodium" (OutBuffer As Ptr, OutSize As UInt64, Nonce As Ptr, KeyStream As Ptr) As Int32
 	#tag EndExternalMethod
 
@@ -497,7 +505,7 @@ Protected Module libsodium
 		    randombytes_buf(mb, mb.Size)
 		  Else
 		    If Not System.IsFunctionAvailable("randombytes_buf_deterministic", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
-		    CheckSize(Seed, randombytes_SEEDBYTES)
+		    CheckSize(Seed, randombytes_seedbytes)
 		    randombytes_buf_deterministic(mb, mb.Size, Seed)
 		  End If
 		  Return mb
@@ -514,6 +522,10 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function randombytes_random Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function randombytes_seedbytes Lib "libsodium" () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -590,9 +602,9 @@ Protected Module libsodium
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.ShortHash
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  CheckSize(Key, crypto_shorthash_KEYBYTES)
+		  CheckSize(Key, crypto_shorthash_keybytes)
 		  
-		  Dim buffer As New MemoryBlock(crypto_shorthash_BYTES)
+		  Dim buffer As New MemoryBlock(crypto_shorthash_bytes)
 		  If crypto_shorthash(buffer, InputData, InputData.Size, Key) = 0 Then
 		    Return buffer.UInt64Value(0)
 		  End If
@@ -737,12 +749,6 @@ Protected Module libsodium
 	#tag EndMethod
 
 
-	#tag Constant, Name = crypto_shorthash_BYTES, Type = Double, Dynamic = False, Default = \"8", Scope = Private
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_shorthash_KEYBYTES, Type = Double, Dynamic = False, Default = \"16", Scope = Private
-	#tag EndConstant
-
 	#tag Constant, Name = ERR_CANT_ALLOC, Type = Double, Dynamic = False, Default = \"-5", Scope = Protected
 	#tag EndConstant
 
@@ -822,9 +828,6 @@ Protected Module libsodium
 	#tag EndConstant
 
 	#tag Constant, Name = ERR_WRONG_HALF, Type = Double, Dynamic = False, Default = \"-21", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = randombytes_SEEDBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Private
 	#tag EndConstant
 
 
