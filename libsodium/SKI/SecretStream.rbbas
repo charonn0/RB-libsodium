@@ -215,6 +215,11 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h1
 		Protected Function Read(Count As Integer, AdditionalData As MemoryBlock, ByRef Tag As UInt8) As String
+		  ' This method reads an encrypted block+authentication code from the stream, and validates
+		  ' the block and the AdditionalData against the authentication code. If the block+AdditionalData
+		  ' are authentic then the Tag parameter is set to the accompanying message tag (one of the
+		  ' crypto_secretstream_xchacha20poly1305_TAG_* constants) and the decrypted block is returned.
+		  
 		  Dim cipher As MemoryBlock = mInput.Read(Count + crypto_secretstream_xchacha20poly1305_ABYTES)
 		  If cipher.Size = 0 Then mEOF = mInput.EOF
 		  Dim buffer As New MemoryBlock(cipher.Size - crypto_secretstream_xchacha20poly1305_ABYTES)
