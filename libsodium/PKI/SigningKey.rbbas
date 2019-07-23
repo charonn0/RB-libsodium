@@ -10,21 +10,21 @@ Inherits libsodium.PKI.KeyPair
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Constructor
 		  
 		  If Nonce = Nil Then Nonce = StreamData.RandomNonce(StreamData.Type)
-		  Me.Constructor(StreamData.DeriveKey(crypto_sign_SECRETKEYBYTES, Nonce))
+		  Me.Constructor(StreamData.DeriveKey(crypto_sign_secretkeybytes, Nonce))
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h1000
 		Sub Constructor(PasswordData As libsodium.Password, Optional Salt As MemoryBlock, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Interactive, HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2)
-		  ' Generates a key pair by deriving it from a salted hash of the password. The operation is 
-		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits 
+		  ' Generates a key pair by deriving it from a salted hash of the password. The operation is
+		  ' deterministic, such that calling this method twice with the same Password, Salt, and Limits
 		  ' parameters will produce the same output both times.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Constructor
 		  
 		  If Salt = Nil Then Salt = PasswordData.RandomSalt(HashAlgorithm)
-		  Me.Constructor(PasswordData.DeriveKey(crypto_sign_SECRETKEYBYTES, Salt, Limits, HashAlgorithm))
+		  Me.Constructor(PasswordData.DeriveKey(crypto_sign_secretkeybytes, Salt, Limits, HashAlgorithm))
 		  mPasswdSalt = Salt
 		End Sub
 	#tag EndMethod
@@ -34,9 +34,9 @@ Inherits libsodium.PKI.KeyPair
 		  ' Given a user's private key, this method computes their public key
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
-		  CheckSize(PrivateKeyData, crypto_sign_SECRETKEYBYTES)
+		  CheckSize(PrivateKeyData, crypto_sign_secretkeybytes)
 		  
-		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
+		  Dim pub As New MemoryBlock(crypto_sign_publickeybytes)
 		  If crypto_sign_ed25519_sk_to_pk(pub, PrivateKeyData) = 0 Then
 		    Me.Constructor(PrivateKeyData, pub)
 		  Else
@@ -49,8 +49,8 @@ Inherits libsodium.PKI.KeyPair
 
 	#tag Method, Flags = &h1001
 		Protected Sub Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock)
-		  CheckSize(PrivateKeyData, crypto_sign_SECRETKEYBYTES)
-		  CheckSize(PublicKeyData, crypto_sign_PUBLICKEYBYTES)
+		  CheckSize(PrivateKeyData, crypto_sign_secretkeybytes)
+		  CheckSize(PublicKeyData, crypto_sign_publickeybytes)
 		  
 		  // Calling the overridden superclass constructor.
 		  // Constructor(PrivateKeyData As MemoryBlock, PublicKeyData As MemoryBlock) -- From KeyPair
@@ -115,12 +115,12 @@ Inherits libsodium.PKI.KeyPair
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
-		  Dim pub As New MemoryBlock(crypto_sign_PUBLICKEYBYTES)
-		  Dim priv As New MemoryBlock(crypto_sign_SECRETKEYBYTES)
+		  Dim pub As New MemoryBlock(crypto_sign_publickeybytes)
+		  Dim priv As New MemoryBlock(crypto_sign_secretkeybytes)
 		  If SeedData = Nil Then
 		    If crypto_sign_keypair(pub, priv) = -1 Then Return Nil
 		  Else
-		    CheckSize(SeedData, crypto_sign_SEEDBYTES)
+		    CheckSize(SeedData, crypto_sign_seedbytes)
 		    If crypto_sign_seed_keypair(pub, priv, SeedData) = -1 Then Return Nil
 		  End If
 		  Return New SigningKey(priv, pub)
@@ -175,7 +175,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.RandomSeed
 		  
-		  Return RandomBytes(crypto_sign_SEEDBYTES)
+		  Return RandomBytes(crypto_sign_seedbytes)
 		End Function
 	#tag EndMethod
 
@@ -187,7 +187,7 @@ Inherits libsodium.PKI.KeyPair
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey.Seed
 		  
-		  Dim seed As New MemoryBlock(crypto_sign_SEEDBYTES)
+		  Dim seed As New MemoryBlock(crypto_sign_seedbytes)
 		  If crypto_sign_ed25519_sk_to_seed(seed, Me.PrivateKey) = 0 Then Return seed
 		End Function
 	#tag EndMethod
