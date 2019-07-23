@@ -159,6 +159,18 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_alg_argon2i13 Lib "libsodium" () As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_alg_argon2id13 Lib "libsodium" () As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_pwhash_alg_default Lib "libsodium" () As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_pwhash_argon2i_memlimit_interactive Lib "libsodium" () As UInt32
 	#tag EndExternalMethod
 

@@ -18,7 +18,7 @@ Inherits libsodium.SKI.KeyContainer
 		  Select Case HashAlgorithm
 		  Case ALG_ARGON2
 		    CheckSize(Salt, crypto_pwhash_saltbytes)
-		    If crypto_pwhash(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit, 1) = -1 Then ' Fixme: use crypto_pwhash_alg_default
+		    If crypto_pwhash(out, out.Size, clearpw, clearpw.Size, Salt, opslimit, memlimit, crypto_pwhash_alg_argon2i13) = -1 Then
 		      HashAlgorithm = get_errno
 		      Raise New SodiumException(ERR_COMPUTATION_FAILED)
 		    End If
