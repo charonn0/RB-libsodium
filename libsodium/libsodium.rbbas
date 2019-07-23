@@ -538,6 +538,9 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Sub PadData(ByRef Data As MemoryBlock, BlockSize As UInt32)
+		  ' Adds padding to the Data, using the ISO/IEC 7816-4 padding algorithm, until the Data.Size
+		  ' is a multiple of the BlockSize. Use UnpadData to remove the padding.
+		  
 		  If Not IsAvailable() Or Not System.IsFunctionAvailable("sodium_pad", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If Data.Size = -1 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
 		  Dim origsz As UInt32 = Data.Size
@@ -783,6 +786,8 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Sub UnpadData(ByRef Data As MemoryBlock, BlockSize As UInt32)
+		  ' Removes the padding that was applied to the Data by the PadData method.
+		  
 		  If Not IsAvailable() Or Not System.IsFunctionAvailable("sodium_unpad", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If Data.Size = -1 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
 		  Dim unpadsz As UInt32
