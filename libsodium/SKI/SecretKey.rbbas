@@ -149,7 +149,7 @@ Inherits libsodium.SKI.KeyContainer
 		This class contains a key for use with symmetric encryption and message authentication. Encryption, 
 		decryption, and MAC generation/validation use the same key, so it must be kept secret at all times.
 		
-		You may use a SecretKey with these utility methods:
+		You may use a SecretKey with the SecretStream class or these utility methods:
 		
 		  * libsodium.SKI.EncryptData: Encrypt a message and generate its MAC; the MAC is prepended to the 
 		    encrypted message and returned.
@@ -179,6 +179,8 @@ Inherits libsodium.SKI.KeyContainer
 		    Dim n As MemoryBlock = sk.RandomNonce()
 		    Dim msg As MemoryBlock = libsodium.SKI.EncryptData("Hello, world!", sk, n)
 		    MsgBox(libsodium.SKI.DecryptData(msg, sk, n))
+		
+		See also the libsodium.IncrementNonce, libsodium.CombineNonce, and libsodium.CompareNonce utility methods.
 	#tag EndNote
 
 
