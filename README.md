@@ -41,6 +41,7 @@ RB-libsodium will raise a PlatformNotSupportedException when used if all require
 * [Secure memory](https://github.com/charonn0/RB-libsodium/wiki/Secure-Memory-Example)
 * [Password hashing](https://github.com/charonn0/RB-libsodium/wiki/Password-Example#generate-a-hash)
 * [Generic hashing](https://github.com/charonn0/RB-libsodium/wiki/Generic-Hash-Example)
+* [Encrypting streams or files](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream#example)
 * PKI
   * Encryption
     * [Generate a key pair](https://github.com/charonn0/RB-libsodium/wiki/PKI-Encryption-Examples#generate-a-new-random-encryption-key)
