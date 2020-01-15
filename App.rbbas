@@ -4,14 +4,14 @@ Inherits Application
 	#tag Event
 		Sub Open()
 		  If Testing.RunTests() Then
-		    MsgBox("All Tests passed!")
+		    Call MsgBox("All Tests passed!", 64, libsodium.Version.VersionString)
 		  Else
 		    Dim s As String
 		    For i As Integer = 0 To UBound(Testing.Failures)
 		      s = s + Testing.TestName(Testing.Failures(i))
 		      If i < UBound(Testing.Failures) Then s = s  + ", " + EndOfLine
 		    Next
-		    MsgBox("Test failure(s): " + EndOfLine + s)
+		    Call MsgBox("Test failure(s): " + EndOfLine + s, 16, libsodium.Version.VersionString)
 		  End If
 		End Sub
 	#tag EndEvent
