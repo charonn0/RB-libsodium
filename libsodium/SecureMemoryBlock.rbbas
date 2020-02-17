@@ -69,6 +69,7 @@ Class SecureMemoryBlock
 		  mPtr = sodium_malloc(Size)
 		  If mPtr = Nil Then Raise New SodiumException(ERR_CANT_ALLOC)
 		  mSize = Size
+		  mFreeable = True
 		End Sub
 	#tag EndMethod
 
