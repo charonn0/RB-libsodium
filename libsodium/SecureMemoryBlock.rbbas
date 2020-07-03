@@ -69,6 +69,7 @@ Class SecureMemoryBlock
 		  mPtr = sodium_malloc(Size)
 		  If mPtr = Nil Then Raise New SodiumException(ERR_CANT_ALLOC)
 		  mSize = Size
+		  mFreeable = True
 		End Sub
 	#tag EndMethod
 
@@ -239,7 +240,11 @@ Class SecureMemoryBlock
 		  Case libsodium.StrComp(Me.StringValue(0, Me.Size), OtherMB.StringValue(0, OtherMB.Size))
 		    Return 0
 		  Case OtherMB.Size = mSize
-		    Return Sign(Int32(mPtr) - Int32(OtherMB.mPtr))
+		    #If Target64Bit Then
+		      Return Sign(Int64(mPtr) - Int64(OtherMB.mPtr))
+		    #Else
+		      Return Sign(Int32(mPtr) - Int32(OtherMB.mPtr))
+		    #endif
 		  Else
 		    Return Sign(mSize - UInt64(OtherMB.Size))
 		  End Select

@@ -380,7 +380,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function DecodeBase64(Data As MemoryBlock, IgnoredChars As String = "", Type As libsodium.Base64Variant = libsodium.Base64Variant.Original) As MemoryBlock
-		  ' Decodes Base64 to Binary. On error, returns Nil. IgnoredChars is an optional string 
+		  ' Decodes base64 to binary. On error, returns Nil. IgnoredChars is an optional string
 		  ' of characters to skip when interpreting the Data
 		  '
 		  ' See:
@@ -400,7 +400,7 @@ Protected Module libsodium
 
 	#tag Method, Flags = &h1
 		Protected Function DecodeHex(HexData As MemoryBlock, IgnoredChars As String = "") As MemoryBlock
-		  ' Decodes Base64 to Binary. On error, returns Nil. IgnoredChars is an optional 
+		  ' Decodes hexadecimal to binary. On error, returns Nil. IgnoredChars is an optional
 		  ' string of characters to skip when interpreting the HexData
 		  '
 		  ' See:
