@@ -77,35 +77,6 @@ Protected Class GenericHashDigest
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub FinalizeBlake2b()
-		  mLastError = crypto_generichash_final(mState, mOutput, mOutput.Size)
-		  mState = Nil
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
-		Private Sub FinalizeSHA256()
-		  If mKey = Nil Then
-		    mLastError = crypto_hash_sha256_final(mState, mOutput)
-		  Else
-		    mLastError = crypto_auth_hmacsha256_final(mState, mOutput)
-		  End If
-		  mState = Nil
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
-		Private Sub FinalizeSHA512()
-		  If mKey = Nil Then
-		    mLastError = crypto_hash_sha512_final(mState, mOutput)
-		  Else
-		    mLastError = crypto_auth_hmacsha512_final(mState, mOutput)
-		  End If
-		  mState = Nil
-		End Sub
-	#tag EndMethod
-
-	#tag Method, Flags = &h21
 		Private Sub InitBlake2b()
 		  mState = New MemoryBlock(crypto_generichash_statebytes())
 		  
@@ -152,7 +123,7 @@ Protected Class GenericHashDigest
 	#tag Method, Flags = &h0
 		Sub Process(NewData As MemoryBlock)
 		  ' Processes the NewData into a running hash.
-		  '
+		  ' 
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Process
 		  
@@ -203,7 +174,7 @@ Protected Class GenericHashDigest
 		 Shared Function RandomKey(Type As libsodium.HashType = libsodium.HashType.Generic) As MemoryBlock
 		  ' Returns unpredictable bytes that are suitable to be used as a key for GenericHashDigest.Constructor
 		  '
-		  ' See:
+		  ' See: 
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.RandomKey
 		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
@@ -243,26 +214,43 @@ Protected Class GenericHashDigest
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Function Type() As libsodium.HashType
+		  Return mType
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Value() As String
 		  ' Finalizes the digest operation and returns the hash value.
-		  ' Once you call this method the processor can accept no more input until
+		  ' Once you call this method the processor can accept no more input until 
 		  ' the processor is Reset().
 		  '
-		  ' See:
+		  ' See: 
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Value
 		  
 		  If mOutput <> Nil Or mState = Nil Then Return mOutput
-		  
 		  mOutput = New MemoryBlock(mHashSize)
 		  Select Case mType
 		  Case HashType.Generic
-		    FinalizeBlake2b()
+		    mLastError = crypto_generichash_final(mState, mOutput, mOutput.Size)
+		    
 		  Case HashType.SHA256
-		    FinalizeSHA256()
+		    If mKey = Nil Then
+		      mLastError = crypto_hash_sha256_final(mState, mOutput)
+		    Else
+		      mLastError = crypto_auth_hmacsha256_final(mState, mOutput)
+		    End If
+		    
 		  Case HashType.SHA512
-		    FinalizeSHA512()
+		    If mKey = Nil Then
+		      mLastError = crypto_hash_sha512_final(mState, mOutput)
+		    Else
+		      mLastError = crypto_auth_hmacsha512_final(mState, mOutput)
+		    End If
+		    
 		  End Select
 		  
+		  mState = Nil
 		  Return mOutput
 		  
 		  
@@ -270,38 +258,29 @@ Protected Class GenericHashDigest
 	#tag EndMethod
 
 
-	#tag Property, Flags = &h21
-		Private mHashSize As UInt32
+	#tag Property, Flags = &h1
+		Protected mHashSize As UInt32
 	#tag EndProperty
 
-	#tag Property, Flags = &h21
-		Private mKey As MemoryBlock
+	#tag Property, Flags = &h1
+		Protected mKey As MemoryBlock
 	#tag EndProperty
 
-	#tag Property, Flags = &h21
-		Private mLastError As Int32
+	#tag Property, Flags = &h1
+		Protected mLastError As Int32
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
 		Private mOutput As MemoryBlock
 	#tag EndProperty
 
-	#tag Property, Flags = &h21
-		Private mState As MemoryBlock
+	#tag Property, Flags = &h1
+		Protected mState As MemoryBlock
 	#tag EndProperty
 
-	#tag Property, Flags = &h21
-		Private mType As libsodium.HashType
+	#tag Property, Flags = &h1
+		Protected mType As libsodium.HashType
 	#tag EndProperty
-
-	#tag ComputedProperty, Flags = &h0
-		#tag Getter
-			Get
-			  return mType
-			End Get
-		#tag EndGetter
-		Type As libsodium.HashType
-	#tag EndComputedProperty
 
 
 	#tag Constant, Name = crypto_auth_hmacsha256_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
