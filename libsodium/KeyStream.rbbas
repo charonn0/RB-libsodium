@@ -176,12 +176,6 @@ Protected Class KeyStream
 		End Function
 	#tag EndMethod
 
-	#tag Method, Flags = &h0
-		Function Type() As libsodium.StreamType
-		  Return mType
-		End Function
-	#tag EndMethod
-
 
 	#tag Note, Name = About key streams
 		The Process method, viewed as a function of the nonce for a uniform random key, is designed to meet the standard notion
@@ -209,6 +203,15 @@ Protected Class KeyStream
 	#tag Property, Flags = &h1
 		Protected mType As libsodium.StreamType = libsodium.StreamType.XSalsa20
 	#tag EndProperty
+
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  return mType
+			End Get
+		#tag EndGetter
+		Type As libsodium.StreamType
+	#tag EndComputedProperty
 
 
 	#tag ViewBehavior

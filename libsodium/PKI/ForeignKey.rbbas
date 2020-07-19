@@ -128,12 +128,6 @@ Protected Class ForeignKey
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Type() As libsodium.PKI.ForeignKey.KeyType
-		  Return mType
-		End Function
-	#tag EndMethod
-
-	#tag Method, Flags = &h0
 		Function Value() As MemoryBlock
 		  Return mKeyData
 		End Function
@@ -147,6 +141,15 @@ Protected Class ForeignKey
 	#tag Property, Flags = &h21
 		Private mType As libsodium.PKI.ForeignKey.KeyType
 	#tag EndProperty
+
+	#tag ComputedProperty, Flags = &h0
+		#tag Getter
+			Get
+			  return mType
+			End Get
+		#tag EndGetter
+		Type As libsodium.PKI.ForeignKey.KeyType
+	#tag EndComputedProperty
 
 
 	#tag Enum, Name = KeyType, Type = Integer, Flags = &h0
