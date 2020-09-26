@@ -60,8 +60,8 @@ Implements Readable,Writeable
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h21
-		Private Sub Constructor(InputStream As Readable, Key As MemoryBlock, Header As MemoryBlock)
+	#tag Method, Flags = &h1
+		Protected Sub Constructor(InputStream As Readable, Key As MemoryBlock, Header As MemoryBlock)
 		  ' Construct a decryption stream from the InputStream, Key, and Header parameters.
 		  
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_pull", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
@@ -76,8 +76,8 @@ Implements Readable,Writeable
 		End Sub
 	#tag EndMethod
 
-	#tag Method, Flags = &h21
-		Private Sub Constructor(OutputStream As Writeable, Key As MemoryBlock)
+	#tag Method, Flags = &h1
+		Protected Sub Constructor(OutputStream As Writeable, Key As MemoryBlock)
 		  ' Construct a new encryption stream using the specified key.
 		  
 		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_push", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
