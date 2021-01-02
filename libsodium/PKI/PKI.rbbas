@@ -97,6 +97,10 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_ed25519ph_statebytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_sign_ed25519_pk_to_curve25519 Lib "libsodium" (ToEncryptionKey As Ptr, FromSigningKey As Ptr) As Int32
 	#tag EndExternalMethod
 
@@ -110,6 +114,18 @@ Protected Module PKI
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_sign_ed25519_sk_to_seed Lib "libsodium" (Seed As Ptr, PrivateKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_final_create Lib "libsodium" (State As Ptr, Signature As Ptr, ByRef SigLength As UInt64, PrivateKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_final_verify Lib "libsodium" (State As Ptr, Signature As Ptr, PublicKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_init Lib "libsodium" (State As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -134,6 +150,10 @@ Protected Module PKI
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_sign_seed_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr, SeedData As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_update Lib "libsodium" (State As Ptr, Message As Ptr, MessageLength As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21

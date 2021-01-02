@@ -892,6 +892,9 @@ Protected Module libsodium
 	#tag Constant, Name = ERR_UNAVAILABLE, Type = Double, Dynamic = False, Default = \"-3", Scope = Protected
 	#tag EndConstant
 
+	#tag Constant, Name = ERR_UNSUITABLE, Type = Double, Dynamic = False, Default = \"-29", Scope = Protected
+	#tag EndConstant
+
 	#tag Constant, Name = ERR_WRITE_DENIED, Type = Double, Dynamic = False, Default = \"-8", Scope = Protected
 	#tag EndConstant
 
