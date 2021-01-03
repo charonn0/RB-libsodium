@@ -73,6 +73,22 @@ Protected Class SigningDigest
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
+		Sub Reset()
+		  ' Resets the processor state so that a new signature can be computed.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningDigest.Reset
+		  
+		  Select Case True
+		  Case mDigest <> Nil
+		    mDigest.Reset()
+		  Case mState <> Nil
+		    Me.Constructor()
+		  End Select
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
 		Function Sign(SenderKey As libsodium.PKI.SigningKey) As MemoryBlock
 		  ' Finalizes the hash operation and then signs the result with the SenderKey. On
 		  ' success the signature is returned; on error Nil is returned. After calling this
@@ -149,8 +165,6 @@ Protected Class SigningDigest
 
 	#tag Note, Name = About this class
 		Use this class as an alternative to libsodium.PKI.SignData/VerifyData for messages that are too large to fit into memory.
-		
-		
 	#tag EndNote
 
 
