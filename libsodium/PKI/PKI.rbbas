@@ -292,6 +292,24 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function SignData(Message As Readable, SenderKey As libsodium.PKI.SigningKey, Exportable As Boolean = False) As MemoryBlock
+		  ' Generate a Ed25519ph signature for the Message using the SenderKey. 
+		  ' This method is suited for Messages that can't fit into memory.
+		  
+		  CheckSize(SenderKey.PrivateKey, crypto_sign_secretkeybytes)
+		  
+		  Dim sigstream As New libsodium.PKI.SigningDigest()
+		  Do Until Message.EOF
+		    sigstream.Process(Message.Read(1024 * 1024 * 32))
+		  Loop
+		  Dim signature As MemoryBlock = sigstream.Sign(SenderKey)
+		  If Exportable Then signature = libsodium.Exporting.Export(signature, libsodium.Exporting.ExportableType.Signature)
+		  Return signature
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function UnsealData(SealedBox As MemoryBlock, RecipientPrivateKey As libsodium.PKI.EncryptionKey) As MemoryBlock
 		  ' Decrypts the SealedBox using the XSalsa20 stream cipher with the recipient's private key. The decrypted
 		  ' data is returned  on success. On error returns Nil.
@@ -345,6 +363,23 @@ Protected Module PKI
 		  If Left(DetachedSignature, 5) = "-----" Then DetachedSignature = libsodium.Exporting.Import(DetachedSignature)
 		  Return crypto_sign_verify_detached(DetachedSignature, SignedMessage, SignedMessage.Size, SignerPublicKey.Value) = 0
 		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function VerifyData(SignedMessage As Readable, SignerPublicKey As libsodium.PKI.ForeignKey, Signature As MemoryBlock) As Boolean
+		  ' Verify a Ed25519ph signature for the Message using the SenderKey.
+		  ' This method is suited for Messages that can't fit into memory.
+		  
+		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  CheckSize(SignerPublicKey.Value, crypto_sign_publickeybytes)
+		  If Left(Signature, 5) = "-----" Then Signature = libsodium.Exporting.Import(Signature)
+		  
+		  Dim sigstream As New libsodium.PKI.SigningDigest()
+		  Do Until SignedMessage.EOF
+		    sigstream.Process(SignedMessage.Read(1024 * 1024 * 32))
+		  Loop
+		  Return sigstream.Verify(SignerPublicKey, Signature)
 		End Function
 	#tag EndMethod
 
