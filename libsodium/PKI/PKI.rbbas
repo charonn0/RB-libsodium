@@ -348,6 +348,41 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function VerifyData(Algorithm As libsodium.HashType, SignedMessage As Readable, SignerPublicKey As libsodium.PKI.ForeignKey, Signature As MemoryBlock) As Boolean
+		  ' Verify a Ed25519ph signature for the Message using the SenderKey.
+		  ' This method is suited for Messages that can't fit into memory.
+		  
+		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  CheckSize(SignerPublicKey.Value, crypto_sign_publickeybytes)
+		  Dim metadata As Dictionary
+		  Dim sigstream As libsodium.PKI.SigningDigest
+		  If Left(Signature, 5) = "-----" Then
+		    Signature = libsodium.Exporting.Import(Signature, metadata)
+		    If metadata = Nil Or metadata.Lookup("Alg", "") = "" Then
+		      sigstream = New libsodium.PKI.SigningDigest()
+		    ElseIf metadata.Lookup("Alg", "") = "SHA512" Then
+		      sigstream = New libsodium.PKI.SigningDigest(HashType.SHA512)
+		    ElseIf metadata.Lookup("Alg", "") = "blake2b" Then
+		      sigstream = New libsodium.PKI.SigningDigest(HashType.Generic)
+		    Else
+		      Return False
+		    End If
+		  Else
+		    If Algorithm = HashType.SHA256 Then
+		      sigstream = New libsodium.PKI.SigningDigest()
+		    Else
+		      sigstream = New libsodium.PKI.SigningDigest(Algorithm)
+		    End If
+		  End If
+		  
+		  Do Until SignedMessage.EOF
+		    sigstream.Process(SignedMessage.Read(1024 * 1024 * 32))
+		  Loop
+		  Return sigstream.Verify(SignerPublicKey, Signature)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function VerifyData(SignedMessage As MemoryBlock, SignerPublicKey As libsodium.PKI.ForeignKey) As MemoryBlock
 		  ' Validate a Ed25519 signature for the Message that was generated using the signer's PRIVATE key.
 		  ' The signature is expected to be prepended to the message (the default for SignData).
@@ -394,26 +429,7 @@ Protected Module PKI
 		  ' Verify a Ed25519ph signature for the Message using the SenderKey.
 		  ' This method is suited for Messages that can't fit into memory.
 		  
-		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
-		  CheckSize(SignerPublicKey.Value, crypto_sign_publickeybytes)
-		  Dim metadata As Dictionary
-		  If Left(Signature, 5) = "-----" Then Signature = libsodium.Exporting.Import(Signature, metadata)
-		  Dim sigstream As libsodium.PKI.SigningDigest
-		  
-		  If metadata = Nil Or metadata.Lookup("Alg", "") = "" Then
-		    sigstream = New libsodium.PKI.SigningDigest()
-		  ElseIf metadata.Lookup("Alg", "") = "SHA512" Then
-		    sigstream = New libsodium.PKI.SigningDigest(HashType.SHA512)
-		  ElseIf metadata.Lookup("Alg", "") = "blake2b" Then
-		    sigstream = New libsodium.PKI.SigningDigest(HashType.Generic)
-		  Else
-		    Return False
-		  End If
-		  
-		  Do Until SignedMessage.EOF
-		    sigstream.Process(SignedMessage.Read(1024 * 1024 * 32))
-		  Loop
-		  Return sigstream.Verify(SignerPublicKey, Signature)
+		  Return VerifyData(HashType.SHA256, SignedMessage, SignerPublicKey, Signature)
 		End Function
 	#tag EndMethod
 
