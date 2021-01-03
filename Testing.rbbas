@@ -92,6 +92,12 @@ Protected Module Testing
 		    Failures.Append(14)
 		  End Try
 		  
+		  Try
+		    TestPKISignDigest()
+		  Catch
+		    Failures.Append(15)
+		  End Try
+		  
 		  Return UBound(Failures) = -1
 		End Function
 	#tag EndMethod
@@ -289,6 +295,10 @@ Protected Module Testing
 		    Return "TestKeyStream_Salsa20"
 		  Case 13
 		    Return "TestKeyStream_XSalsa20"
+		  Case 14
+		    Return "TestSecretStream"
+		  Case 15
+		    Return "TestPKISignDigest"
 		  Else
 		    Return "Unknown test"
 		  End Select
@@ -462,6 +472,53 @@ Protected Module Testing
 		  Finally
 		    tis.Close
 		  End Try
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h21
+		Private Sub TestPKISignDigest()
+		  Dim senderkey As libsodium.PKI.SigningKey
+		  senderkey = senderkey.Import(TestSigningKey, TestPasswordValue)
+		  Dim fk As New libsodium.PKI.ForeignKey(senderkey)
+		  Dim msg As MemoryBlock = "This is a test message."
+		  Dim bs As New BinaryStream(msg)
+		  
+		  Dim sig As MemoryBlock = libsodium.PKI.SignData(bs, senderkey)
+		  bs.Position = 0
+		  Assert(libsodium.PKI.VerifyData(bs, fk, sig))
+		  
+		  bs.Position = 0
+		  sig = libsodium.PKI.SignData(libsodium.HashType.SHA512, bs, senderkey)
+		  bs.Position = 0
+		  Assert(libsodium.PKI.VerifyData(libsodium.HashType.SHA512, bs, fk, sig))
+		  
+		  bs.Position = 0
+		  sig = libsodium.PKI.SignData(libsodium.HashType.Generic, bs, senderkey)
+		  bs.Position = 0
+		  Assert(libsodium.PKI.VerifyData(libsodium.HashType.Generic, bs, fk, sig))
+		  
+		  bs.Position = 0
+		  sig = libsodium.PKI.SignData(libsodium.HashType.SHA256, bs, senderkey)
+		  bs.Position = 0
+		  Assert(libsodium.PKI.VerifyData(libsodium.HashType.SHA256, bs, fk, sig))
+		  
+		  
+		  bs.Position = 0
+		  sig = libsodium.PKI.SignData(libsodium.HashType.SHA512, bs, senderkey, True)
+		  bs.Position = 0
+		  Assert(libsodium.PKI.VerifyData(bs, fk, sig))
+		  
+		  bs.Position = 0
+		  sig = libsodium.PKI.SignData(libsodium.HashType.Generic, bs, senderkey, True)
+		  bs.Position = 0
+		  Assert(libsodium.PKI.VerifyData(bs, fk, sig))
+		  
+		  bs.Position = 0
+		  sig = libsodium.PKI.SignData(libsodium.HashType.SHA256, bs, senderkey, True)
+		  bs.Position = 0
+		  Assert(libsodium.PKI.VerifyData(bs, fk, sig))
+		  
+		  
 		End Sub
 	#tag EndMethod
 
