@@ -2,6 +2,14 @@
 Protected Class SigningDigest
 	#tag Method, Flags = &h0
 		Sub Constructor()
+		  ' Instantiates the digest operation. If libsodium has the multipart crypto_sign api then
+		  ' we use it. Otherwise we use the GenericHashDigest to compute a SHA512 hash of the
+		  ' input. These two modes are equivalent but not identical, such that a signature from one
+		  ' will not validate in the other.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningDigest.Constructor
+		  
 		  If System.IsFunctionAvailable("crypto_sign_init", "libsodium") Then
 		    mState = New MemoryBlock(crypto_sign_ed25519ph_statebytes)
 		    If crypto_sign_init(mState) <> 0 Then Raise New SodiumException(ERR_INIT_FAILED)
@@ -13,6 +21,11 @@ Protected Class SigningDigest
 
 	#tag Method, Flags = &h0
 		Sub Constructor(HashAlgorithm As libsodium.HashType)
+		  ' Instantiates the digest operation using either blake2b or SHA512; SHA256 is not allowed. 
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningDigest.Constructor
+		  
 		  If HashAlgorithm = HashType.SHA256 Then Raise New SodiumException(ERR_UNSUITABLE)
 		  mDigest = New GenericHashDigest(HashAlgorithm)
 		End Sub
@@ -33,6 +46,11 @@ Protected Class SigningDigest
 
 	#tag Method, Flags = &h0
 		Sub Process(NewData As MemoryBlock)
+		  ' Process the NewData into the running hash.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningDigest.Process
+		  
 		  If mDigest = Nil Then
 		    ProcessEd25519ph(NewData)
 		  Else
@@ -56,6 +74,14 @@ Protected Class SigningDigest
 
 	#tag Method, Flags = &h0
 		Function Sign(SenderKey As libsodium.PKI.SigningKey) As MemoryBlock
+		  ' Finalizes the hash operation and then signs the result with the SenderKey. On
+		  ' success the signature is returned; on error Nil is returned. After calling this
+		  ' method (regardless of success) no other methods (Process, Verify, etc.) may be
+		  ' called nor can this method be called twice.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningDigest.Sign
+		  
 		  If mDigest = Nil Then
 		    Return SignFinalEd25519ph(SenderKey)
 		  Else
@@ -87,6 +113,14 @@ Protected Class SigningDigest
 
 	#tag Method, Flags = &h0
 		Function Verify(SenderKey As libsodium.PKI.ForeignKey, Signature As MemoryBlock) As Boolean
+		  ' Finalizes the hash operation and then verifies the Signature with the SenderKey.
+		  ' Returns True if the Signature is valid. After calling this method (regardless of
+		  ' success) no other methods (Process, Sign, etc.) may be called nor can this method
+		  ' be called twice.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningDigest.Verify
+		  
 		  If mDigest = Nil Then
 		    Return VerifyFinalEd25519ph(SenderKey, Signature)
 		  Else
@@ -111,6 +145,13 @@ Protected Class SigningDigest
 		  Return ok
 		End Function
 	#tag EndMethod
+
+
+	#tag Note, Name = About this class
+		Use this class as an alternative to libsodium.PKI.SignData/VerifyData for messages that are too large to fit into memory.
+		
+		
+	#tag EndNote
 
 
 	#tag Property, Flags = &h21
