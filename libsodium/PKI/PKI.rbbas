@@ -265,6 +265,38 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function SignData(Algorithm As libsodium.HashType, Message As Readable, SenderKey As libsodium.PKI.SigningKey, Exportable As Boolean = False) As MemoryBlock
+		  ' Generate a Ed25519ph signature for the Message using the SenderKey.
+		  ' This method is suited for Messages that can't fit into memory.
+		  
+		  CheckSize(SenderKey.PrivateKey, crypto_sign_secretkeybytes)
+		  Dim sigstream As libsodium.PKI.SigningDigest
+		  If Algorithm = HashType.SHA256 Then ' ignored
+		    sigstream = New libsodium.PKI.SigningDigest()
+		  Else
+		    sigstream = New libsodium.PKI.SigningDigest(Algorithm)
+		  End If
+		  
+		  Do Until Message.EOF
+		    sigstream.Process(Message.Read(1024 * 1024 * 32))
+		  Loop
+		  Dim signature As MemoryBlock = sigstream.Sign(SenderKey)
+		  Dim metadata As Dictionary
+		  If Exportable Then
+		    If Algorithm = HashType.SHA512 Then
+		      metadata = New Dictionary("Alg":"SHA512")
+		    ElseIf Algorithm = HashType.Generic Then
+		      metadata = New Dictionary("Alg":"blake2b")
+		    End If
+		    Dim type As libsodium.Exporting.ExportableType = libsodium.Exporting.ExportableType.SignatureDigest
+		    signature = libsodium.Exporting.Export(signature, type, Nil, ResourceLimits.Interactive, metadata)
+		  End If
+		  Return signature
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function SignData(Message As MemoryBlock, SenderKey As libsodium.PKI.SigningKey, Detached As Boolean = False, Exportable As Boolean = False) As MemoryBlock
 		  ' Generate a Ed25519 signature for the Message using the SenderKey. If Detached=True then
 		  ' only the signature is returned; otherwise the signature is prepended to the message and
@@ -293,19 +325,10 @@ Protected Module PKI
 
 	#tag Method, Flags = &h1
 		Protected Function SignData(Message As Readable, SenderKey As libsodium.PKI.SigningKey, Exportable As Boolean = False) As MemoryBlock
-		  ' Generate a Ed25519ph signature for the Message using the SenderKey. 
+		  ' Generate a Ed25519ph signature for the Message using the SenderKey.
 		  ' This method is suited for Messages that can't fit into memory.
 		  
-		  CheckSize(SenderKey.PrivateKey, crypto_sign_secretkeybytes)
-		  
-		  Dim sigstream As New libsodium.PKI.SigningDigest()
-		  Do Until Message.EOF
-		    sigstream.Process(Message.Read(1024 * 1024 * 32))
-		  Loop
-		  Dim signature As MemoryBlock = sigstream.Sign(SenderKey)
-		  If Exportable Then signature = libsodium.Exporting.Export(signature, libsodium.Exporting.ExportableType.Signature)
-		  Return signature
-		  
+		  Return SignData(HashType.SHA256, Message, SenderKey, Exportable)
 		End Function
 	#tag EndMethod
 
@@ -373,9 +396,20 @@ Protected Module PKI
 		  
 		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  CheckSize(SignerPublicKey.Value, crypto_sign_publickeybytes)
-		  If Left(Signature, 5) = "-----" Then Signature = libsodium.Exporting.Import(Signature)
+		  Dim metadata As Dictionary
+		  If Left(Signature, 5) = "-----" Then Signature = libsodium.Exporting.Import(Signature, metadata)
+		  Dim sigstream As libsodium.PKI.SigningDigest
 		  
-		  Dim sigstream As New libsodium.PKI.SigningDigest()
+		  If metadata = Nil Or metadata.Lookup("Alg", "") = "" Then
+		    sigstream = New libsodium.PKI.SigningDigest()
+		  ElseIf metadata.Lookup("Alg", "") = "SHA512" Then
+		    sigstream = New libsodium.PKI.SigningDigest(HashType.SHA512)
+		  ElseIf metadata.Lookup("Alg", "") = "blake2b" Then
+		    sigstream = New libsodium.PKI.SigningDigest(HashType.Generic)
+		  Else
+		    Return False
+		  End If
+		  
 		  Do Until SignedMessage.EOF
 		    sigstream.Process(SignedMessage.Read(1024 * 1024 * 32))
 		  Loop

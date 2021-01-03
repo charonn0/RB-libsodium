@@ -166,6 +166,9 @@ Protected Module Exporting
 		          MetaData.Value("Alg") = Password.ALG_ARGON2
 		        Case "scrypt"
 		          MetaData.Value("Alg") = Password.ALG_SCRYPT
+		        Else
+		          s = Replace(s, NthField(s, "=", 1) + "=", "")
+		          MetaData.Value("Alg") = s
 		        End Select
 		      Case Left(s, 8) = "#Limits="
 		        Select Case Right(s, s.Len - 8)
@@ -225,6 +228,9 @@ Protected Module Exporting
 		  Case ExportableType.StateHeader
 		    Return StateHeaderPrefix
 		    
+		  Case ExportableType.SignatureDigest
+		    Return SignatureDigestPrefix
+		    
 		  Else
 		    Return UnknownPrefix
 		    
@@ -262,6 +268,9 @@ Protected Module Exporting
 		  Case ExportableType.StateHeader
 		    Return StateHeaderSuffix
 		    
+		  Case ExportableType.SignatureDigest
+		    Return SignatureDigestSuffix
+		    
 		  Else
 		    Return UnknownSuffix
 		  End Select
@@ -271,7 +280,8 @@ Protected Module Exporting
 	#tag Method, Flags = &h1
 		Protected Function GetType(EncodedKey As MemoryBlock) As libsodium.Exporting.ExportableType
 		  Static Prefixes() As String = Array(EncryptionPrivatePrefix, EncryptionPublicPrefix, _
-		  SigningPrivatePrefix, SigningPublicPrefix, SalsaPrefix, SharedPrefix, SignaturePrefix, HMACPrefix, StateHeaderPrefix)
+		  SigningPrivatePrefix, SigningPublicPrefix, SalsaPrefix, SharedPrefix, SignaturePrefix, HMACPrefix, StateHeaderPrefix, _
+		  SignatureDigestPrefix)
 		  Dim ExportedKey As MemoryBlock = ReplaceLineEndings(EncodedKey, EndOfLine.Windows)
 		  Dim lines() As String = SplitB(ExportedKey, EndOfLine.Windows)
 		  For i As Integer = 0 To UBound(lines)
@@ -294,6 +304,8 @@ Protected Module Exporting
 		      Return ExportableType.HMAC
 		    Case 8 ' decryption header
 		      Return ExportableType.StateHeader
+		    Case 9 ' Signed hash digest
+		      Return ExportableType.SignatureDigest
 		    End Select
 		  Next
 		  Return ExportableType.Unknown
@@ -394,6 +406,12 @@ Protected Module Exporting
 	#tag Constant, Name = SharedSuffix, Type = String, Dynamic = False, Default = \"-----END CURVE25519 SHARED KEY BLOCK-----", Scope = Private
 	#tag EndConstant
 
+	#tag Constant, Name = SignatureDigestPrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519ph SIGNATURE BLOCK-----", Scope = Private
+	#tag EndConstant
+
+	#tag Constant, Name = SignatureDigestSuffix, Type = String, Dynamic = False, Default = \"-----END ED25519ph SIGNATURE BLOCK-----", Scope = Private
+	#tag EndConstant
+
 	#tag Constant, Name = SignaturePrefix, Type = String, Dynamic = False, Default = \"-----BEGIN ED25519 SIGNATURE BLOCK-----", Scope = Private
 	#tag EndConstant
 
@@ -435,7 +453,8 @@ Protected Module Exporting
 		  Unknown
 		  Signature
 		  HMAC
-		StateHeader
+		  StateHeader
+		SignatureDigest
 	#tag EndEnum
 
 
