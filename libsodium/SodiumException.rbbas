@@ -86,6 +86,9 @@ Inherits RuntimeException
 		  Case ERR_DECRYPT_FAIL
 		    Me.Message = "Decryption or authentication failed."
 		    
+		  Case ERR_UNSUITABLE
+		    Me.Message = "The specified algorithm is not suitable for the requested operation."
+		    
 		  Else
 		    Me.Message = "Unknown error in libsodium."
 		    

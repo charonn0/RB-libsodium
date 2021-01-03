@@ -97,6 +97,10 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_ed25519ph_statebytes Lib "libsodium" () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_sign_ed25519_pk_to_curve25519 Lib "libsodium" (ToEncryptionKey As Ptr, FromSigningKey As Ptr) As Int32
 	#tag EndExternalMethod
 
@@ -110,6 +114,18 @@ Protected Module PKI
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_sign_ed25519_sk_to_seed Lib "libsodium" (Seed As Ptr, PrivateKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_final_create Lib "libsodium" (State As Ptr, Signature As Ptr, ByRef SigLength As UInt64, PrivateKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_final_verify Lib "libsodium" (State As Ptr, Signature As Ptr, PublicKey As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_init Lib "libsodium" (State As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -134,6 +150,10 @@ Protected Module PKI
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_sign_seed_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr, SeedData As Ptr) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_sign_update Lib "libsodium" (State As Ptr, Message As Ptr, MessageLength As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -245,6 +265,38 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function SignData(Algorithm As libsodium.HashType, Message As Readable, SenderKey As libsodium.PKI.SigningKey, Exportable As Boolean = False) As MemoryBlock
+		  ' Generate a Ed25519ph signature for the Message using the SenderKey.
+		  ' This method is suited for Messages that can't fit into memory.
+		  
+		  CheckSize(SenderKey.PrivateKey, crypto_sign_secretkeybytes)
+		  Dim sigstream As libsodium.PKI.SigningDigest
+		  If Algorithm = HashType.SHA256 Then ' ignored
+		    sigstream = New libsodium.PKI.SigningDigest()
+		  Else
+		    sigstream = New libsodium.PKI.SigningDigest(Algorithm)
+		  End If
+		  
+		  Do Until Message.EOF
+		    sigstream.Process(Message.Read(1024 * 1024 * 32))
+		  Loop
+		  Dim signature As MemoryBlock = sigstream.Sign(SenderKey)
+		  Dim metadata As Dictionary
+		  If Exportable Then
+		    If Algorithm = HashType.SHA512 Then
+		      metadata = New Dictionary("Alg":"SHA512")
+		    ElseIf Algorithm = HashType.Generic Then
+		      metadata = New Dictionary("Alg":"blake2b")
+		    End If
+		    Dim type As libsodium.Exporting.ExportableType = libsodium.Exporting.ExportableType.SignatureDigest
+		    signature = libsodium.Exporting.Export(signature, type, Nil, ResourceLimits.Interactive, metadata)
+		  End If
+		  Return signature
+		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function SignData(Message As MemoryBlock, SenderKey As libsodium.PKI.SigningKey, Detached As Boolean = False, Exportable As Boolean = False) As MemoryBlock
 		  ' Generate a Ed25519 signature for the Message using the SenderKey. If Detached=True then
 		  ' only the signature is returned; otherwise the signature is prepended to the message and
@@ -272,6 +324,15 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
+		Protected Function SignData(Message As Readable, SenderKey As libsodium.PKI.SigningKey, Exportable As Boolean = False) As MemoryBlock
+		  ' Generate a Ed25519ph signature for the Message using the SenderKey.
+		  ' This method is suited for Messages that can't fit into memory.
+		  
+		  Return SignData(HashType.SHA256, Message, SenderKey, Exportable)
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
 		Protected Function UnsealData(SealedBox As MemoryBlock, RecipientPrivateKey As libsodium.PKI.EncryptionKey) As MemoryBlock
 		  ' Decrypts the SealedBox using the XSalsa20 stream cipher with the recipient's private key. The decrypted
 		  ' data is returned  on success. On error returns Nil.
@@ -283,6 +344,41 @@ Protected Module PKI
 		  If crypto_box_seal_open(Buffer, SealedBox, SealedBox.Size, RecipientPrivateKey.Publickey, RecipientPrivateKey.PrivateKey) = 0 Then
 		    Return buffer
 		  End If
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function VerifyData(Algorithm As libsodium.HashType, SignedMessage As Readable, SignerPublicKey As libsodium.PKI.ForeignKey, Signature As MemoryBlock) As Boolean
+		  ' Verify a Ed25519ph signature for the Message using the SenderKey.
+		  ' This method is suited for Messages that can't fit into memory.
+		  
+		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  CheckSize(SignerPublicKey.Value, crypto_sign_publickeybytes)
+		  Dim metadata As Dictionary
+		  Dim sigstream As libsodium.PKI.SigningDigest
+		  If Left(Signature, 5) = "-----" Then
+		    Signature = libsodium.Exporting.Import(Signature, metadata)
+		    If metadata = Nil Or metadata.Lookup("Alg", "") = "" Then
+		      sigstream = New libsodium.PKI.SigningDigest()
+		    ElseIf metadata.Lookup("Alg", "") = "SHA512" Then
+		      sigstream = New libsodium.PKI.SigningDigest(HashType.SHA512)
+		    ElseIf metadata.Lookup("Alg", "") = "blake2b" Then
+		      sigstream = New libsodium.PKI.SigningDigest(HashType.Generic)
+		    Else
+		      Return False
+		    End If
+		  Else
+		    If Algorithm = HashType.SHA256 Then
+		      sigstream = New libsodium.PKI.SigningDigest()
+		    Else
+		      sigstream = New libsodium.PKI.SigningDigest(Algorithm)
+		    End If
+		  End If
+		  
+		  Do Until SignedMessage.EOF
+		    sigstream.Process(SignedMessage.Read(1024 * 1024 * 32))
+		  Loop
+		  Return sigstream.Verify(SignerPublicKey, Signature)
 		End Function
 	#tag EndMethod
 
@@ -325,6 +421,15 @@ Protected Module PKI
 		  If Left(DetachedSignature, 5) = "-----" Then DetachedSignature = libsodium.Exporting.Import(DetachedSignature)
 		  Return crypto_sign_verify_detached(DetachedSignature, SignedMessage, SignedMessage.Size, SignerPublicKey.Value) = 0
 		  
+		End Function
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Function VerifyData(SignedMessage As Readable, SignerPublicKey As libsodium.PKI.ForeignKey, Signature As MemoryBlock) As Boolean
+		  ' Verify a Ed25519ph signature for the Message using the SenderKey.
+		  ' This method is suited for Messages that can't fit into memory.
+		  
+		  Return VerifyData(HashType.SHA256, SignedMessage, SignerPublicKey, Signature)
 		End Function
 	#tag EndMethod
 
