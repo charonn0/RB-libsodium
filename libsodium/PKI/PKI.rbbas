@@ -1,163 +1,163 @@
 #tag Module
 Protected Module PKI
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_beforenm Lib "libsodium" (Buffer As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
+		Private Soft Declare Function crypto_box_beforenm Lib sodium (Buffer As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_beforenmbytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_box_beforenmbytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_detached Lib "libsodium" (Buffer As Ptr, MAC As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
+		Private Soft Declare Function crypto_box_detached Lib sodium (Buffer As Ptr, MAC As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_detached_afternm Lib "libsodium" (Buffer As Ptr, MAC As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
+		Private Soft Declare Function crypto_box_detached_afternm Lib sodium (Buffer As Ptr, MAC As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_easy Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
+		Private Soft Declare Function crypto_box_easy Lib sodium (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_easy_afternm Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
+		Private Soft Declare Function crypto_box_easy_afternm Lib sodium (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr) As Int32
+		Private Soft Declare Function crypto_box_keypair Lib sodium (PublicKey As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_macbytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_box_macbytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_noncebytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_box_noncebytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_open_detached_afternm Lib "libsodium" (Buffer As Ptr, Message As Ptr, MAC As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
+		Private Soft Declare Function crypto_box_open_detached_afternm Lib sodium (Buffer As Ptr, Message As Ptr, MAC As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_open_easy Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
+		Private Soft Declare Function crypto_box_open_easy Lib sodium (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, PublicKey As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_open_easy_afternm Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
+		Private Soft Declare Function crypto_box_open_easy_afternm Lib sodium (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SharedKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_publickeybytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_box_publickeybytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_seal Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr) As Int32
+		Private Soft Declare Function crypto_box_seal Lib sodium (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_seal_open Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr, PrivateKey As Ptr) As Int32
+		Private Soft Declare Function crypto_box_seal_open Lib sodium (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_secretkeybytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_box_secretkeybytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_seedbytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_box_seedbytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_box_seed_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr, SeedData As Ptr) As Int32
+		Private Soft Declare Function crypto_box_seed_keypair Lib sodium (PublicKey As Ptr, PrivateKey As Ptr, SeedData As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_scalarmult Lib "libsodium" (Buffer As Ptr, PrivateKey As Ptr, PublicKey As Ptr) As Int32
+		Private Soft Declare Function crypto_scalarmult Lib sodium (Buffer As Ptr, PrivateKey As Ptr, PublicKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_scalarmult_base Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr) As Int32
+		Private Soft Declare Function crypto_scalarmult_base Lib sodium (PublicKey As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_scalarmult_bytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_scalarmult_bytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign Lib "libsodium" (Buffer As Ptr, ByRef BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign Lib sodium (Buffer As Ptr, ByRef BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_bytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_sign_bytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_detached Lib "libsodium" (Buffer As Ptr, ByRef BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_detached Lib sodium (Buffer As Ptr, ByRef BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_ed25519ph_statebytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_sign_ed25519ph_statebytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_ed25519_pk_to_curve25519 Lib "libsodium" (ToEncryptionKey As Ptr, FromSigningKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_ed25519_pk_to_curve25519 Lib sodium (ToEncryptionKey As Ptr, FromSigningKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_ed25519_sk_to_curve25519 Lib "libsodium" (ToEncryptionKey As Ptr, FromSigningKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_ed25519_sk_to_curve25519 Lib sodium (ToEncryptionKey As Ptr, FromSigningKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_ed25519_sk_to_pk Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_ed25519_sk_to_pk Lib sodium (PublicKey As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_ed25519_sk_to_seed Lib "libsodium" (Seed As Ptr, PrivateKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_ed25519_sk_to_seed Lib sodium (Seed As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_final_create Lib "libsodium" (State As Ptr, Signature As Ptr, ByRef SigLength As UInt64, PrivateKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_final_create Lib sodium (State As Ptr, Signature As Ptr, ByRef SigLength As UInt64, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_final_verify Lib "libsodium" (State As Ptr, Signature As Ptr, PublicKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_final_verify Lib sodium (State As Ptr, Signature As Ptr, PublicKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_init Lib "libsodium" (State As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_init Lib sodium (State As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_keypair Lib sodium (PublicKey As Ptr, PrivateKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_open Lib "libsodium" (Buffer As Ptr, ByRef BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_open Lib sodium (Buffer As Ptr, ByRef BufferSize As UInt64, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_publickeybytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_sign_publickeybytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_secretkeybytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_sign_secretkeybytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_seedbytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_sign_seedbytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_seed_keypair Lib "libsodium" (PublicKey As Ptr, PrivateKey As Ptr, SeedData As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_seed_keypair Lib sodium (PublicKey As Ptr, PrivateKey As Ptr, SeedData As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_update Lib "libsodium" (State As Ptr, Message As Ptr, MessageLength As UInt64) As Int32
+		Private Soft Declare Function crypto_sign_update Lib sodium (State As Ptr, Message As Ptr, MessageLength As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_sign_verify_detached Lib "libsodium" (Signature As Ptr, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr) As Int32
+		Private Soft Declare Function crypto_sign_verify_detached Lib sodium (Signature As Ptr, Message As Ptr, MessageLength As UInt64, PublicKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1

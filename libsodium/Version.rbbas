@@ -85,51 +85,51 @@ Protected Module Version
 	#tag EndMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_library_version_major Lib "libsodium" () As Int32
+		Private Soft Declare Function sodium_library_version_major Lib sodium () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_library_version_minor Lib "libsodium" () As Int32
+		Private Soft Declare Function sodium_library_version_minor Lib sodium () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_runtime_has_aesni Lib "libsodium" () As Int32
+		Private Soft Declare Function sodium_runtime_has_aesni Lib sodium () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_runtime_has_avx Lib "libsodium" () As Int32
+		Private Soft Declare Function sodium_runtime_has_avx Lib sodium () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_runtime_has_avx2 Lib "libsodium" () As Int32
+		Private Soft Declare Function sodium_runtime_has_avx2 Lib sodium () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_runtime_has_neon Lib "libsodium" () As Int32
+		Private Soft Declare Function sodium_runtime_has_neon Lib sodium () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_runtime_has_pclmul Lib "libsodium" () As Int32
+		Private Soft Declare Function sodium_runtime_has_pclmul Lib sodium () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_runtime_has_sse2 Lib "libsodium" () As Int32
+		Private Soft Declare Function sodium_runtime_has_sse2 Lib sodium () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_runtime_has_sse3 Lib "libsodium" () As Int32
+		Private Soft Declare Function sodium_runtime_has_sse3 Lib sodium () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_runtime_has_sse41 Lib "libsodium" () As Int32
+		Private Soft Declare Function sodium_runtime_has_sse41 Lib sodium () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_runtime_has_ssse3 Lib "libsodium" () As Int32
+		Private Soft Declare Function sodium_runtime_has_ssse3 Lib sodium () As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function sodium_version_string Lib "libsodium" () As Ptr
+		Private Soft Declare Function sodium_version_string Lib sodium () As Ptr
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
