@@ -24,6 +24,16 @@ This example generates and validates a password hash that is suitable to be stor
 ## Synopsis
 RB-libsodium is designed to make it as hard as possible to write bad crypto code. For example signing keys can't be used to perform encryption, so methods that need a signing key will require an instance of the [SigningKey](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey) class as a parameter; attempting to pass an [EncryptionKey](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey) will generate a compiler error. 
 
+All key types are represented by a different class:
+
+|Object Class|Comment|
+|-----------|-------|
+|[`EncryptionKey`](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey)|A private key for use with Diffie–Hellman based encryption.| 
+|[`ForeignKey`](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey)|A public key for use with encryption or signatures.| 
+|[`SecretKey`](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey)|A secret key for use with symmetric encryption and message authentication.| 
+|[`SharedSecret`](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret)|A shared secret encryption key derived using a Diffie–Hellman key exchange.|
+|[`SigningKey`](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey)|A private key for use with EdDSA-based signatures.| 
+
 libsodium uses state-of-the-art cryptographic primitives and algorithms based on [elliptic curves](https://en.wikipedia.org/wiki/Elliptic_curve_cryptography) ("ECC"). ECC provides comparable security to older systems based on prime factorization, such as RSA, but with much smaller key sizes. For example, a 224-bit (28 byte) ECC key provides a level of security that is comparable to a 2,048-bit (256 byte) RSA key. For comparison, [NIST recommends](https://www.keylength.com/en/4/) a RSA key size of at least 3,072 bits to ensure security through the year 2030.
 
 ## How to incorporate libsodium into your Realbasic/Xojo project
