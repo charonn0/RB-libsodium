@@ -136,7 +136,7 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		Function ExportDecryptionHeader(Optional Passwd As libsodium.Password) As MemoryBlock
-		  ' Exports the SecretKey in a format that is understood by SecretKey.Import
+		  ' Exports the SecretKey in a format that is understood by SecretStream.Open
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.ExportDecryptionHeader
