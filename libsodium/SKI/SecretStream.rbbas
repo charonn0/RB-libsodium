@@ -118,7 +118,7 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		Function ExportDecryptionHeader(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
-		  ' Exports the decryption header in a format that is understood by SecretStream.Open
+		  ' Exports the decryption header (initialization vector) in a format that is understood by SecretStream.Open
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.ExportDecryptionHeader
@@ -136,7 +136,7 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		Function ExportDecryptionHeader(Optional Passwd As libsodium.Password) As MemoryBlock
-		  ' Exports the SecretKey in a format that is understood by SecretStream.Open
+		  ' Exports the decryption header (initialization vector) in a format that is understood by SecretStream.Open
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.ExportDecryptionHeader
@@ -226,8 +226,15 @@ Implements Readable,Writeable
 		Protected Function Read(Count As Integer, AdditionalData As MemoryBlock, ByRef Tag As UInt8) As String
 		  ' This method reads an encrypted block+authentication code from the stream, and validates
 		  ' the block and the AdditionalData against the authentication code. If the block+AdditionalData
-		  ' are authentic then the Tag parameter is set to the accompanying message tag (one of the
-		  ' crypto_secretstream_xchacha20poly1305_TAG_* constants) and the decrypted block is returned.
+		  ' are authentic then the decrypted block is returned and the Tag parameter is set to one of these
+		  ' constants:
+		  '
+		  '   crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+		  '   crypto_secretstream_xchacha20poly1305_TAG_PUSH
+		  '   crypto_secretstream_xchacha20poly1305_TAG_REKEY
+		  '   crypto_secretstream_xchacha20poly1305_TAG_FINAL
+		  '
+		  ' Refer to the libsodium documentation for the meanings of these tags.
 		  
 		  Dim cipher As MemoryBlock = mInput.Read(Count + crypto_secretstream_xchacha20poly1305_abytes)
 		  If cipher.Size = 0 Then mEOF = mInput.EOF
@@ -253,6 +260,11 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Function Read(Count As Integer, encoding As TextEncoding = Nil) As String Implements Readable.Read
 		  // Part of the Readable interface.
+		  ' Reads the specified number of encrypted bytes. If the bytes were successfully decrypted and
+		  ' authenticated then the decrypted bytes are returned.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Read
 		  
 		  Do Until Count <= mReadBuffer.LenB Or mInput.EOF Or mEOF
 		    Dim ad As New MemoryBlock(0)
@@ -269,6 +281,17 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h1
 		Protected Function Read(Count As Integer, ByRef Tag As UInt8) As String
+		  ' This method reads an encrypted block+authentication code from the stream, and validates
+		  ' the block against the authentication code. If the block is authentic then the decrypted
+		  ' block is returned and the Tag parameter is set to one of these constants:
+		  '
+		  '   crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+		  '   crypto_secretstream_xchacha20poly1305_TAG_PUSH
+		  '   crypto_secretstream_xchacha20poly1305_TAG_REKEY
+		  '   crypto_secretstream_xchacha20poly1305_TAG_FINAL
+		  '
+		  ' Refer to the libsodium documentation for the meanings of these tags.
+		  
 		  Dim ad As New MemoryBlock(0)
 		  Return Me.Read(Count, ad, Tag)
 		End Function
@@ -296,6 +319,12 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Sub Write(text As String) Implements Writeable.Write
 		  // Part of the Writeable interface.
+		  ' Encrypts the Text and computes an authentication code based on the Text and writes
+		  ' the encrypted bytes and the authentication code to the output stream.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Write
+		  
 		  
 		  mWriteBuffer = mWriteBuffer + text
 		  Do Until mWriteBuffer.LenB < mBlockSize
@@ -309,7 +338,7 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		Sub Write(Text As String, AdditionalData As MemoryBlock)
-		  ' Encrypts the text and computes an authentication code based on the Text and the AdditionalData
+		  ' Encrypts the Text and computes an authentication code based on the Text and the AdditionalData
 		  ' and writes the encrypted bytes and the authentication code to the output stream.
 		  '
 		  ' See:
@@ -321,6 +350,17 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h1
 		Protected Sub Write(Text As String, AdditionalData As MemoryBlock, Tag As UInt8)
+		  ' Encrypts the Text and computes an authentication code based on the Text and the AdditionalData
+		  ' and writes the encrypted bytes and the authentication code to the output stream. Tag is one of
+		  ' these constants:
+		  '   
+		  '   crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+		  '   crypto_secretstream_xchacha20poly1305_TAG_PUSH
+		  '   crypto_secretstream_xchacha20poly1305_TAG_REKEY
+		  '   crypto_secretstream_xchacha20poly1305_TAG_FINAL
+		  '
+		  ' Refer to the libsodium documentation for the meanings of these tags.
+		  
 		  Dim sz As UInt64 = Text.LenB
 		  Dim adsz As UInt64
 		  Dim ad As Ptr
@@ -340,6 +380,17 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h1
 		Protected Sub Write(Text As String, Tag As UInt8)
+		  ' Encrypts the Text and computes an authentication code based on the Text and writes the
+		  ' encrypted bytes and the authentication code to the output stream. Tag is one of these
+		  ' constants:
+		  '
+		  '   crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
+		  '   crypto_secretstream_xchacha20poly1305_TAG_PUSH
+		  '   crypto_secretstream_xchacha20poly1305_TAG_REKEY
+		  '   crypto_secretstream_xchacha20poly1305_TAG_FINAL
+		  '
+		  ' Refer to the libsodium documentation for the meanings of these tags.
+		  
 		  Me.Write(Text, Nil, Tag)
 		End Sub
 	#tag EndMethod
