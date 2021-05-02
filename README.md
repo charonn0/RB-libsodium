@@ -47,7 +47,7 @@ libsodium is not ordinarily installed by default on most operating systems, you 
 
 RB-libsodium will raise a PlatformNotSupportedException when used if all required DLLs/SOs/DyLibs are not available at runtime. 
 
-## Examples
+## [Examples](https://github.com/charonn0/RB-libsodium/wiki/Examples)
 * [Secure memory](https://github.com/charonn0/RB-libsodium/wiki/Secure-Memory-Example)
 * [Password hashing](https://github.com/charonn0/RB-libsodium/wiki/Password-Example#generate-a-hash)
 * [Generic hashing](https://github.com/charonn0/RB-libsodium/wiki/Generic-Hash-Example)
