@@ -473,8 +473,8 @@ Implements Readable,Writeable
 		Private mState As MemoryBlock
 	#tag EndProperty
 
-	#tag Property, Flags = &h21
-		Private mWriteBuffer As String
+	#tag Property, Flags = &h1
+		Protected mWriteBuffer As String
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
