@@ -122,7 +122,7 @@ Protected Class GenericHashDigest
 	#tag Method, Flags = &h21
 		Private Sub InitSHA256()
 		  If mKey <> Nil Then
-		    If Not System.IsFunctionAvailable("crypto_auth_hmacsha256_init", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
+		    If Not System.IsFunctionAvailable("crypto_auth_hmacsha256_init", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
 		    mState = New MemoryBlock(crypto_auth_hmacsha256_statebytes())
 		    mLastError = crypto_auth_hmacsha256_init(mState, mKey, mKey.Size)
 		  Else

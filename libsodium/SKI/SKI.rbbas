@@ -1,79 +1,79 @@
 #tag Module
 Protected Module SKI
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_auth Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
+		Private Soft Declare Function crypto_auth Lib sodium (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_auth_bytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_auth_bytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_auth_keybytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_auth_keybytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_auth_verify Lib "libsodium" (Signature As Ptr, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
+		Private Soft Declare Function crypto_auth_verify Lib sodium (Signature As Ptr, Message As Ptr, MessageLength As UInt64, SecretKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretbox_easy Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SecretKey As Ptr) As Int32
+		Private Soft Declare Function crypto_secretbox_easy Lib sodium (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SecretKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretbox_keybytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_secretbox_keybytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretbox_macbytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_secretbox_macbytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretbox_noncebytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_secretbox_noncebytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretbox_open_easy Lib "libsodium" (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SecretKey As Ptr) As Int32
+		Private Soft Declare Function crypto_secretbox_open_easy Lib sodium (Buffer As Ptr, Message As Ptr, MessageLength As UInt64, Nonce As Ptr, SecretKey As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_abytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_abytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_headerbytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_headerbytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_init_pull Lib "libsodium" (State As Ptr, Header As Ptr, Key As Ptr) As Int32
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_init_pull Lib sodium (State As Ptr, Header As Ptr, Key As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_init_push Lib "libsodium" (State As Ptr, Header As Ptr, Key As Ptr) As Int32
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_init_push Lib sodium (State As Ptr, Header As Ptr, Key As Ptr) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_keybytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_keybytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Sub crypto_secretstream_xchacha20poly1305_keygen Lib "libsodium" (Key As Ptr)
+		Private Soft Declare Sub crypto_secretstream_xchacha20poly1305_keygen Lib sodium (Key As Ptr)
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_pull Lib "libsodium" (State As Ptr, Buffer As Ptr, ByRef BufferSize As UInt64, ByRef Tag As UInt8, CipherText As Ptr, CipherTextSize As UInt64, AdditionalData As Ptr, AdditionalDataSize As UInt64) As Int32
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_pull Lib sodium (State As Ptr, Buffer As Ptr, ByRef BufferSize As UInt64, ByRef Tag As UInt8, CipherText As Ptr, CipherTextSize As UInt64, AdditionalData As Ptr, AdditionalDataSize As UInt64) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_push Lib "libsodium" (State As Ptr, Buffer As Ptr, ByRef BufferLength As UInt64, Message As Ptr, MessageLength As UInt64, AdditionalData As Ptr, AdditionalDataLength As UInt64, Tag As UInt8) As Int32
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_push Lib sodium (State As Ptr, Buffer As Ptr, ByRef BufferLength As UInt64, Message As Ptr, MessageLength As UInt64, AdditionalData As Ptr, AdditionalDataLength As UInt64, Tag As UInt8) As Int32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Sub crypto_secretstream_xchacha20poly1305_rekey Lib "libsodium" (State As Ptr)
+		Private Soft Declare Sub crypto_secretstream_xchacha20poly1305_rekey Lib sodium (State As Ptr)
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
-		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_statebytes Lib "libsodium" () As UInt32
+		Private Soft Declare Function crypto_secretstream_xchacha20poly1305_statebytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1

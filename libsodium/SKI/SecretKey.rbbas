@@ -87,6 +87,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Generate
 		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Return New libsodium.SKI.SecretKey(RandomBytes(crypto_secretbox_keybytes))
 		End Function
 	#tag EndMethod
@@ -132,6 +133,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.RandomNonce
 		  
+		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Return RandomBytes(crypto_secretbox_noncebytes)
 		End Function
 	#tag EndMethod
