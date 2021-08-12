@@ -507,7 +507,7 @@ Protected Module libsodium
 		  
 		  Static available As Boolean
 		  
-		  If Not available Then available = System.IsFunctionAvailable("sodium_init", "libsodium")
+		  If Not available Then available = System.IsFunctionAvailable("sodium_init", sodium)
 		  If available Then
 		    If sodium_init() = -1 Then available = False Else available = True
 		  End If
