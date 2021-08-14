@@ -44,14 +44,14 @@ Protected Class ForeignKey
 		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
-		  Dim t As libsodium.Exporting.ExportableType
+		  Dim t As ExportableType
 		  Select Case mType
 		  Case KeyType.Signature
-		    t = libsodium.Exporting.ExportableType.SignPublic
+		    t = ExportableType.SignPublic
 		  Case KeyType.Encryption
-		    t = libsodium.Exporting.ExportableType.CryptPublic
+		    t = ExportableType.CryptPublic
 		  Else
-		    t = libsodium.Exporting.ExportableType.Unknown
+		    t = ExportableType.Unknown
 		  End Select
 		  bs.Write(libsodium.Exporting.Export(Me.Value, t, Passwd))
 		  bs.Close
@@ -77,18 +77,18 @@ Protected Class ForeignKey
 	#tag Method, Flags = &h0
 		 Shared Function Import(KeyData As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.PKI.ForeignKey
 		  Dim typ As KeyType
-		  Dim extype As libsodium.Exporting.ExportableType = libsodium.Exporting.GetType(KeyData)
+		  Dim extype As ExportableType = libsodium.Exporting.GetType(KeyData)
 		  Dim key As MemoryBlock = libsodium.Exporting.Import(KeyData, Passwd)
 		  Select Case extype
-		  Case libsodium.Exporting.ExportableType.SignPublic
+		  Case ExportableType.SignPublic
 		    typ = KeyType.Signature
 		    CheckSize(key, crypto_sign_publickeybytes)
-		  Case libsodium.Exporting.ExportableType.CryptPublic
+		  Case ExportableType.CryptPublic
 		    typ = KeyType.Encryption
 		    CheckSize(key, crypto_box_publickeybytes)
-		  Case libsodium.Exporting.ExportableType.Secret
+		  Case ExportableType.Secret
 		    typ = KeyType.Generic
-		  Case libsodium.Exporting.ExportableType.CryptPrivate, libsodium.Exporting.ExportableType.SignPrivate
+		  Case ExportableType.CryptPrivate, ExportableType.SignPrivate
 		    Raise New SodiumException(ERR_WRONG_HALF)
 		  Else
 		    typ = KeyType.Unknown

@@ -147,7 +147,7 @@ Protected Module SKI
 		  
 		  Dim signature As New MemoryBlock(crypto_auth_bytes)
 		  If crypto_auth(signature, Message, Message.Size, Key.Value) = 0 Then
-		    If Exportable Then signature = libsodium.Exporting.Export(signature, libsodium.Exporting.ExportableType.HMAC)
+		    If Exportable Then signature = libsodium.Exporting.Export(signature, ExportableType.HMAC)
 		    Return signature
 		  End If
 		End Function

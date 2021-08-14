@@ -76,7 +76,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Export
 		  
-		  Return libsodium.Exporting.Export(Me.Value, libsodium.Exporting.ExportableType.Secret, Passwd)
+		  Return libsodium.Exporting.Export(Me.Value, ExportableType.Secret, Passwd)
 		End Function
 	#tag EndMethod
 
@@ -113,7 +113,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Import
 		  
-		  libsodium.Exporting.AssertType(ExportedKey, libsodium.Exporting.ExportableType.Secret)
+		  libsodium.Exporting.AssertType(ExportedKey, ExportableType.Secret)
 		  Dim sk As MemoryBlock = libsodium.Exporting.Import(ExportedKey, Passwd)
 		  If sk <> Nil Then Return New SecretKey(sk)
 		End Function

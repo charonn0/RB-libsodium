@@ -915,6 +915,20 @@ Protected Module libsodium
 		URLSafeNoPadding=7
 	#tag EndEnum
 
+	#tag Enum, Name = ExportableType, Flags = &h1
+		CryptPrivate
+		  CryptPublic
+		  SignPrivate
+		  SignPublic
+		  Secret
+		  SharedSecret
+		  Unknown
+		  Signature
+		  HMAC
+		  StateHeader
+		SignatureDigest
+	#tag EndEnum
+
 	#tag Enum, Name = HashType, Type = Integer, Flags = &h1
 		Generic
 		  SHA256

@@ -1,7 +1,7 @@
 #tag Module
 Protected Module Exporting
 	#tag Method, Flags = &h1
-		Protected Sub AssertType(KeyData As MemoryBlock, ExpectedType As libsodium.Exporting.ExportableType)
+		Protected Sub AssertType(KeyData As MemoryBlock, ExpectedType As libsodium.ExportableType)
 		  Dim detect As ExportableType = GetType(KeyData)
 		  If Not IsValidFormat(KeyData, detect) Then Raise New SodiumException(ERR_IMPORT_INVALID)
 		  If detect <> ExpectedType Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
@@ -59,7 +59,7 @@ Protected Module Exporting
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function Export(KeyData As MemoryBlock, Type As libsodium.Exporting.ExportableType, Optional Passwd As libsodium.Password, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Moderate, Optional MetaData As Dictionary) As MemoryBlock
+		Protected Function Export(KeyData As MemoryBlock, Type As libsodium.ExportableType, Optional Passwd As libsodium.Password, Limits As libsodium.ResourceLimits = libsodium.ResourceLimits.Moderate, Optional MetaData As Dictionary) As MemoryBlock
 		  ' This method takes a raw binary crypto key and encodes it in a plain text
 		  ' format that is suitable to be stored or transferred. If a Password is
 		  ' specified then then key will be encrypted with a random nonce and a secret
@@ -117,7 +117,7 @@ Protected Module Exporting
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function GetKeyData(EncodedKey As MemoryBlock, Type As libsodium.Exporting.ExportableType) As MemoryBlock
+		Private Function GetKeyData(EncodedKey As MemoryBlock, Type As libsodium.ExportableType) As MemoryBlock
 		  EncodedKey = ReplaceLineEndings(EncodedKey, EndOfLine.Windows)
 		  Dim lines() As String = SplitB(EncodedKey, EndOfLine.Windows)
 		  Dim suffix As String = GetSuffix(Type)
@@ -199,7 +199,7 @@ Protected Module Exporting
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function GetPrefix(Type As libsodium.Exporting.ExportableType) As String
+		Private Function GetPrefix(Type As libsodium.ExportableType) As String
 		  Select Case Type
 		  Case ExportableType.CryptPrivate
 		    Return EncryptionPrivatePrefix
@@ -239,7 +239,7 @@ Protected Module Exporting
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function GetSuffix(Type As libsodium.Exporting.ExportableType) As String
+		Private Function GetSuffix(Type As libsodium.ExportableType) As String
 		  Select Case Type
 		  Case ExportableType.CryptPrivate
 		    Return EncryptionPrivateSuffix
@@ -278,7 +278,7 @@ Protected Module Exporting
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GetType(EncodedKey As MemoryBlock) As libsodium.Exporting.ExportableType
+		Protected Function GetType(EncodedKey As MemoryBlock) As libsodium.ExportableType
 		  Static Prefixes() As String = Array(EncryptionPrivatePrefix, EncryptionPublicPrefix, _
 		  SigningPrivatePrefix, SigningPublicPrefix, SalsaPrefix, SharedPrefix, SignaturePrefix, HMACPrefix, StateHeaderPrefix, _
 		  SignatureDigestPrefix)
@@ -441,21 +441,6 @@ Protected Module Exporting
 
 	#tag Constant, Name = UnknownSuffix, Type = String, Dynamic = False, Default = \"-----END DATA BLOCK-----", Scope = Private
 	#tag EndConstant
-
-
-	#tag Enum, Name = ExportableType, Flags = &h1
-		CryptPrivate
-		  CryptPublic
-		  SignPrivate
-		  SignPublic
-		  Secret
-		  SharedSecret
-		  Unknown
-		  Signature
-		  HMAC
-		  StateHeader
-		SignatureDigest
-	#tag EndEnum
 
 
 	#tag ViewBehavior
