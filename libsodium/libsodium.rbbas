@@ -424,7 +424,7 @@ Protected Module libsodium
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.EncodeBase64
 		  
-		  If Not System.IsFunctionAvailable("sodium_bin2base64", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If Not IsAvailable() Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  Dim output As New MemoryBlock(sodium_base64_encoded_len(BinaryData.Size, Type))
 		  If sodium_bin2base64(output, output.Size, BinaryData, BinaryData.Size, Type) <> Nil Then Return output.CString(0)
 		  
