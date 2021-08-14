@@ -288,8 +288,7 @@ Protected Module PKI
 		    ElseIf Algorithm = HashType.Generic Then
 		      metadata = New Dictionary("Alg":"blake2b")
 		    End If
-		    Dim type As libsodium.Exporting.ExportableType = libsodium.Exporting.ExportableType.SignatureDigest
-		    signature = libsodium.Exporting.Export(signature, type, Nil, ResourceLimits.Interactive, metadata)
+		    signature = libsodium.Exporting.Export(signature, ExportableType.SignatureDigest, Nil, ResourceLimits.Interactive, metadata)
 		  End If
 		  Return signature
 		  
@@ -317,7 +316,7 @@ Protected Module PKI
 		  End If
 		  
 		  signature = signature.StringValue(0, siglen)
-		  If Exportable Then signature = libsodium.Exporting.Export(signature, libsodium.Exporting.ExportableType.Signature)
+		  If Exportable Then signature = libsodium.Exporting.Export(signature, ExportableType.Signature)
 		  Return signature
 		  
 		End Function

@@ -141,7 +141,7 @@ Implements Readable,Writeable
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.ExportDecryptionHeader
 		  
-		  Return libsodium.Exporting.Export(mHeader, libsodium.Exporting.ExportableType.StateHeader, Passwd)
+		  Return libsodium.Exporting.Export(mHeader, ExportableType.StateHeader, Passwd)
 		End Function
 	#tag EndMethod
 
