@@ -63,10 +63,10 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
-		  ' Exports the EncryptionKey in a format that is understood by EncryptionKey.Import(FolderItem)
+		  ' Exports the SharedSecret in a format that is understood by SharedSecret.Import(FolderItem)
 		  '
 		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Export
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Export
 		  
 		  Try
 		    Dim bs As BinaryStream = BinaryStream.Create(SaveTo, OverWrite)
@@ -81,10 +81,10 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
-		  ' Exports the EncryptionKey in a format that is understood by EncryptionKey.Import
+		  ' Exports the SharedSecret in a format that is understood by SharedSecret.Import
 		  '
 		  ' See:
-		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey.Export
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Export
 		  
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
