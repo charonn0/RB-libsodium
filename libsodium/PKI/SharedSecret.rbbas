@@ -3,9 +3,8 @@ Protected Class SharedSecret
 Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h1000
 		Sub Constructor(RecipientPublicKey As libsodium.PKI.ForeignKey, SenderPrivateKey As libsodium.PKI.EncryptionKey)
-		  ' Derives the shared key from the public half of the recipient's key pair and the
-		  ' private half of the sender's key pair. This allows the key derivation calculation
-		  ' to be performed once rather than on each Encrypt/Decrypt operation.
+		  ' Derives a shared key from the public half of the recipient's key and the private half of the sender's key using
+		  ' an Elliptic Curve Diffie-Hellman (ECDH) key exchange over the Curve25519 curve.
 		  '
 		  ' See:
 		  ' https://download.libsodium.org/doc/public-key_cryptography/authenticated_encryption.html#precalculation-interface
@@ -41,7 +40,7 @@ Inherits libsodium.SKI.KeyContainer
 		  ' the curve. As a result, the number of possible keys is limited to the group
 		  ' size (≈2^252), and the key distribution is not uniform.
 		  '
-		  ' For this reason, instead of directly using the return value as a shared key,
+		  ' For this reason, instead of directly using the return value as a shared key
 		  ' it is recommended to use:
 		  '
 		  '    GenericHash(return value + RecipientPublicKey + Sender's PUBLIC KEY)
@@ -63,7 +62,7 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		Function Export(SaveTo As FolderItem, Optional Passwd As libsodium.Password, OverWrite As Boolean = False) As Boolean
-		  ' Exports the SharedSecret in a format that is understood by SharedSecret.Import(FolderItem)
+		  ' Exports the SharedSecret in a format that is understood by SharedSecret.Import
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Export
@@ -98,7 +97,7 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		 Shared Function Import(ExportedKey As FolderItem, Optional Passwd As libsodium.Password) As libsodium.PKI.SharedSecret
-		  ' Import a SharedSecret that was exported using SharedSecret.Export(FolderItem)
+		  ' Import a SharedSecret that was exported using SharedSecret.Export
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Import
