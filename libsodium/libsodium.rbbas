@@ -541,7 +541,7 @@ Protected Module libsodium
 		  ' Adds padding to the Data, using the ISO/IEC 7816-4 padding algorithm, until the Data.Size
 		  ' is a multiple of the BlockSize. Use UnpadData to remove the padding.
 		  
-		  If Not IsAvailable() Or Not System.IsFunctionAvailable("sodium_pad", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If Not IsAvailable() Or Not System.IsFunctionAvailable("sodium_pad", sodium) Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If Data.Size = -1 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
 		  Dim origsz As UInt32 = Data.Size
 		  Dim padsz As UInt32
@@ -570,7 +570,7 @@ Protected Module libsodium
 		  If Seed = Nil Then
 		    randombytes_buf(mb, mb.Size)
 		  Else
-		    If Not System.IsFunctionAvailable("randombytes_buf_deterministic", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		    If Not System.IsFunctionAvailable("randombytes_buf_deterministic", sodium) Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
 		    CheckSize(Seed, randombytes_seedbytes)
 		    randombytes_buf_deterministic(mb, mb.Size, Seed)
 		  End If
@@ -791,7 +791,7 @@ Protected Module libsodium
 		Protected Sub UnpadData(ByRef Data As MemoryBlock, BlockSize As UInt32)
 		  ' Removes the padding that was applied to the Data by the PadData method.
 		  
-		  If Not IsAvailable() Or Not System.IsFunctionAvailable("sodium_unpad", "libsodium") Then Raise New SodiumException(ERR_UNAVAILABLE)
+		  If Not IsAvailable() Or Not System.IsFunctionAvailable("sodium_unpad", sodium) Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If Data.Size = -1 Then Raise New SodiumException(ERR_SIZE_REQUIRED)
 		  Dim unpadsz As UInt32
 		  If sodium_unpad(unpadsz, Data, Data.Size, BlockSize) <> 0 Then Raise New SodiumException(ERR_PADDING)

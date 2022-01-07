@@ -64,7 +64,7 @@ Implements Readable,Writeable
 		Protected Sub Constructor(InputStream As Readable, Key As MemoryBlock, Header As MemoryBlock)
 		  ' Construct a decryption stream from the InputStream, Key, and Header parameters.
 		  
-		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_pull", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_pull", sodium) Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
 		  If Left(Header, 5) = "-----" Then Header = libsodium.Exporting.DecodeMessage(Header)
 		  CheckSize(Header, crypto_secretstream_xchacha20poly1305_headerbytes)
 		  CheckSize(Key, crypto_secretstream_xchacha20poly1305_keybytes)
@@ -80,7 +80,7 @@ Implements Readable,Writeable
 		Protected Sub Constructor(OutputStream As Writeable, Key As MemoryBlock)
 		  ' Construct a new encryption stream using the specified key.
 		  
-		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_push", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_init_push", sodium) Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
 		  CheckSize(Key, crypto_secretstream_xchacha20poly1305_keybytes)
 		  
 		  mState = New MemoryBlock(crypto_secretstream_xchacha20poly1305_statebytes)
@@ -158,7 +158,7 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function GenerateKey() As libsodium.SKI.KeyContainer
-		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_keygen", "libsodium") Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		  If Not libsodium.IsAvailable Or Not System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_keygen", sodium) Then Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
 		  Dim k As New MemoryBlock(crypto_secretstream_xchacha20poly1305_keybytes)
 		  crypto_secretstream_xchacha20poly1305_keygen(k)
 		  If k.IsZero Then Raise New SodiumException(ERR_KEYGEN_FAILED)
