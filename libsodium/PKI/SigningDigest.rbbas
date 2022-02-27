@@ -10,7 +10,7 @@ Protected Class SigningDigest
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningDigest.Constructor
 		  
-		  If System.IsFunctionAvailable("crypto_sign_init", "libsodium") Then
+		  If System.IsFunctionAvailable("crypto_sign_init", sodium) Then
 		    mState = New MemoryBlock(crypto_sign_ed25519ph_statebytes)
 		    If crypto_sign_init(mState) <> 0 Then Raise New SodiumException(ERR_INIT_FAILED)
 		  Else

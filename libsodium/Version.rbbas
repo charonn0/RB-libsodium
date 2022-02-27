@@ -2,7 +2,7 @@
 Protected Module Version
 	#tag Method, Flags = &h1
 		Protected Function HasAESNI() As Boolean
-		  If System.IsFunctionAvailable("sodium_runtime_has_aesni", "libsodium") Then 
+		  If System.IsFunctionAvailable("sodium_runtime_has_aesni", sodium) Then
 		    Return sodium_runtime_has_aesni = 0
 		  End If
 		End Function
@@ -10,7 +10,7 @@ Protected Module Version
 
 	#tag Method, Flags = &h1
 		Protected Function HasAVX() As Boolean
-		  If System.IsFunctionAvailable("sodium_runtime_has_avx", "libsodium") Then 
+		  If System.IsFunctionAvailable("sodium_runtime_has_avx", sodium) Then
 		    Return sodium_runtime_has_avx = 0
 		  End If
 		End Function
@@ -18,7 +18,7 @@ Protected Module Version
 
 	#tag Method, Flags = &h1
 		Protected Function HasAVX2() As Boolean
-		  If System.IsFunctionAvailable("sodium_runtime_has_avx2", "libsodium") Then 
+		  If System.IsFunctionAvailable("sodium_runtime_has_avx2", sodium) Then
 		    Return sodium_runtime_has_avx2 = 0
 		  End If
 		End Function
@@ -26,7 +26,7 @@ Protected Module Version
 
 	#tag Method, Flags = &h1
 		Protected Function HasNeon() As Boolean
-		  If System.IsFunctionAvailable("sodium_runtime_has_neon", "libsodium") Then 
+		  If System.IsFunctionAvailable("sodium_runtime_has_neon", sodium) Then
 		    Return sodium_runtime_has_neon = 0
 		  End If
 		End Function
@@ -34,7 +34,7 @@ Protected Module Version
 
 	#tag Method, Flags = &h1
 		Protected Function HasPCLMul() As Boolean
-		  If System.IsFunctionAvailable("sodium_runtime_has_pclmul", "libsodium") Then 
+		  If System.IsFunctionAvailable("sodium_runtime_has_pclmul", sodium) Then
 		    Return sodium_runtime_has_pclmul = 0
 		  End If
 		End Function
@@ -42,7 +42,7 @@ Protected Module Version
 
 	#tag Method, Flags = &h1
 		Protected Function HasSSE2() As Boolean
-		  If System.IsFunctionAvailable("sodium_runtime_has_sse2", "libsodium") Then
+		  If System.IsFunctionAvailable("sodium_runtime_has_sse2", sodium) Then
 		    Return sodium_runtime_has_sse2 = 0
 		  End If
 		End Function
@@ -50,7 +50,7 @@ Protected Module Version
 
 	#tag Method, Flags = &h1
 		Protected Function HasSSE3() As Boolean
-		  If System.IsFunctionAvailable("sodium_runtime_has_sse3", "libsodium") Then
+		  If System.IsFunctionAvailable("sodium_runtime_has_sse3", sodium) Then
 		    Return sodium_runtime_has_sse3 = 0
 		  End If
 		End Function
@@ -58,7 +58,7 @@ Protected Module Version
 
 	#tag Method, Flags = &h1
 		Protected Function HasSSE41() As Boolean
-		  If System.IsFunctionAvailable("sodium_runtime_has_sse41", "libsodium") Then
+		  If System.IsFunctionAvailable("sodium_runtime_has_sse41", sodium) Then
 		    Return sodium_runtime_has_sse41 = 0
 		  End If
 		End Function
@@ -66,7 +66,7 @@ Protected Module Version
 
 	#tag Method, Flags = &h1
 		Protected Function HasSSSE3() As Boolean
-		  If System.IsFunctionAvailable("sodium_runtime_has_ssse3", "libsodium") Then
+		  If System.IsFunctionAvailable("sodium_runtime_has_ssse3", sodium) Then
 		    Return sodium_runtime_has_ssse3 = 0
 		  End If
 		End Function

@@ -1,7 +1,7 @@
 ## Introduction
 [libsodium](https://github.com/jedisct1/libsodium) is a cross-platform fork of the [NaCl](http://nacl.cr.yp.to/) cryptographic library. It provides secret-key and public-key encryption ([XSalsa20](https://en.wikipedia.org/wiki/Salsa20)), message authentication ([Poly1305](https://en.wikipedia.org/wiki/Poly1305)), digital signatures ([Ed25519](https://en.wikipedia.org/wiki/EdDSA)), key exchange ([X25519](https://en.wikipedia.org/wiki/Curve25519)), generic hashing ([BLAKE2b](https://en.wikipedia.org/wiki/BLAKE_(hash_function)), SHA256, SHA512), password hashing and key derivation ([scrypt](https://en.wikipedia.org/wiki/Scrypt) or [Argon2i](https://en.wikipedia.org/wiki/Argon2)), in addition to facilities for guarded memory allocations and constant-time string comparisons. 
 
-**RB-libsodium** is a libsodium [binding](http://en.wikipedia.org/wiki/Language_binding) for Realbasic and Xojo ("classic" framework) projects. It is designed and tested using REALstudio 2011r4.3 on Windows 7. Library binaries for [a number of platforms](https://download.libsodium.org/libsodium/releases/) are available, or can built from source. 
+**RB-libsodium** is a libsodium [binding](http://en.wikipedia.org/wiki/Language_binding) for Realbasic and Xojo ("classic" framework) projects. Library binaries for [a number of platforms](https://download.libsodium.org/libsodium/releases/) are available, or can built from source. 
 
 ## Example
 This example generates and validates a password hash that is suitable to be stored in a database ([more examples](https://github.com/charonn0/RB-libsodium/wiki/Examples)):
@@ -52,6 +52,8 @@ RB-libsodium will raise a PlatformNotSupportedException when used if all require
 * [Password hashing](https://github.com/charonn0/RB-libsodium/wiki/Password-Example#generate-a-hash)
 * [Generic hashing](https://github.com/charonn0/RB-libsodium/wiki/Generic-Hash-Example)
 * [Encrypting streams or files](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream#example)
+  * [...with gzip compression](https://github.com/charonn0/RB-libsodium/wiki/Compressed-SecretStream-Example)
+  * [Password protected file example](https://github.com/charonn0/RB-libsodium/wiki/Examples#putting-it-all-together)
 * PKI
   * Encryption
     * [Generate a key pair](https://github.com/charonn0/RB-libsodium/wiki/PKI-Encryption-Examples#generate-a-new-random-encryption-key)
