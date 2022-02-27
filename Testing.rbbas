@@ -524,8 +524,7 @@ Protected Module Testing
 
 	#tag Method, Flags = &h21
 		Private Sub TestSecretStream()
-		  Dim k As libsodium.SKI.SecretKey
-		  k = k.Generate
+		  Dim k As libsodium.SKI.SecretKey = libsodium.SKI.SecretStream.GenerateKey()
 		  Dim mb As New MemoryBlock(0)
 		  Dim stream As New libsodium.SKI.SecretStream(mb, k)
 		  Dim additional As New MemoryBlock(16)
