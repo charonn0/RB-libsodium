@@ -31,25 +31,44 @@ Implements Readable,Writeable
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(Buffer As MemoryBlock, Key As libsodium.SKI.KeyContainer, DecryptHeader As MemoryBlock = Nil, HeaderPassword As libsodium.Password = Nil)
+		Sub Constructor(Buffer As MemoryBlock, Key As libsodium.PKI.SharedSecret, DecryptHeader As MemoryBlock = Nil, HeaderPassword As libsodium.Password = Nil)
 		  ' Constructs an in-memory SecretStream. If the Buffer size is zero then an encryption stream is created,
 		  ' otherwise a decryption stream is created. Decryption requires the original decryption header.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Constructor
 		  
+		  Me.Constructor(Buffer, Key.Value, DecryptHeader, HeaderPassword)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h0
+		Sub Constructor(Buffer As MemoryBlock, Key As libsodium.SKI.SecretKey, DecryptHeader As MemoryBlock = Nil, HeaderPassword As libsodium.Password = Nil)
+		  ' Constructs an in-memory SecretStream. If the Buffer size is zero then an encryption stream is created,
+		  ' otherwise a decryption stream is created. Decryption requires the original decryption header.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Constructor
+		  
+		  Me.Constructor(Buffer, Key.Value, DecryptHeader, HeaderPassword)
+		End Sub
+	#tag EndMethod
+
+	#tag Method, Flags = &h1
+		Protected Sub Constructor(Buffer As MemoryBlock, Key As MemoryBlock, DecryptHeader As MemoryBlock, HeaderPassword As libsodium.Password)
+		  ' Constructs an in-memory SecretStream. If the Buffer size is zero then an encryption stream is created,
+		  ' otherwise a decryption stream is created. Decryption requires the original decryption header.
+		  
 		  Dim metadata As Dictionary
 		  If DecryptHeader <> Nil And DecryptHeader.StringValue(0, 5) = "-----" Then
 		    DecryptHeader = libsodium.Exporting.Import(DecryptHeader, metadata, HeaderPassword)
 		  End If
 		  
-		  If Key IsA libsodium.Password Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
-		  
 		  Select Case True
 		  Case Buffer.Size > 0 And DecryptHeader <> Nil ' readable
-		    Me.Constructor(New BinaryStream(Buffer), Key.Value, DecryptHeader)
+		    Me.Constructor(New BinaryStream(Buffer), Key, DecryptHeader)
 		  Case Buffer.Size = 0 And DecryptHeader = Nil ' writeable
-		    Me.Constructor(New BinaryStream(Buffer), Key.Value)
+		    Me.Constructor(New BinaryStream(Buffer), Key)
 		  Case Buffer.Size < 0
 		    Raise New SodiumException(ERR_SIZE_REQUIRED)
 		  Case Buffer.Size > 0 And DecryptHeader <> Nil
