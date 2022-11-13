@@ -451,6 +451,7 @@ Protected Module Testing
 		  
 		  //These test vectors are from http://ed25519.cr.yp.to/python/sign.input
 		  Dim f As FolderItem = App.ExecutableFile.Parent.Child("ed25519_test_vectors.txt")
+		  If Not f.Exists Then f = App.ExecutableFile.Parent.Parent.Child("ed25519_test_vectors.txt")
 		  If Not f.Exists Then Return
 		  
 		  Dim tis As TextInputStream = TextInputStream.Open(f)
