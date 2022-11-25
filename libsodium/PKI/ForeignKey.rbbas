@@ -2,6 +2,13 @@
 Protected Class ForeignKey
 	#tag Method, Flags = &h0
 		Sub Constructor(FromKey As libsodium.PKI.EncryptionKey)
+		  ' Instantiates the ForeignKey using the public half of the specified key pair.
+		  ' To construct an instance of ForeignKey from the public half of a key pair,
+		  ' use ForeignKey.Operator_Convert(String).
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey.Constructor
+		  
 		  Me.Constructor(FromKey.PublicKey)
 		  mType = KeyType.Encryption
 		End Sub
@@ -9,6 +16,13 @@ Protected Class ForeignKey
 
 	#tag Method, Flags = &h0
 		Sub Constructor(FromKey As libsodium.PKI.SigningKey)
+		  ' Instantiates the ForeignKey using the public half of the specified key pair.
+		  ' To construct an instance of ForeignKey from the public half of a key pair,
+		  ' use ForeignKey.Operator_Convert(String).
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey.Constructor
+		  
 		  Me.Constructor(FromKey.PublicKey)
 		  mType = KeyType.Signature
 		End Sub
@@ -42,6 +56,11 @@ Protected Class ForeignKey
 
 	#tag Method, Flags = &h0
 		Function Export(Optional Passwd As libsodium.Password) As MemoryBlock
+		  ' Exports the ForeignKey in a format that is understood by ForeignKey.Import(MemoryBlock)
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey.Export
+		  
 		  Dim data As New MemoryBlock(0)
 		  Dim bs As New BinaryStream(data)
 		  Dim t As ExportableType
@@ -76,6 +95,11 @@ Protected Class ForeignKey
 
 	#tag Method, Flags = &h0
 		 Shared Function Import(KeyData As MemoryBlock, Optional Passwd As libsodium.Password) As libsodium.PKI.ForeignKey
+		  ' Import a public key that was exported using ForeignKey.Export() As MemoryBlock
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey.Import
+		  
 		  Dim typ As KeyType
 		  Dim extype As ExportableType = libsodium.Exporting.GetType(KeyData)
 		  Dim key As MemoryBlock = libsodium.Exporting.Import(KeyData, Passwd)
@@ -101,12 +125,24 @@ Protected Class ForeignKey
 
 	#tag Method, Flags = &h0
 		Function Length() As Int32
+		  ' Returns the size of the ForeignKey, in bytes.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey.Length
+		  
 		  Return mKeyData.Size
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherKey As libsodium.PKI.ForeignKey) As Int32
+		  ' This method overloads the comparison operator (=) allowing direct comparisons
+		  ' between instances of ForeignKey or instances of ForeignKey and Strings. The
+		  ' comparison operation itself is a constant-time binary comparison.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey.Operator_Compare
+		  
 		  If OtherKey Is Nil Then Return 1
 		  If libsodium.StrComp(Me.Value, OtherKey.Value) Then Return 0
 		  Return -1
@@ -115,7 +151,13 @@ Protected Class ForeignKey
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherKey As String) As Int32
-		  ' Performs a constant-time binary comparison to the OtherKey
+		  ' This method overloads the comparison operator (=) allowing direct comparisons
+		  ' between instances of ForeignKey or instances of ForeignKey and Strings. The
+		  ' comparison operation itself is a constant-time binary comparison.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey.Operator_Compare
+		  
 		  If libsodium.StrComp(Me.Value, OtherKey) Then Return 0
 		  Return -1
 		End Function
@@ -123,12 +165,23 @@ Protected Class ForeignKey
 
 	#tag Method, Flags = &h0
 		Sub Operator_Convert(FromString As String)
+		  ' This method overloads the conversion operator (=) allowing direct conversion
+		  ' from a String into a new instance of ForeignKey.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey.Operator_Convert
+		  
 		  Me.Constructor(FromString)
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function Value() As MemoryBlock
+		  ' Returns the key data.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.ForeignKey.Value
+		  
 		  Return mKeyData
 		End Function
 	#tag EndMethod

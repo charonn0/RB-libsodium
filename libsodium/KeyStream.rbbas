@@ -207,6 +207,11 @@ Protected Class KeyStream
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
+			  ' Gets the cipher being used to generate the key stream.
+			  '
+			  ' See:
+			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Type
+			  
 			  return mType
 			End Get
 		#tag EndGetter

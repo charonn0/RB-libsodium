@@ -124,6 +124,12 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherSecret As libsodium.PKI.SharedSecret) As Int32
+		  ' Performs a constant-time binary comparison. Returns zero if the keys are equal, 
+		  ' non-zero if they are not equal.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Operator_Compare
+		  
 		  If OtherSecret Is Nil Then Return 1
 		  Return Super.Operator_Compare(OtherSecret.Value)
 		End Function
