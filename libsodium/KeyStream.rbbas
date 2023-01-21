@@ -29,7 +29,7 @@ Protected Class KeyStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(KeyData As libsodium.PKI.ForeignKey, NewStreamType As libsodium.StreamType = libsodium.StreamType.XSalsa20)
+		Sub Constructor(KeyData As libsodium.PKI.PublicKey, NewStreamType As libsodium.StreamType = libsodium.StreamType.XSalsa20)
 		  ' Uses the KeyData as the key for the key stream.
 		  '
 		  ' See:

@@ -2,7 +2,7 @@
 Protected Class SharedSecret
 Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h1000
-		Sub Constructor(RecipientPublicKey As libsodium.PKI.ForeignKey, SenderPrivateKey As libsodium.PKI.EncryptionKey)
+		Sub Constructor(RecipientPublicKey As libsodium.PKI.PublicKey, SenderPrivateKey As libsodium.PKI.EncryptionKey)
 		  ' Derives a shared key from the public half of the recipient's key and the private half of the sender's key using
 		  ' an Elliptic Curve Diffie-Hellman (ECDH) key exchange over the Curve25519 curve.
 		  '
