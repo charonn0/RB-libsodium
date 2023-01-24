@@ -104,6 +104,13 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherPassword As libsodium.Password) As Int32
+		  ' This method overloads the comparison operator (=) allowing direct comparisons
+		  ' between instances of Password or instances of Password and Strings. The comparison
+		  ' operation is a constant-time binary comparison of password strings.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.Operator_Compare
+		  
 		  If OtherPassword Is Nil Then Return 1
 		  Return Super.Operator_Compare(OtherPassword.Value)
 		End Function
@@ -111,6 +118,12 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		Sub Operator_Convert(FromString As String)
+		  ' This method overloads the conversion operator (=) allowing direct conversion
+		  ' from a String into a new instance of Password.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.Operator_Convert
+		  
 		  Me.Constructor(FromString)
 		End Sub
 	#tag EndMethod
@@ -118,6 +131,9 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h0
 		 Shared Function RandomSalt(HashAlgorithm As Int32 = libsodium.Password.ALG_ARGON2) As MemoryBlock
 		  ' Returns unpredictable bytes that are suitable to be used as a salt for Password.DeriveKey
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.Password.RandomSalt
 		  
 		  If HashAlgorithm = ALG_ARGON2 Then
 		    Return RandomBytes(crypto_pwhash_saltbytes)

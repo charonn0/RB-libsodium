@@ -166,6 +166,16 @@ Protected Module SKI
 	#tag EndMethod
 
 
+	#tag Note, Name = "SKI"
+		This module contains methods, classes, etc. related to SECRECT KEY crypto.
+		
+		Secret key crypto is appropriate when the secret data will be encrypted by
+		the same user who will decrypt it, or by two users using a negotiated secret
+		key (See: libsodium.PKI.SharedSecret).
+		
+	#tag EndNote
+
+
 	#tag ViewBehavior
 		#tag ViewProperty
 			Name="Index"

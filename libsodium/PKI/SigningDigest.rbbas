@@ -128,7 +128,7 @@ Protected Class SigningDigest
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function Verify(SenderKey As libsodium.PKI.ForeignKey, Signature As MemoryBlock) As Boolean
+		Function Verify(SenderKey As libsodium.PKI.PublicKey, Signature As MemoryBlock) As Boolean
 		  ' Finalizes the hash operation and then verifies the Signature with the SenderKey.
 		  ' Returns True if the Signature is valid. After calling this method (regardless of
 		  ' success) no other methods (Process, Sign, etc.) may be called nor can this method
@@ -146,7 +146,7 @@ Protected Class SigningDigest
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function VerifyFinalEd25519ph(SenderKey As libsodium.PKI.ForeignKey, Signature As MemoryBlock) As Boolean
+		Private Function VerifyFinalEd25519ph(SenderKey As libsodium.PKI.PublicKey, Signature As MemoryBlock) As Boolean
 		  If mState = Nil Then Return False
 		  Dim ok As Boolean = (crypto_sign_final_verify(mState, Signature, SenderKey.Value) = 0)
 		  mState = Nil
@@ -155,7 +155,7 @@ Protected Class SigningDigest
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Function VerifyFinalSHA512(SenderKey As libsodium.PKI.ForeignKey, Signature As MemoryBlock) As Boolean
+		Private Function VerifyFinalSHA512(SenderKey As libsodium.PKI.PublicKey, Signature As MemoryBlock) As Boolean
 		  Dim ok As Boolean = libsodium.PKI.VerifyData(mDigest.Value, SenderKey, Signature)
 		  mDigest = Nil
 		  Return ok

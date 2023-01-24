@@ -161,7 +161,7 @@ Protected Module PKI
 	#tag EndExternalMethod
 
 	#tag Method, Flags = &h1
-		Protected Function DecryptData(CipherText As MemoryBlock, SenderPublicKey As libsodium.PKI.ForeignKey, RecipientPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
+		Protected Function DecryptData(CipherText As MemoryBlock, SenderPublicKey As libsodium.PKI.PublicKey, RecipientPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock) As MemoryBlock
 		  ' Decrypts the CipherText using the XSalsa20 stream cipher with a shared key, which is derived
 		  ' from the SenderPublicKey and RecipientPrivateKey, and a Nonce. A Poly1305 message authentication
 		  ' code is prepended by the EncryptData method and will be validated by this method. The decrypted
@@ -215,7 +215,7 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.ForeignKey, SenderPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock, Exportable As Boolean = False) As MemoryBlock
+		Protected Function EncryptData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.PublicKey, SenderPrivateKey As libsodium.PKI.EncryptionKey, Nonce As MemoryBlock, Exportable As Boolean = False) As MemoryBlock
 		  ' Encrypts the ClearText using the XSalsa20 stream cipher with a shared key, which is derived
 		  ' from the RecipientPublicKey and SenderPrivateKey, and a Nonce. A Poly1305 message authentication
 		  ' code is also generated and prepended to the returned encrypted data. On error returns Nil.
@@ -228,7 +228,7 @@ Protected Module PKI
 		  CheckSize(Nonce, crypto_box_noncebytes)
 		  CheckSize(RecipientPublicKey.Value, crypto_box_publickeybytes)
 		  CheckSize(SenderPrivateKey.PrivateKey, crypto_box_secretkeybytes)
-		  If RecipientPublicKey.Type <> ForeignKey.KeyType.Encryption Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  If RecipientPublicKey.Type <> PublicKey.KeyType.Encryption Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_macbytes)
 		  If crypto_box_easy(buffer, ClearText, ClearText.Size, Nonce, RecipientPublicKey.Value, SenderPrivateKey.PrivateKey) = 0 Then
@@ -260,7 +260,7 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function SealData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.ForeignKey, Exportable As Boolean = False) As MemoryBlock
+		Protected Function SealData(ClearText As MemoryBlock, RecipientPublicKey As libsodium.PKI.PublicKey, Exportable As Boolean = False) As MemoryBlock
 		  ' Seals the ClearText using the XSalsa20 stream cipher with the recipient's public key and an
 		  ' ephemeral private key. On error returns Nil.
 		  '
@@ -268,7 +268,7 @@ Protected Module PKI
 		  ' https://download.libsodium.org/doc/public-key_cryptography/sealed_boxes.html
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SealData
 		  
-		  If RecipientPublicKey.Type <> ForeignKey.KeyType.Encryption Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  If RecipientPublicKey.Type <> PublicKey.KeyType.Encryption Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  
 		  Dim buffer As New MemoryBlock(ClearText.Size + crypto_box_publickeybytes + crypto_box_macbytes)
 		  If crypto_box_seal(buffer, ClearText, ClearText.Size, RecipientPublicKey.Value) = 0 Then
@@ -375,7 +375,7 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function VerifyData(Algorithm As libsodium.HashType, SignedMessage As Readable, SignerPublicKey As libsodium.PKI.ForeignKey, Signature As MemoryBlock) As Boolean
+		Protected Function VerifyData(Algorithm As libsodium.HashType, SignedMessage As Readable, SignerPublicKey As libsodium.PKI.PublicKey, Signature As MemoryBlock) As Boolean
 		  ' Verify a Ed25519ph signature for the Message using the SenderKey.
 		  ' This method is suited for Messages that can't fit into memory.
 		  '
@@ -383,7 +383,7 @@ Protected Module PKI
 		  ' https://doc.libsodium.org/public-key_cryptography/public-key_signatures#example-multi-part-message
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.VerifyData
 		  
-		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  If SignerPublicKey.Type <> PublicKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  CheckSize(SignerPublicKey.Value, crypto_sign_publickeybytes)
 		  Dim metadata As Dictionary
 		  Dim sigstream As libsodium.PKI.SigningDigest
@@ -414,7 +414,7 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function VerifyData(SignedMessage As MemoryBlock, SignerPublicKey As libsodium.PKI.ForeignKey) As MemoryBlock
+		Protected Function VerifyData(SignedMessage As MemoryBlock, SignerPublicKey As libsodium.PKI.PublicKey) As MemoryBlock
 		  ' Validate a Ed25519 signature for the Message that was generated using the signer's PRIVATE key.
 		  ' The signature is expected to be prepended to the message (the default for SignData).
 		  '
@@ -424,7 +424,7 @@ Protected Module PKI
 		  
 		  
 		  CheckSize(SignerPublicKey.Value, crypto_sign_publickeybytes)
-		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  If SignerPublicKey.Type <> PublicKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  
 		  If Left(SignedMessage, 5) = "-----" Then SignedMessage = libsodium.Exporting.Import(SignedMessage)
 		  Dim tmp As New MemoryBlock(SignedMessage.Size - crypto_sign_bytes)
@@ -437,7 +437,7 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function VerifyData(SignedMessage As MemoryBlock, SignerPublicKey As libsodium.PKI.ForeignKey, DetachedSignature As MemoryBlock) As Boolean
+		Protected Function VerifyData(SignedMessage As MemoryBlock, SignerPublicKey As libsodium.PKI.PublicKey, DetachedSignature As MemoryBlock) As Boolean
 		  ' Validate a Ed25519 signature for the Message that was generated using the signer's PRIVATE key.
 		  ' If the signature was not prepended to the message (the default for SignData) then the signature
 		  ' must be passed as DetatchedSignature.
@@ -447,7 +447,7 @@ Protected Module PKI
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.VerifyData
 		  
 		  
-		  If SignerPublicKey.Type <> ForeignKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
+		  If SignerPublicKey.Type <> PublicKey.KeyType.Signature Then Raise New SodiumException(ERR_KEYTYPE_MISMATCH)
 		  CheckSize(SignerPublicKey.Value, crypto_sign_publickeybytes)
 		  If Left(DetachedSignature, 5) = "-----" Then DetachedSignature = libsodium.Exporting.Import(DetachedSignature)
 		  Return crypto_sign_verify_detached(DetachedSignature, SignedMessage, SignedMessage.Size, SignerPublicKey.Value) = 0
@@ -456,7 +456,7 @@ Protected Module PKI
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function VerifyData(SignedMessage As Readable, SignerPublicKey As libsodium.PKI.ForeignKey, Signature As MemoryBlock) As Boolean
+		Protected Function VerifyData(SignedMessage As Readable, SignerPublicKey As libsodium.PKI.PublicKey, Signature As MemoryBlock) As Boolean
 		  ' Verify a Ed25519ph signature for the Message using the SenderKey.
 		  ' This method is suited for Messages that can't fit into memory.
 		  '

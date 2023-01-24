@@ -3,7 +3,9 @@ Protected Class SecretStream
 Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Sub Close()
-		  ' Close the stream
+		  ' Closes the stream and releases all resources. If there are any bytes
+		  ' remaining in the write buffer then they are padded to fill a full
+		  ' block and written to the stream with the TAG_FINAL tag.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Close
@@ -111,12 +113,22 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function Create(Key As libsodium.PKI.SharedSecret, OutputStream As Writeable) As libsodium.SKI.SecretStream
+		  ' Creates a new encrypted stream in the OutputStream using the specified shared key.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Create
+		  
 		  Return New SecretStream(OutputStream, Key.Value)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		 Shared Function Create(Key As libsodium.SKI.SecretKey, OutputStream As Writeable) As libsodium.SKI.SecretStream
+		  ' Creates a new encrypted stream in the OutputStream using the specified secret key.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Create
+		  
 		  Return New SecretStream(OutputStream, Key.Value)
 		End Function
 	#tag EndMethod
@@ -131,11 +143,12 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Function EOF() As Boolean
 		  // Part of the Readable interface.
+		  ' Returns True if there are no more bytes to read from the encrypted stream.
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.EOF
 		  
-		  Return (mEOF Or (mInput <> Nil And mInput.EOF)) And mReadBuffer.LenB = 0 
+		  Return (mEOF Or (mInput <> Nil And mInput.EOF)) And mReadBuffer.LenB = 0
 		  Return (mEOF Or (mInput <> Nil And mInput.EOF)) And mReadBuffer.LenB = 0
 		End Function
 	#tag EndMethod
@@ -172,6 +185,7 @@ Implements Readable,Writeable
 	#tag Method, Flags = &h0
 		Sub Flush()
 		  // Part of the Writeable interface.
+		  ' Flushes the stream (encryption mode only.)
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Flush
@@ -182,6 +196,11 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function GenerateKey() As libsodium.SKI.SecretKey
+		  ' Generate a new secret key for use with this class.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.GenerateKey
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If System.IsFunctionAvailable("crypto_secretstream_xchacha20poly1305_keygen", sodium) Then
 		    Dim k As New MemoryBlock(crypto_secretstream_xchacha20poly1305_keybytes)
@@ -218,6 +237,12 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function Open(Key As libsodium.PKI.SharedSecret, InputStream As Readable, DecryptHeader As FolderItem, HeaderPassword As libsodium.Password = Nil) As libsodium.SKI.SecretStream
+		  ' Opens the encrypted stream represented by InputStream using the specified
+		  ' shared key and initialization vector/DecryptHeader.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Open
+		  
 		  Dim bs As BinaryStream = BinaryStream.Open(DecryptHeader)
 		  Dim metadata As Dictionary
 		  Dim header As MemoryBlock = bs.Read(bs.Length)
@@ -228,6 +253,12 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function Open(Key As libsodium.PKI.SharedSecret, InputStream As Readable, DecryptHeader As MemoryBlock, HeaderPassword As libsodium.Password = Nil) As libsodium.SKI.SecretStream
+		  ' Opens the encrypted stream represented by InputStream using the specified
+		  ' shared key and initialization vector/DecryptHeader.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Open
+		  
 		  Dim metadata As Dictionary
 		  If DecryptHeader.StringValue(0, 5) = "-----" Then DecryptHeader = libsodium.Exporting.Import(DecryptHeader, metadata, HeaderPassword)
 		  Return New SecretStream(InputStream, Key.Value, DecryptHeader)
@@ -236,6 +267,12 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function Open(Key As libsodium.SKI.SecretKey, InputStream As Readable, DecryptHeader As FolderItem, HeaderPassword As libsodium.Password = Nil) As libsodium.SKI.SecretStream
+		  ' Opens the encrypted stream represented by InputStream using the specified
+		  ' secret key and initialization vector/DecryptHeader.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Open
+		  
 		  Dim bs As BinaryStream = BinaryStream.Open(DecryptHeader)
 		  Dim metadata As Dictionary
 		  Dim header As MemoryBlock = bs.Read(bs.Length)
@@ -246,6 +283,12 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		 Shared Function Open(Key As libsodium.SKI.SecretKey, InputStream As Readable, DecryptHeader As MemoryBlock, HeaderPassword As libsodium.Password = Nil) As libsodium.SKI.SecretStream
+		  ' Opens the encrypted stream represented by InputStream using the specified
+		  ' secret key and initialization vector/DecryptHeader.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.Open
+		  
 		  Dim metadata As Dictionary
 		  If DecryptHeader.StringValue(0, 5) = "-----" Then DecryptHeader = libsodium.Exporting.Import(DecryptHeader, metadata, HeaderPassword)
 		  Return New SecretStream(InputStream, Key.Value, DecryptHeader)
@@ -254,7 +297,7 @@ Implements Readable,Writeable
 
 	#tag Method, Flags = &h0
 		Function Read(Count As Integer, AdditionalData As MemoryBlock) As String
-		  ' Reads the specified number of encrypted bytes. If the bytes were successfully decrypted and 
+		  ' Reads the specified number of encrypted bytes. If the bytes were successfully decrypted and
 		  ' authenticated then the decrypted bytes are returned. AdditionalData is extra data that was
 		  ' used by the encryptor when computing the authentication code.
 		  '
@@ -397,7 +440,7 @@ Implements Readable,Writeable
 		  ' Encrypts the Text and computes an authentication code based on the Text and the AdditionalData
 		  ' and writes the encrypted bytes and the authentication code to the output stream. Tag is one of
 		  ' these constants:
-		  '   
+		  '
 		  '   crypto_secretstream_xchacha20poly1305_TAG_MESSAGE
 		  '   crypto_secretstream_xchacha20poly1305_TAG_PUSH
 		  '   crypto_secretstream_xchacha20poly1305_TAG_REKEY
@@ -451,11 +494,31 @@ Implements Readable,Writeable
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
+			  ' Gets the size of the blocks that are written/read when using the
+			  ' buffered write/read methods. The same block size must be used for
+			  ' both encryption and decryption.
+			  
+			  ' The Close() method pads the final block of encrypted data to equal
+			  ' the block size.
+			  ' 
+			  ' See:
+			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.BlockSize
+			  
 			  return mBlockSize
 			End Get
 		#tag EndGetter
 		#tag Setter
 			Set
+			  ' Sets the size of the blocks that are written/read when using the
+			  ' buffered write/read methods. The same block size must be used for
+			  ' both encryption and decryption.
+			  
+			  ' The Close() method pads the final block of encrypted data to equal
+			  ' the block size.
+			  '
+			  ' See:
+			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.BlockSize
+			  
 			  value = Max(value, 1024 * 16)
 			  mBlockSize = value
 			End Set
@@ -466,7 +529,8 @@ Implements Readable,Writeable
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
-			  ' Returns the header that will be required to decrypt the stream
+			  ' Returns the decryption header/initialization vector. This header is needed
+			  ' for decryption and must be transmitted with the encrypted stream.
 			  '
 			  ' See:
 			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.DecryptionHeader

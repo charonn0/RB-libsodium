@@ -24,12 +24,22 @@ Protected Class KeyPair
 
 	#tag Method, Flags = &h0
 		Function PrivateKey() As MemoryBlock
+		  ' Returns an unprotected copy of the private half of the key pair.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.KeyPair.PrivateKey
+		  
 		  Return mPrivate.Value()
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function PublicKey() As MemoryBlock
+		  ' Returns the public half of the key pair.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.KeyPair.PublicKey
+		  
 		  Return mPublic
 		End Function
 	#tag EndMethod
@@ -37,6 +47,9 @@ Protected Class KeyPair
 	#tag Method, Flags = &h0
 		Function Salt() As MemoryBlock
 		  ' If the KeyPair was derived from a Password then this method will return the salt, otherwise it returns Nil.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.KeyPair.Salt
 		  
 		  Return mPasswdSalt
 		End Function

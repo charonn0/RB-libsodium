@@ -121,6 +121,13 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherKey As libsodium.SKI.SecretKey) As Int32
+		  ' This method overloads the comparison operator (=) allowing direct comparisons
+		  ' between instances of SecretKey. The comparison operation itself is a constant-time
+		  ' binary comparison of the key data. 
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Operator_Compare
+		  
 		  If OtherKey Is Nil Then Return 1
 		  Return Super.Operator_Compare(OtherKey.Value)
 		End Function
@@ -141,6 +148,9 @@ Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h0
 		Function Salt() As MemoryBlock
 		  ' If the Key was derived from a Password then this method will return the salt, otherwise it returns Nil.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretKey.Salt
 		  
 		  Return mPasswdSalt
 		End Function

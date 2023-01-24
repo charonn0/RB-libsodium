@@ -2,6 +2,11 @@
 Class SecureMemoryBlock
 	#tag Method, Flags = &h0
 		Function BooleanValue(Offset As UInt64) As Boolean
+		  ' Gets the Boolean value at the specified offset.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.BooleanValue
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  Dim mb As MemoryBlock = mPtr
 		  Return mb.BooleanValue(Offset)
@@ -10,6 +15,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub BooleanValue(Offset As UInt64, Assigns NewBool As Boolean)
+		  ' Sets the Boolean value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.BooleanValue
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 1 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -19,6 +29,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function ByteValue(Offset As UInt64) As Byte
+		  ' Gets the Byte value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.ByteValue
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 1 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -28,6 +43,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub ByteValue(Offset As UInt64, Assigns NewByte As Byte)
+		  ' Sets the Byte value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.ByteValue
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 1 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -37,6 +57,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function ColorValue(Offset As UInt64, Bits As Int32) As Color
+		  ' Gets the Color value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.ColorValue
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -46,6 +71,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub ColorValue(Offset As UInt64, Bits As Int32, Assigns NewColor As Color)
+		  ' Sets the Color value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.ColorValue
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -55,6 +85,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub Constructor(RealMB As Ptr, RealSize As UInt64)
+		  ' Secures a MemoryBlock that was allocated by Xojo.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.Constructor
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  If RealMB = Nil Then Raise New NilObjectException
 		  mPtr = RealMB
@@ -65,6 +100,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub Constructor(Size As UInt32)
+		  ' Allocates a new SecureMemoryBlock of the specified size.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.Constructor
+		  
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  mPtr = sodium_malloc(Size)
 		  If mPtr = Nil Then Raise New SodiumException(ERR_CANT_ALLOC)
@@ -75,6 +115,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function CString(Offset As UInt64) As CString
+		  ' Gets the CString value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.CString
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  Dim mb As MemoryBlock = mPtr
 		  Return mb.CString(Offset)
@@ -83,6 +128,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub CString(Offset As UInt64, Assigns NewString As CString)
+		  ' Gets the CString value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.CString
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  #If RBVersion > 2014.02 Then
 		    If Offset + CType(NewString, String).LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
@@ -96,6 +146,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function CurrencyValue(Offset As UInt64) As Currency
+		  ' Gets the Currency value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.CurrencyValue
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -105,6 +160,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub CurrencyValue(Offset As UInt64, Assigns NewCurrency As Currency)
+		  ' Gets the Currency value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.CurrencyValue
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -130,6 +190,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function DoubleValue(Offset As UInt64) As Double
+		  ' Gets the Double value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.DoubleValue
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -139,6 +204,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub DoubleValue(Offset As UInt64, Assigns NewDouble As Double)
+		  ' Sets the Double value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.DoubleValue
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -148,6 +218,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function Int16Value(Offset As UInt64) As Int16
+		  ' Gets the Int16 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.Int16Value
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 2 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -157,6 +232,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub Int16Value(Offset As UInt64, Assigns NewInt As Int16)
+		  ' Sets the Int16 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.Int16Value
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 2 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -166,6 +246,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function Int32Value(Offset As UInt64) As Int32
+		  ' Gets the Int32 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.Int32Value
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -175,6 +260,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub Int32Value(Offset As UInt64, Assigns NewInt As Int32)
+		  ' Sets the Int32 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.Int32Value
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -184,6 +274,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function Int64Value(Offset As UInt64) As Int64
+		  ' Gets the Int64 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.Int64Value
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -193,6 +288,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub Int64Value(Offset As UInt64, Assigns NewInt As Int64)
+		  ' Sets the Int64 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.Int64Value
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -201,9 +301,12 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Function IsZero(Offset As Int32 = 0, Length As Int32 = -1) As Boolean
+		Function IsZero(Offset As Int32 = 0, Length As Int32 = - 1) As Boolean
 		  ' This method returns True if the SecureMemoryBlock contains only zeros. It returns False
 		  ' if non-zero bits are found. Execution time is constant for a given length.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.IsZero
 		  
 		  If mPtr = Nil Then Return True
 		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
@@ -222,12 +325,22 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function Long(Offset As UInt64) As Int32
+		  ' Gets the Long value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.LongValue
+		  
 		  Return Me.Int32Value(Offset)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub Long(Offset As UInt64, Assigns NewInt As Int32)
+		  ' Sets the Long value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.LongValue
+		  
 		  Me.Int32Value(Offset) = NewInt
 		End Sub
 	#tag EndMethod
@@ -276,6 +389,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function PString(Offset As UInt64) As PString
+		  ' Gets the PString value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.PString
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  Dim mb As MemoryBlock = mPtr
 		  Return mb.PString(Offset)
@@ -284,6 +402,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub PString(Offset As UInt64, Assigns NewString As PString)
+		  ' Sets the PString value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.PString
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  #If RBVersion > 2014.02 Then
 		    If Offset + CType(NewString, String).LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
@@ -297,6 +420,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function SingleValue(Offset As UInt64) As Single
+		  ' Gets the Single value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.SingleValue
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -306,6 +434,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub SingleValue(Offset As UInt64, Assigns NewInt As Single)
+		  ' Sets the Single value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.SingleValue
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -315,12 +448,24 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function Size() As UInt64
+		  ' Returns the size of the SecureMemoryBlock, in bytes. This does not correspond to
+		  ' the amount of memory allocated due to the addition of guard pages and canaries.
+		  ' This value is readable even if the ProtectionLevel=NoAccess.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.Size
+		  
 		  Return mSize
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function StringValue(Offset As UInt64, Length As UInt64) As MemoryBlock
+		  ' Gets the string value at the specified offset and length.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.StringValue
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  Dim mb As MemoryBlock = mPtr
 		  Return mb.StringValue(Offset, Length)
@@ -329,6 +474,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub StringValue(Offset As UInt64, Length As UInt64, Assigns NewData As MemoryBlock)
+		  ' Sets the string value at the specified offset and length.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.StringValue
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + Length > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -338,6 +488,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function UInt16Value(Offset As UInt64) As UInt16
+		  ' Gets the UInt16 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.UInt16Value
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 2 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -347,6 +502,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub UInt16Value(Offset As UInt64, Assigns NewInt As UInt16)
+		  ' Sets the UInt16 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.UInt16Value
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 2 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -356,6 +516,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function UInt32Value(Offset As UInt64) As UInt32
+		  ' Gets the UInt32 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.UInt32Value
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -365,6 +530,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub UInt32Value(Offset As UInt64, Assigns NewInt As UInt32)
+		  ' Sets the UInt32 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.UInt32Value
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 4 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -374,6 +544,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function UInt64Value(Offset As UInt64) As UInt64
+		  ' Gets the UInt64 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.UInt64Value
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -383,6 +558,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub UInt64Value(Offset As UInt64, Assigns NewInt As UInt64)
+		  ' Sets the UInt64 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.UInt64Value
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 8 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -392,6 +572,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function UInt8Value(Offset As UInt64) As UInt8
+		  ' Gets the UInt8 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.UInt8Value
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  If Offset + 1 > mSize Then Raise New SodiumException(ERR_OUT_OF_BOUNDS)
 		  Dim mb As MemoryBlock = mPtr
@@ -401,6 +586,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub UInt8Value(Offset As UInt64, Assigns NewInt As UInt8)
+		  ' Sets the UInt8 value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.UInt8Value
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  If Offset + 1 > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
 		  Dim mb As MemoryBlock = mPtr
@@ -410,18 +600,33 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Function UShortValue(Offset As UInt64) As UInt16
+		  ' Gets the UShort value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.UShortValue
+		  
 		  Return Me.UInt16Value(Offset)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub UShortValue(Offset As UInt64, Assigns NewInt As UInt16)
+		  ' Sets the UShort value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.UShortValue
+		  
 		  Me.UInt16Value(Offset) = NewInt
 		End Sub
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Function WString(Offset As UInt64) As WString
+		  ' Gets the WString value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.WString
+		  
 		  If mProtectionLevel = libsodium.ProtectionLevel.NoAccess Then Raise New SodiumException(ERR_READ_DENIED)
 		  Dim mb As MemoryBlock = mPtr
 		  Return mb.WString(Offset)
@@ -430,6 +635,11 @@ Class SecureMemoryBlock
 
 	#tag Method, Flags = &h0
 		Sub WString(Offset As UInt64, Assigns NewString As WString)
+		  ' Sets the WString value at the specified offset.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.WString
+		  
 		  If mProtectionLevel <> libsodium.ProtectionLevel.ReadWrite Then Raise New SodiumException(ERR_WRITE_DENIED)
 		  #If RBVersion > 2014.02 Then
 		    If Offset + CType(NewString, String).LenB > mSize Then Raise New SodiumException(ERR_TOO_LARGE)
@@ -442,8 +652,11 @@ Class SecureMemoryBlock
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub ZeroFill(Offset As Int32 = 0, Length As Int32 = -1)
+		Sub ZeroFill(Offset As Int32 = 0, Length As Int32 = - 1)
 		  ' This method fills the SecureMemoryBlock with zeroes, overwriting any previous data.
+		  '
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.ZeroFill
 		  
 		  If mPtr = Nil Then Return
 		  If Offset < 0 Then Raise New SodiumException(ERR_OUT_OF_RANGE)
@@ -499,11 +712,28 @@ Class SecureMemoryBlock
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
+			  ' Gets whether the operating system may swap-out the pages containing the SecureMemoryBlock.
+			  ' This is a suggestion, not a command, and the OS is free to ignore it. Setting this to False
+			  ' may improve security by preventing sensitive memory pages from being written to disk. The
+			  ' default is True, which means the pages are subject to swapping at any time.
+			  '
+			  ' See:
+			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.AllowSwap
+			  
+			  
 			  return mAllowSwap
 			End Get
 		#tag EndGetter
 		#tag Setter
 			Set
+			  ' Sets whether the operating system may swap-out the pages containing the SecureMemoryBlock.
+			  ' This is a suggestion, not a command, and the OS is free to ignore it. Setting this to False
+			  ' may improve security by preventing sensitive memory pages from being written to disk. The
+			  ' default is True, which means the pages are subject to swapping at any time.
+			  '
+			  ' See:
+			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.AllowSwap
+			  
 			  Dim i As Int32
 			  If value Then
 			    i = sodium_munlock(mPtr, mSize)
@@ -552,11 +782,23 @@ Class SecureMemoryBlock
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
+			  ' Gets the current ProtectionLevel of the SecureMemoryBlock. The default
+			  ' is ProtectionLevel.ReadWrite.
+			  '
+			  ' See:
+			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.ProtectionLevel
+			  
 			  return mProtectionLevel
 			End Get
 		#tag EndGetter
 		#tag Setter
 			Set
+			  ' Sets the current ProtectionLevel of the SecureMemoryBlock. The default
+			  ' is ProtectionLevel.ReadWrite.
+			  '
+			  ' See:
+			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock.ProtectionLevel
+			  
 			  Dim i As Int32
 			  Select Case value
 			  Case libsodium.ProtectionLevel.ReadWrite

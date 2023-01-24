@@ -297,6 +297,11 @@ Protected Class GenericHashDigest
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
+			  ' The selected hash algorithm.
+			  '
+			  ' See:
+			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.GenericHashDigest.Type
+			  
 			  return mType
 			End Get
 		#tag EndGetter

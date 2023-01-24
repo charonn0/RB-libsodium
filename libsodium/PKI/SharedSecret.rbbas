@@ -2,7 +2,7 @@
 Protected Class SharedSecret
 Inherits libsodium.SKI.KeyContainer
 	#tag Method, Flags = &h1000
-		Sub Constructor(RecipientPublicKey As libsodium.PKI.ForeignKey, SenderPrivateKey As libsodium.PKI.EncryptionKey)
+		Sub Constructor(RecipientPublicKey As libsodium.PKI.PublicKey, SenderPrivateKey As libsodium.PKI.EncryptionKey)
 		  ' Derives a shared key from the public half of the recipient's key and the private half of the sender's key using
 		  ' an Elliptic Curve Diffie-Hellman (ECDH) key exchange over the Curve25519 curve.
 		  '
@@ -124,6 +124,12 @@ Inherits libsodium.SKI.KeyContainer
 
 	#tag Method, Flags = &h0
 		Function Operator_Compare(OtherSecret As libsodium.PKI.SharedSecret) As Int32
+		  ' Performs a constant-time binary comparison. Returns zero if the keys are equal, 
+		  ' non-zero if they are not equal.
+		  ' 
+		  ' See:
+		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SharedSecret.Operator_Compare
+		  
 		  If OtherSecret Is Nil Then Return 1
 		  Return Super.Operator_Compare(OtherSecret.Value)
 		End Function

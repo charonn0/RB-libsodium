@@ -29,7 +29,7 @@ Protected Class KeyStream
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
-		Sub Constructor(KeyData As libsodium.PKI.ForeignKey, NewStreamType As libsodium.StreamType = libsodium.StreamType.XSalsa20)
+		Sub Constructor(KeyData As libsodium.PKI.PublicKey, NewStreamType As libsodium.StreamType = libsodium.StreamType.XSalsa20)
 		  ' Uses the KeyData as the key for the key stream.
 		  '
 		  ' See:
@@ -207,6 +207,11 @@ Protected Class KeyStream
 	#tag ComputedProperty, Flags = &h0
 		#tag Getter
 			Get
+			  ' Gets the cipher being used to generate the key stream.
+			  '
+			  ' See:
+			  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.KeyStream.Type
+			  
 			  return mType
 			End Get
 		#tag EndGetter
