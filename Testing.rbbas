@@ -45,7 +45,7 @@ Protected Module Testing
 		  End Try
 		  
 		  Try
-		    TestPKIForeignKey()
+		    TestPKIPublicKey()
 		  Catch
 		    Failures.Append(7)
 		  End Try
@@ -163,7 +163,7 @@ Protected Module Testing
 		  ' ChaCha20 test vectors taken from https://tools.ietf.org/html/draft-agl-tls-chacha20poly1305-04#section-7
 		  
 		  Dim prefix As String = DecodeHex("76b8e0ada0f13d90405d6ae55386bd28bdd219b8a08ded1aa836efcc8b770dc7da41597c5157488d7724e03fb8d84a376a43b8f41518a11cc387b669b2ee6586")
-		  Dim key As libsodium.PKI.ForeignKey = DecodeHex("0000000000000000000000000000000000000000000000000000000000000000")
+		  Dim key As libsodium.PKI.PublicKey = DecodeHex("0000000000000000000000000000000000000000000000000000000000000000")
 		  Dim nonce As String = DecodeHex("0000000000000000")
 		  Dim ks As New libsodium.KeyStream(key, libsodium.StreamType.ChaCha20)
 		  Dim output As String = ks.DeriveKey(prefix.LenB, nonce)
@@ -197,7 +197,7 @@ Protected Module Testing
 		  ' salsa20 test vectors taken from https://github.com/alexwebr/salsa20/blob/master/test_vectors.256
 		  
 		  Dim prefix As String = DecodeHex("5E5E71F90199340304ABB22A37B6625BF883FB89CE3B21F54A10B81066EF87DA30B77699AA7379DA595C77DD59542DA208E5954F89E40EB7AA80A84A6176663F")
-		  Dim key As libsodium.PKI.ForeignKey = DecodeHex("0F62B5085BAE0154A7FA4DA0F34699EC3F92E5388BDE3184D72A7DD02376C91C")
+		  Dim key As libsodium.PKI.PublicKey = DecodeHex("0F62B5085BAE0154A7FA4DA0F34699EC3F92E5388BDE3184D72A7DD02376C91C")
 		  Dim nonce As String = DecodeHex("288FF65DC42B92F9")
 		  Dim ks As New libsodium.KeyStream(key, libsodium.StreamType.Salsa20)
 		  Dim output As String = ks.DeriveKey(prefix.LenB, nonce)
@@ -232,7 +232,7 @@ Protected Module Testing
 		  
 		  Dim ciphertext As String = DecodeHex("b2af688e7d8fc4b508c05cc39dd583d6714322c64d7f3e63147aede2d9534934b04ff6f337b031815cd094bdbc6d7a92077dce709412286822ef0737ee47f6b7ffa22f9d53f11dd2b0a3bb9fc01d9a88f9d53c26e9365c2c3c063bc4840bfc812e4b80463e69d179530b25c158f543191cff993106511aa036043bbc75866ab7e34afc57e2cce4934a5faae6eabe4f221770183dd060467827c27a354159a081275a291f69d946d6fe28ed0b9ce08206cf484925a51b9498dbde178ddd3ae91a8581b91682d860f840782f6eea49dbb9bd721501d2c67122dea3b7283848c5f13e0c0de876bd227a856e4de593a3")
 		  Dim plain As String = DecodeHex("093c5e5585579625337bd3ab619d615760d8c5b224a85b1d0efe0eb8a7ee163abb0376529fcc09bab506c618e13ce777d82c3ae9d1a6f972d4160287cbfe60bf2130fc0a6ff6049d0a5c8a82f429231f008082e845d7e189d37f9ed2b464e6b919e6523a8c1210bd52a02a4c3fe406d3085f5068d1909eeeca6369abc981a42e87fe665583f0ab85ae71f6f84f528e6b397af86f6917d9754b7320dbdc2fea81496f2732f532ac78c4e9c6cfb18f8e9bdf74622eb126141416776971a84f94d156beaf67aecbf2ad412e76e66e8fad7633f5b6d7f3d64b5c6c69ce29003c6024465ae3b89be78e915d88b4b5621d")
-		  Dim key As libsodium.PKI.ForeignKey = DecodeHex("a6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff88030")
+		  Dim key As libsodium.PKI.PublicKey = DecodeHex("a6a7251c1e72916d11c2cb214d3c252539121d8e234e652d651fa4c8cff88030")
 		  Dim nonce As String = DecodeHex("9e645a74e9e0a60d8243acd9177ab51a1beb8d5a2f5d700c")
 		  Dim ks As New libsodium.KeyStream(key, libsodium.StreamType.XSalsa20)
 		  Dim output As String = ks.Process(plain, nonce)
@@ -282,7 +282,7 @@ Protected Module Testing
 		  Case 6
 		    Return "TestHash"
 		  Case 7
-		    Return "TestPKIForeignKey"
+		    Return "TestPKIPublicKey"
 		  Case 8
 		    Return "TestPKIExchange"
 		  Case 9
@@ -348,7 +348,7 @@ Protected Module Testing
 		  If nonce = Nil Then nonce = recipkey.RandomNonce
 		  
 		  Dim msg1 As String = "This is a test message."
-		  Dim crypted As String = libsodium.PKI.EncryptData(msg1, New libsodium.PKI.ForeignKey(recipkey), senderkey, nonce)
+		  Dim crypted As String = libsodium.PKI.EncryptData(msg1, New libsodium.PKI.PublicKey(recipkey), senderkey, nonce)
 		  Dim msg2 As String = libsodium.PKI.DecryptData(crypted, senderkey.PublicKey, recipkey, nonce)
 		  
 		  Assert(msg1 = msg2)
@@ -364,7 +364,7 @@ Protected Module Testing
 		  For i As Integer = 0 To 10
 		    n = libsodium.IncrementNonce(n)
 		    Assert(n <> nonce)
-		    Dim m As MemoryBlock = libsodium.PKI.EncryptData(msg1, New libsodium.PKI.ForeignKey(recipkey), senderkey, n)
+		    Dim m As MemoryBlock = libsodium.PKI.EncryptData(msg1, New libsodium.PKI.PublicKey(recipkey), senderkey, n)
 		    Assert(m <> Nil)
 		    msgs.Append(m)
 		  Next
@@ -373,7 +373,7 @@ Protected Module Testing
 		  For i As Integer = 0 To UBound(msgs)
 		    n = libsodium.IncrementNonce(n)
 		    Assert(n <> nonce)
-		    Assert(libsodium.PKI.DecryptData(msgs(i), New libsodium.PKI.ForeignKey(senderkey), recipkey, n) = msg1)
+		    Assert(libsodium.PKI.DecryptData(msgs(i), New libsodium.PKI.PublicKey(senderkey), recipkey, n) = msg1)
 		  Next
 		End Sub
 	#tag EndMethod
@@ -402,10 +402,10 @@ Protected Module Testing
 	#tag EndMethod
 
 	#tag Method, Flags = &h21
-		Private Sub TestPKIForeignKey()
+		Private Sub TestPKIPublicKey()
 		  Dim SenderKey As libsodium.PKI.EncryptionKey
 		  SenderKey = SenderKey.Import(TestEncryptionKey, TestPasswordValue)
-		  Dim recipkey As New libsodium.PKI.ForeignKey(SenderKey.Generate(SenderKey.RandomSeed))
+		  Dim recipkey As New libsodium.PKI.PublicKey(SenderKey.Generate(SenderKey.RandomSeed))
 		  Dim nonce As MemoryBlock = SenderKey.RandomNonce
 		  
 		  Dim msg1 As MemoryBlock = "This is a test message."
@@ -417,7 +417,7 @@ Protected Module Testing
 		  
 		  Dim SignKey As libsodium.PKI.SigningKey
 		  SignKey = SignKey.Generate'Import(TestSigningKey, TestPasswordValue)
-		  Dim verkey As New libsodium.PKI.ForeignKey(SignKey)
+		  Dim verkey As New libsodium.PKI.PublicKey(SignKey)
 		  
 		  crypted = libsodium.PKI.SignData(msg1, SignKey)
 		  msg2 = libsodium.PKI.VerifyData(crypted, verkey)
@@ -433,7 +433,7 @@ Protected Module Testing
 		  recipkey = recipkey.Generate(recipkey.RandomSeed)
 		  
 		  Dim msg1 As String = "This is a test message."
-		  Dim sealed As String = libsodium.PKI.SealData(msg1, New libsodium.PKI.ForeignKey(recipkey))
+		  Dim sealed As String = libsodium.PKI.SealData(msg1, New libsodium.PKI.PublicKey(recipkey))
 		  Dim msg2 As String = libsodium.PKI.UnsealData(sealed, recipkey)
 		  
 		  Assert(msg1 = msg2)
@@ -447,7 +447,7 @@ Protected Module Testing
 		  senderkey = senderkey.Import(TestSigningKey, TestPasswordValue)
 		  Dim msg As MemoryBlock = "This is a test message."
 		  Dim sig As MemoryBlock = libsodium.PKI.SignData(msg, senderkey)
-		  Assert(libsodium.PKI.VerifyData(sig, New libsodium.PKI.ForeignKey(senderkey)) <> Nil)
+		  Assert(libsodium.PKI.VerifyData(sig, New libsodium.PKI.PublicKey(senderkey)) <> Nil)
 		  
 		  //These test vectors are from http://ed25519.cr.yp.to/python/sign.input
 		  Dim f As FolderItem = App.ExecutableFile.Parent.Child("ed25519_test_vectors.txt")
@@ -468,7 +468,7 @@ Protected Module Testing
 		      k = k.Derive(skey)
 		      Assert(k.PublicKey = pkey)
 		      Assert(k.PrivateKey = skey)
-		      Assert(libsodium.PKI.VerifyData(msg, New libsodium.PKI.ForeignKey(k), sig))
+		      Assert(libsodium.PKI.VerifyData(msg, New libsodium.PKI.PublicKey(k), sig))
 		    Loop
 		  Finally
 		    tis.Close
@@ -480,7 +480,7 @@ Protected Module Testing
 		Private Sub TestPKISignDigest()
 		  Dim senderkey As libsodium.PKI.SigningKey
 		  senderkey = senderkey.Import(TestSigningKey, TestPasswordValue)
-		  Dim fk As New libsodium.PKI.ForeignKey(senderkey)
+		  Dim fk As New libsodium.PKI.PublicKey(senderkey)
 		  Dim msg As MemoryBlock = "This is a test message."
 		  Dim bs As New BinaryStream(msg)
 		  
