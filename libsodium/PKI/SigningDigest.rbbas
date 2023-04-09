@@ -110,7 +110,7 @@ Protected Class SigningDigest
 	#tag Method, Flags = &h21
 		Private Function SignFinalEd25519ph(SenderKey As libsodium.PKI.SigningKey) As MemoryBlock
 		  If mState = Nil Then Return Nil
-		  Dim sig As MemoryBlock = New MemoryBlock(crypto_sign_BYTES)
+		  Dim sig As MemoryBlock = New MemoryBlock(crypto_sign_bytes)
 		  Dim sigsz As UInt64 = sig.Size
 		  If crypto_sign_final_create(mState, sig, sigsz, SenderKey.PrivateKey) <> 0 Then Return Nil
 		  sig.Size = sigsz

@@ -13,16 +13,16 @@ Protected Class GenericHashDigest
 		  mType = Type
 		  Select Case Type
 		  Case HashType.Generic
-		    If KeyData <> Nil Then CheckSize(KeyData, crypto_generichash_KEYBYTES)
-		    mHashSize = crypto_generichash_BYTES_MAX
+		    If KeyData <> Nil Then CheckSize(KeyData, crypto_generichash_keybytes)
+		    mHashSize = crypto_generichash_bytes_max
 		    
 		  Case HashType.SHA256
-		    If KeyData <> Nil Then CheckSize(KeyData, crypto_auth_hmacsha256_KEYBYTES)
-		    mHashSize = crypto_hash_sha256_BYTES
+		    If KeyData <> Nil Then CheckSize(KeyData, crypto_auth_hmacsha256_keybytes)
+		    mHashSize = crypto_hash_sha256_bytes
 		    
 		  Case HashType.SHA512
-		    If KeyData <> Nil Then CheckSize(KeyData, crypto_auth_hmacsha512_KEYBYTES)
-		    mHashSize = crypto_hash_sha512_BYTES
+		    If KeyData <> Nil Then CheckSize(KeyData, crypto_auth_hmacsha512_keybytes)
+		    mHashSize = crypto_hash_sha512_bytes
 		    
 		  End Select
 		  
@@ -40,11 +40,11 @@ Protected Class GenericHashDigest
 		  Dim k As Int32
 		  Select Case Type
 		  Case HashType.Generic
-		    k = crypto_generichash_KEYBYTES
+		    k = crypto_generichash_keybytes
 		  Case HashType.SHA256
-		    k = crypto_auth_hmacsha256_KEYBYTES
+		    k = crypto_auth_hmacsha256_keybytes
 		  Case HashType.SHA512
-		    k = crypto_auth_hmacsha512_KEYBYTES
+		    k = crypto_auth_hmacsha512_keybytes
 		  End Select
 		  
 		  Me.Constructor(Type, KeyData.DeriveKey(k, Salt, ResourceLimits.Interactive))
@@ -61,8 +61,8 @@ Protected Class GenericHashDigest
 		  If Not libsodium.IsAvailable Then Raise New SodiumException(ERR_UNAVAILABLE)
 		  
 		  mType = HashType.Generic
-		  If KeyData <> Nil Then CheckSize(KeyData, crypto_generichash_KEYBYTES)
-		  CheckSize(HashSize, crypto_generichash_BYTES_MIN, crypto_generichash_BYTES_MAX)
+		  If KeyData <> Nil Then CheckSize(KeyData, crypto_generichash_keybytes)
+		  CheckSize(HashSize, crypto_generichash_bytes_min, crypto_generichash_bytes_max)
 		  mKey = KeyData
 		  mHashSize = HashSize
 		  Me.Reset()
@@ -210,13 +210,13 @@ Protected Class GenericHashDigest
 		  
 		  Select Case Type
 		  Case HashType.Generic
-		    Return RandomBytes(crypto_generichash_KEYBYTES)
+		    Return RandomBytes(crypto_generichash_keybytes)
 		    
 		  Case HashType.SHA256
-		    Return RandomBytes(crypto_auth_hmacsha256_KEYBYTES)
+		    Return RandomBytes(crypto_auth_hmacsha256_keybytes)
 		    
 		  Case HashType.SHA512
-		    Return RandomBytes(crypto_auth_hmacsha512_KEYBYTES)
+		    Return RandomBytes(crypto_auth_hmacsha512_keybytes)
 		    
 		  End Select
 		  
@@ -307,37 +307,6 @@ Protected Class GenericHashDigest
 		#tag EndGetter
 		Type As libsodium.HashType
 	#tag EndComputedProperty
-
-
-	#tag Constant, Name = crypto_auth_hmacsha256_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_auth_hmacsha512_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_generichash_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_generichash_BYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_generichash_BYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Public
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_generichash_KEYBYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_generichash_KEYBYTES_MAX, Type = Double, Dynamic = False, Default = \"64", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_generichash_KEYBYTES_MIN, Type = Double, Dynamic = False, Default = \"16", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_hash_sha256_BYTES, Type = Double, Dynamic = False, Default = \"32", Scope = Protected
-	#tag EndConstant
-
-	#tag Constant, Name = crypto_hash_sha512_BYTES, Type = Double, Dynamic = False, Default = \"64", Scope = Protected
-	#tag EndConstant
 
 
 	#tag ViewBehavior

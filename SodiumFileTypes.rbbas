@@ -18,12 +18,12 @@
 	#tag EndFileType
 
 	#tag FileType
-		CodeName=ForeignKey
-		Extension=.fnk
+		CodeName=PublicKey
+		Extension=.puk
 		Flags=&h0
 		MacCreator=
 		MacType=
-		Name=ForeignKey
+		Name=PublicKey
 	#tag EndFileType
 
 	#tag FileType

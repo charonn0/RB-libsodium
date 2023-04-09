@@ -149,7 +149,6 @@ Implements Readable,Writeable
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.SKI.SecretStream.EOF
 		  
 		  Return (mEOF Or (mInput <> Nil And mInput.EOF)) And mReadBuffer.LenB = 0
-		  Return (mEOF Or (mInput <> Nil And mInput.EOF)) And mReadBuffer.LenB = 0
 		End Function
 	#tag EndMethod
 
