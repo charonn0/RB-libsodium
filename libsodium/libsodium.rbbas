@@ -43,9 +43,10 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function CombineNonce(Nonce1 As MemoryBlock, Nonce2 As MemoryBlock) As MemoryBlock
-		  ' Combines Nonce1 with Nonce2 in constant time. The combination formula is
-		  ' (Nonce1 + Nonce2) mod 2^(8*len)
+		Protected Function CombineNonce(Nonce1 As MemoryBlock, Nonce2 As MemoryBlock, DoSubtraction As Boolean = False) As MemoryBlock
+		  ' Combines Nonce1 with Nonce2 in constant time. If DoSubtraction=False then
+		  ' the combination formula is (Nonce1 + Nonce2) mod 2^(8*len). Otherwise the
+		  ' formula is (Nonce1 - Nonce2) mod 2^(8*len).
 		  '
 		  ' See:
 		  ' https://github.com/charonn0/RB-libsodium/wiki/libsodium.CombineNonce
@@ -55,7 +56,13 @@ Protected Module libsodium
 		  
 		  Dim output As New MemoryBlock(Nonce1.Size)
 		  output.StringValue(0, output.Size) = Nonce1.StringValue(0, Nonce1.Size)
-		  sodium_add(output, Nonce2, Max(output.Size, Nonce2.Size))
+		  If Not DoSubtraction Then
+		    sodium_add(output, Nonce2, Max(output.Size, Nonce2.Size))
+		  ElseIf System.IsFunctionAvailable("sodium_sub", sodium) Then
+		    sodium_sub(output, Nonce2, Max(output.Size, Nonce2.Size))
+		  Else
+		    Raise New SodiumException(ERR_FUNCTION_UNAVAILABLE)
+		  End If
 		  Return output
 		End Function
 	#tag EndMethod
@@ -800,6 +807,10 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function sodium_pad Lib sodium (ByRef BufferSize As UInt32, Buffer As Ptr, UnpaddedSize As UInt32, BlockSize As UInt32, MaxBufferSize As UInt32) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Sub sodium_sub Lib sodium (BufferA As Ptr, BufferB As Ptr, Length As UInt32)
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
