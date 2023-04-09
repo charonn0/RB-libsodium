@@ -83,6 +83,10 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_auth_hmacsha256_keybytes Lib sodium () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_auth_hmacsha256_statebytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
@@ -99,11 +103,27 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_auth_hmacsha512_keybytes Lib sodium () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_auth_hmacsha512_statebytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_auth_hmacsha512_update Lib sodium (State As Ptr, InputBuffer As Ptr, InputSize As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_generichash_bytes Lib sodium () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_generichash_bytes_max Lib sodium () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_generichash_bytes_min Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -115,11 +135,27 @@ Protected Module libsodium
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_generichash_keybytes Lib sodium () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_generichash_keybytes_max Lib sodium () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_generichash_keybytes_min Lib sodium () As UInt32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_generichash_statebytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_generichash_update Lib sodium (State As Ptr, InputBuffer As Ptr, InputSize As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_hash_sha256_bytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -136,6 +172,10 @@ Protected Module libsodium
 
 	#tag ExternalMethod, Flags = &h21
 		Private Soft Declare Function crypto_hash_sha256_update Lib sodium (State As Ptr, InputBuffer As Ptr, InputSize As UInt64) As Int32
+	#tag EndExternalMethod
+
+	#tag ExternalMethod, Flags = &h21
+		Private Soft Declare Function crypto_hash_sha512_bytes Lib sodium () As UInt32
 	#tag EndExternalMethod
 
 	#tag ExternalMethod, Flags = &h21
@@ -451,10 +491,11 @@ Protected Module libsodium
 	#tag EndMethod
 
 	#tag Method, Flags = &h1
-		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil, HashSize As UInt32 = libsodium.GenericHashDigest.crypto_generichash_BYTES_MAX) As String
+		Protected Function GenericHash(InputData As MemoryBlock, Key As MemoryBlock = Nil, Optional HashSize As UInt32) As String
 		  ' Generates a 512-bit BLAKE2b digest of the InputData, optionally using the specified key.
 		  ' https://download.libsodium.org/doc/hashing/generic_hashing.html
 		  
+		  If HashSize = 0 Then HashSize = crypto_generichash_bytes_max()
 		  Dim h As New GenericHashDigest(HashSize, Key)
 		  h.Process(InputData)
 		  Return h.Value
