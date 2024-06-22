@@ -21,6 +21,9 @@ This example generates and validates a password hash that is suitable to be stor
 * [Secured memory](https://github.com/charonn0/RB-libsodium/wiki/libsodium.SecureMemoryblock) allocations
 * Import and export keys, messages, hashes, etc. with optional password protection.
 
+## Become a sponsor
+If you use this code in a commercial project, or just want to show your appreciation, please consider sponsoring me through GitHub. https://github.com/sponsors/charonn0
+
 ## Synopsis
 RB-libsodium is designed to make it as hard as possible to write bad crypto code. For example signing keys can't be used to perform encryption, so methods that need a signing key will require an instance of the [SigningKey](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.SigningKey) class as a parameter; attempting to pass an [EncryptionKey](https://github.com/charonn0/RB-libsodium/wiki/libsodium.PKI.EncryptionKey) will generate a compiler error. 
 
