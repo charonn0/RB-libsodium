@@ -4,7 +4,7 @@ Inherits libsodium.SKI.SecretStream
 	#tag Method, Flags = &h0
 		Sub Close()
 		  If mCompressor <> Nil Then
-		    Dim data As String = mCompressor.Deflate("", zlib.Z_FINISH)
+		    Dim data As String = mCompressor.Process("", zlib.Z_FINISH)
 		    mWriteBuffer = mWriteBuffer + data
 		  End If
 		  Super.Close()
@@ -13,7 +13,7 @@ Inherits libsodium.SKI.SecretStream
 
 	#tag Method, Flags = &h1
 		Protected Sub Constructor(InputStream As Readable, Key As MemoryBlock, Header As MemoryBlock)
-		  mDecompressor = New zlib.Inflater(zlib.GZIP_ENCODING)
+		  mDecompressor = New zlib.Decompressor(zlib.GZIP_ENCODING)
 		  // Calling the overridden superclass constructor.
 		  // Constructor(InputStream As Readable, Key As MemoryBlock, Header As MemoryBlock) -- From SecretStream
 		  Super.Constructor(InputStream, Key, Header)
@@ -23,7 +23,7 @@ Inherits libsodium.SKI.SecretStream
 
 	#tag Method, Flags = &h1
 		Protected Sub Constructor(OutputStream As Writeable, Key As MemoryBlock)
-		  mCompressor = New zlib.Deflater(zlib.Z_DEFAULT_COMPRESSION, zlib.Z_DEFAULT_STRATEGY, zlib.GZIP_ENCODING)
+		  mCompressor = New zlib.Compressor(zlib.Z_DEFAULT_COMPRESSION, zlib.Z_DEFAULT_STRATEGY, zlib.GZIP_ENCODING)
 		  // Calling the overridden superclass constructor.
 		  // Constructor(OutputStream As Writeable, Key As MemoryBlock) -- From SecretStream
 		  Super.Constructor(OutputStream, Key)
@@ -61,14 +61,14 @@ Inherits libsodium.SKI.SecretStream
 	#tag Method, Flags = &h0
 		Function Read(Count As Integer, encoding As TextEncoding = Nil) As String
 		  Dim data As String = Super.Read(Count, encoding)
-		  If mDecompressor <> Nil Then data = mDecompressor.Inflate(data)
+		  If mDecompressor <> Nil Then data = mDecompressor.Process(data)
 		  Return DefineEncoding(data, encoding)
 		End Function
 	#tag EndMethod
 
 	#tag Method, Flags = &h0
 		Sub Write(text As String)
-		  If mCompressor <> Nil Then text = mCompressor.Deflate(text, zlib.Z_NO_FLUSH)
+		  If mCompressor <> Nil Then text = mCompressor.Process(text, zlib.Z_NO_FLUSH)
 		  Super.Write(text)
 		End Sub
 	#tag EndMethod
@@ -90,11 +90,11 @@ Inherits libsodium.SKI.SecretStream
 
 
 	#tag Property, Flags = &h21
-		Private mCompressor As zlib.Deflater
+		Private mCompressor As zlib.Compressor
 	#tag EndProperty
 
 	#tag Property, Flags = &h21
-		Private mDecompressor As zlib.Inflater
+		Private mDecompressor As zlib.Decompressor
 	#tag EndProperty
 
 
